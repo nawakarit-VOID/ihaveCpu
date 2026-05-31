@@ -18,27 +18,32 @@ func loadIcon(size int) fyne.Resource {
 
 	switch {
 	case size >= 512:
-		file = "icons/icon-512.png" ///ที่อยู่
+		file = "assets/icons/icon-512.png" ///ที่อยู่
 	case size >= 256:
-		file = "icons/icon-256.png"
+		file = "assets/icons/icon-256.png"
 	case size >= 128:
-		file = "icons/icon-128.png"
+		file = "assets/icons/icon-128.png"
 	default:
-		file = "icons/icon-64.png"
+		file = "assets/icons/icon-64.png"
 	}
 
 	data, _ := iconFS.ReadFile(file)
 	return fyne.NewStaticResource(file, data)
 }
 
-//go:embed icons/*
+//go:embed assets/icons/*
 var iconFS embed.FS
+
+//go:embed assets/font/Itim-Regular.ttf
+var fontItim []byte
+var myFont = fyne.NewStaticResource("Itim-Regular.ttf", fontItim)
 
 func CreateWindow() {
 
 	a := app.NewWithID("com.nawakarit.iHaveCPU")
+	a.Settings().SetTheme(&MyTheme{})
 	icon := loadIcon(64)
-	w := a.NewWindow("CPU Info")
+	w := a.NewWindow("iHaveCPU")
 	w.SetIcon(icon)
 
 	cpuTabs := cpuinfo.CpuTabs()
