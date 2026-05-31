@@ -1,10 +1,11 @@
 // Copyright (c) 2026 Nawakarit
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License v3.0.
-package cpuinfo
+package Ppackage_cpuinfo
 
 import (
 	"fmt"
+	"image/color"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -111,9 +112,7 @@ func CPUdata() map[string]interface{} {
 		"Hyperthreading":            hyperthreading,
 		"CpuThreadCoreSocketresult": cpuThreadCoreSocketresult,
 		"Cache":                     cache, //cpuid
-
 	}
-
 }
 
 // ============================================================================
@@ -248,10 +247,6 @@ func (m *CPUMonitor) Start() {
 					hUser, mUser, sUser, hSystem, mSystem, sSysteme, hIdle, mIdle, sIdle, hNice, mNice, sNice, hIowait, mIowait, sIowait, hIrq, mIrq, sIrq, hSoftirq, mSoftirq, sSoftirq, hSteal, mSteal, sSteal, hGuest, mGuest, sGuest, hGuestNice, mGuestNice, sGuestNice)
 			}
 
-			//จัดเรียง timesusage
-
-			//	timesusage += meanLabel
-
 			if len(percentTotal) > 0 {
 
 				data := StCPUData{
@@ -299,7 +294,6 @@ func processValue(value int) (int, string) {
 // ============================================================================
 // เวลา
 // ============================================================================
-
 func processTimeS(value float64) (int, int, int) {
 
 	hours := int(value) / 3600            // หาชั่วโมง  (int หาร int จะเป็นการหารไม่เอาเศษโดยอัตโนมัติ) *หารไม่เอาเศษ
@@ -316,7 +310,6 @@ func processTimeS(value float64) (int, int, int) {
 func numSumAndCount(value []int) (int, int) {
 	sum := 0
 	count := 0
-
 	for _, x := range value {
 		sum += x
 		if x > 0 { // ถ้ามากกว่า 0 ให้นับเพิ่ม
@@ -335,9 +328,66 @@ func Avg(value float64) (int, int, int) {
 }
 
 // ============================================================================
+// กราฟ
+// ============================================================================
+
+func grid() fyne.CanvasObject {
+
+	//coreCount := runtime.NumCPU()
+	coreCount, _ := cpu.Counts(false)
+
+	colors := []color.RGBA{
+		{0, 255, 0, 255},
+		{0, 128, 255, 255},
+		{255, 0, 0, 255},
+		{255, 255, 0, 255},
+		{255, 0, 255, 255},
+		{0, 255, 255, 255},
+		{255, 128, 0, 255},
+		{128, 255, 0, 255},
+	}
+
+	cards := make([]*CoreCard, coreCount)
+	items := make([]fyne.CanvasObject, coreCount)
+
+	for i := 0; i < coreCount; i++ {
+		c := NewCoreCard(i, colors[i%len(colors)])
+		cards[i] = c
+		items[i] = c.root
+	}
+
+	grid := container.NewGridWithColumns(2, items...)
+
+	go func() {
+		for {
+			values := getCPU()
+
+			for i, c := range cards {
+				if i < len(values) {
+					v := values[i]
+					c.graph.Update(v)
+					c.val.Set(v)
+				}
+			}
+
+			fyne.Do(func() {
+				for _, c := range cards {
+					c.raster.Refresh()
+				}
+			})
+
+			time.Sleep(80 * time.Millisecond)
+		}
+
+	}()
+	return grid
+}
+
+// ============================================================================
 // รวม + เอาออก CpuTabs
 // ============================================================================
 func CpuTabs() fyne.CanvasObject {
+	grid := grid()
 	dataCPUInfo := CPUdata()
 
 	cpuOverviewPage := container.NewVBox(
@@ -370,22 +420,41 @@ func CpuTabs() fyne.CanvasObject {
 	cpuFlagsFeaturePage := container.NewVBox(
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["FlagsFeature"])),
 	)
-
-	//usageLabel := widget.NewLabel("usageLabel...")
+	//cpuUsagePage//
 	usagepercentTotalLabel := widget.NewLabel("usagepercentTotalLabel...")
 	usagePerCoreSTRINGLabel := widget.NewLabel("usagePerCoreSTRINGLabel...")
-	//cpuUsagePage
+	//cpuTimesusagePage//
+	timesTotalAvg := widget.NewLabel("timesTotalAvg...")
+	timesSec := widget.NewLabel("timesSec...")
+	timesHms := widget.NewLabel("timesHms...")
+
+	// สร้าง monitor cpu
+	monitor := NewCPUMonitor(1*time.Second, func(data StCPUData) {
+		fyne.Do(func() {
+			usagepercentTotalLabel.SetText(fmt.Sprintf("%s", data.UsagepercentTotal))          //4 // แสดง usage รวม
+			usagePerCoreSTRINGLabel.SetText(fmt.Sprintf("%s", data.UsagepercentPerCoreSTRING)) //4 // แสดง usage รวม
+			timesTotalAvg.SetText(fmt.Sprintf("%s", data.TimesTotalAvg))
+			timesSec.SetText(fmt.Sprintf("%s", data.TimesSec))
+			timesHms.SetText(fmt.Sprintf("%s", data.TimesHms))
+		})
+	})
+	monitor.Start() // เริ่ม monitoring
+
+	Grid := container.NewBorder(
+		nil,
+		nil,
+		nil,
+		nil,
+		grid,
+	)
+
 	cpuUsagePage := container.NewVBox(
-		//usageLabel,
+		Grid,
 		usagepercentTotalLabel,
 		widget.NewSeparator(),
 		usagePerCoreSTRINGLabel,
 		widget.NewSeparator(),
 	)
-
-	timesTotalAvg := widget.NewLabel("timesTotalAvg...")
-	timesSec := widget.NewLabel("timesSec...")
-	timesHms := widget.NewLabel("timesHms...")
 
 	//cpuTimesusagePage
 	cpuTimesusagePage := container.NewVBox(
@@ -398,22 +467,7 @@ func CpuTabs() fyne.CanvasObject {
 		widget.NewLabel("[ ความหมาย ]\n[ User : โปรแกรมผู้ใช้ ]\n[ System : ระบบ ]\n[ Idle : ไม่ได้ทำอะไร ]\n[ Nice : เวลาปรับ priority ]\n[ Iowait : CPU รอ I/O ]\n[ Irq : Hardware ขัด ]\n[ Softirq : Software ขัดจังหวะ ]\n[ Steal : VM ถูก hyper แย่ง ]\n[ Guest : ใช้ guest virtual ]\n[ GuestNice : VM ใช้แบบ nice priority ]"),
 	)
 
-	// สร้าง monitor cpu
-	monitor := NewCPUMonitor(1*time.Second, func(data StCPUData) {
-		fyne.Do(func() {
-			usagepercentTotalLabel.SetText(fmt.Sprintf("%s", data.UsagepercentTotal))          //4 // แสดง usage รวม
-			usagePerCoreSTRINGLabel.SetText(fmt.Sprintf("%s", data.UsagepercentPerCoreSTRING)) //4 // แสดง usage รวม
-			//TimesusageLabel.SetText(fmt.Sprintf("%s", data.Timesusage)) //5 แสดง timeusage
-			timesTotalAvg.SetText(fmt.Sprintf("%s", data.TimesTotalAvg))
-			timesSec.SetText(fmt.Sprintf("%s", data.TimesSec))
-			timesHms.SetText(fmt.Sprintf("%s", data.TimesHms))
-		})
-	})
-
-	monitor.Start() // เริ่ม monitoring
-
 	return container.NewAppTabs(
-		//container.NewTabItem("TEST", container.NewScroll(xLabel)),
 		container.NewTabItem("Overview", container.NewScroll(cpuOverviewPage)),
 		container.NewTabItem("Detail", container.NewScroll(cpuDetailPage)),
 		container.NewTabItem("Flags Feature", container.NewScroll(cpuFlagsFeaturePage)),
