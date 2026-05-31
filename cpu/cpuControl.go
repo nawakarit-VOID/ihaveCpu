@@ -1,0 +1,198 @@
+// Copyright (c) 2026 Nawakarit
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License v3.0.
+package Ppackage_cpuinfo
+
+import (
+	"fmt"
+	"image/color"
+	"os"
+	"os/exec"
+	"strconv"
+	"strings"
+	"time"
+
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/widget"
+
+	//"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/v3/cpu"
+)
+
+//-------------------------------------------------------------------------------------------
+
+func setAllCPUMaxFreq(freqKHz uint64) error {
+	entries, err := os.ReadDir("/sys/devices/system/cpu")
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		name := entry.Name()
+		// กรองเฉพาะ cpu0, cpu1, cpu2, ...
+		if !strings.HasPrefix(name, "cpu") {
+			continue
+		}
+		var idx int
+		if _, err := fmt.Sscanf(name, "cpu%d", &idx); err != nil {
+			continue
+		}
+
+		path := fmt.Sprintf("/sys/devices/system/cpu/%s/cpufreq/scaling_max_freq", name)
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			continue // บาง CPU ไม่มี cpufreq
+		}
+
+		if err := os.WriteFile(path, []byte(strconv.FormatUint(freqKHz, 10)), 0644); err != nil {
+			return fmt.Errorf("cpu%d: %w", idx, err)
+		}
+	}
+	return nil
+}
+
+func setGovernor(cpuIndex int, governor string) error {
+	path := fmt.Sprintf("/sys/devices/system/cpu/cpu%d/cpufreq/scaling_governor", cpuIndex)
+	return os.WriteFile(path, []byte(governor), 0644)
+}
+
+// setCPUMaxFreq ตั้งความถี่สูงสุดของ CPU core ที่ระบุ (หน่วย: kHz)
+func setCPUMaxFreq(cpuIndex int, freqKHz uint64) error {
+	path := fmt.Sprintf("/sys/devices/system/cpu/cpu%d/cpufreq/scaling_max_freq", cpuIndex)
+	return os.WriteFile(path, []byte(strconv.FormatUint(freqKHz, 10)), 0644)
+}
+
+// setCPUMinFreq ตั้งความถี่ต่ำสุด
+func setCPUMinFreq(cpuIndex int, freqKHz uint64) error {
+	path := fmt.Sprintf("/sys/devices/system/cpu/cpu%d/cpufreq/scaling_min_freq", cpuIndex)
+	return os.WriteFile(path, []byte(strconv.FormatUint(freqKHz, 10)), 0644)
+}
+
+// getCPUFreqInfo อ่านข้อมูลความถี่ของ CPU
+func getCPUFreqInfo(cpuIndex int) {
+	base := fmt.Sprintf("/sys/devices/system/cpu/cpu%d/cpufreq/", cpuIndex)
+	files := map[string]string{
+		"scaling_cur_freq": "ความถี่ปัจจุบัน",
+		"scaling_max_freq": "ความถี่สูงสุด (เพดาน)",
+		"scaling_min_freq": "ความถี่ต่ำสุด",
+		"cpuinfo_max_freq": "ความถี่สูงสุดของ hardware",
+		"scaling_governor": "governor ที่ใช้อยู่",
+	}
+
+	for file, label := range files {
+		data, err := os.ReadFile(base + file)
+		if err != nil {
+			fmt.Printf("  %s: ไม่สามารถอ่านได้\n", label)
+			continue
+		}
+		fmt.Printf("  %s: %s", label, strings.TrimSpace(string(data)))
+		if strings.Contains(file, "freq") {
+			val, _ := strconv.ParseFloat(strings.TrimSpace(string(data)), 64)
+			fmt.Printf(" kHz (%.2f GHz)", val/1e6)
+		}
+		fmt.Println()
+	}
+}
+
+func setCPUMaxFreqWithAuth(freqKHz uint64) error {
+	script := fmt.Sprintf(
+		"echo %d | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq",
+		freqKHz,
+	)
+
+	cmd := exec.Command("pkexec", "bash", "-c", script)
+	return cmd.Run()
+}
+
+func onButtonClick() {
+	freq := uint64(2000000) // อ่านจาก input field
+
+	go func() { // รันใน goroutine ไม่ให้ UI ค้าง
+		script := fmt.Sprintf(
+			"echo %d | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq",
+			freq,
+		)
+		cmd := exec.Command("pkexec", "bash", "-c", script)
+		err := cmd.Run()
+		if err != nil {
+			// แสดง error dialog
+			fmt.Println("ล้มเหลว")
+
+		}
+		// แสดง success dialog
+		fmt.Println("สำเร็จ 2GHz")
+	}()
+}
+
+var overlayW = color.NRGBA{250, 0, 0, 80}
+var overlayB = color.NRGBA{0, 0, 0, 80}
+
+func getCPU555() float64 {
+	v, _ := cpu.Percent(0, false)
+	return v[0] / 100.0 // แปลงเป็น 0.0 - 1.0
+}
+
+// ============================================================================
+// MAIN
+// ============================================================================
+
+func main() {
+
+	a := app.NewWithID("com.nawakarit.iHertz")
+
+	w := a.NewWindow("iHertz")
+
+	//w.Resize(fyne.NewSize(200, 200))
+
+	bar := widget.NewProgressBar()
+	label := widget.NewLabel("0%")
+
+	//w.SetContent(container.NewVBox(bar, label))
+	w.Resize(fyne.NewSize(300, 100))
+
+	go func() {
+		for {
+			val := getCPU555()
+
+			// อัปเดต UI
+			bar.SetValue(val)
+			label.SetText(fmt.Sprintf("%.0f%%", val*100))
+
+			time.Sleep(500 * time.Millisecond)
+		}
+	}()
+
+	//ProgressCpu0 := widget.NewProgressBar()
+	fmt.Println("=== ข้อมูล CPU0 ===")
+
+	//globalProgress.SetValue(float64(fi) / float64(totalFolders))
+	getCPUFreqInfo(0)
+	/*
+		// ตัวอย่าง: ตั้งเพดานที่ 2.0 GHz = 2,000,000 kHz
+		targetFreq := uint64(2_000_000)
+		fmt.Printf("\nตั้งเพดานความถี่ CPU0 เป็น %.1f GHz...\n", float64(targetFreq)/1e6)
+
+		if err := setCPUMaxFreq(0, targetFreq); err != nil {
+			fmt.Printf("เกิดข้อผิดพลาด: %v (ต้องรันด้วย root)\n", err)
+			return
+		}
+
+		// governor ที่ใช้บ่อย: "powersave", "performance", "schedutil", "ondemand"
+		setGovernor(0, "powersave")
+		fmt.Println("สำเร็จ!")
+	*/
+	bt1 := widget.NewButton("TTT", func() {
+		onButtonClick()
+	})
+
+	w.SetContent(container.NewBorder(
+		container.NewVBox(bar, label),
+		nil,
+		nil,
+		nil,
+		bt1),
+	)
+
+	w.ShowAndRun()
+}

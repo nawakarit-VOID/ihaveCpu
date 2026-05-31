@@ -6,6 +6,7 @@ package Ppackage_cpuinfo
 import (
 	"fmt"
 	"image/color"
+	"log"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -15,11 +16,35 @@ import (
 	"github.com/shirou/gopsutil/v3/cpu"
 )
 
+/*
+func getCPU() []float64 {
+	v, err := cpu.Percent(0, true)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	return v
+}
+*/
+
+//////////////////////////////////////////////////
+// 📊 CPU
+//////////////////////////////////////////////////
+
+func getCPU() []float64 {
+	v, err := cpu.Percent(0, true)
+	if err != nil {
+		log.Println(err)
+		return nil
+	}
+	return v
+}
+
 func CPUdata() map[string]interface{} {
 	// gopsutil
 	info, _ := cpu.Info()
-	physical, _ := cpu.Counts(false)
-	logical, _ := cpu.Counts(true)
+	physical, _ := cpu.Counts(false) //core
+	logical, _ := cpu.Counts(true)   //thread
 	//times, _ := cpu.Times(true)
 
 	// ============================================================================
@@ -356,7 +381,7 @@ func grid() fyne.CanvasObject {
 		items[i] = c.root
 	}
 
-	grid := container.NewGridWithColumns(2, items...)
+	grid := container.NewGridWithColumns(1, items...)
 
 	go func() {
 		for {
@@ -376,7 +401,7 @@ func grid() fyne.CanvasObject {
 				}
 			})
 
-			time.Sleep(80 * time.Millisecond)
+			time.Sleep(100 * time.Millisecond)
 		}
 
 	}()
@@ -407,6 +432,7 @@ func CpuTabs() fyne.CanvasObject {
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Cachet"])),
 		widget.NewSeparator(),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Microcode"])),
+		widget.NewSeparator(),
 	)
 
 	cpuDetailPage := container.NewVBox(
@@ -415,14 +441,18 @@ func CpuTabs() fyne.CanvasObject {
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["CpuThreadCoreSocketresult"])),
 		widget.NewSeparator(),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Cache"])), //cpuid
+		widget.NewSeparator(),
 	)
 
 	cpuFlagsFeaturePage := container.NewVBox(
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["FlagsFeature"])),
+		widget.NewSeparator(),
 	)
 	//cpuUsagePage//
 	usagepercentTotalLabel := widget.NewLabel("usagepercentTotalLabel...")
+	usagepercentTotalLabel.Alignment = fyne.TextAlignCenter
 	usagePerCoreSTRINGLabel := widget.NewLabel("usagePerCoreSTRINGLabel...")
+	usagePerCoreSTRINGLabel.Alignment = fyne.TextAlignCenter
 	//cpuTimesusagePage//
 	timesTotalAvg := widget.NewLabel("timesTotalAvg...")
 	timesSec := widget.NewLabel("timesSec...")
@@ -439,22 +469,21 @@ func CpuTabs() fyne.CanvasObject {
 		})
 	})
 	monitor.Start() // เริ่ม monitoring
+	//********************************
+	Grid := container.NewBorder(nil, nil, nil, nil, grid)
 
-	Grid := container.NewBorder(
-		nil,
-		nil,
-		nil,
-		nil,
-		grid,
-	)
-
-	cpuUsagePage := container.NewVBox(
+	cpuUsagePage := container.NewVBox(container.NewBorder(
 		Grid,
-		usagepercentTotalLabel,
-		widget.NewSeparator(),
-		usagePerCoreSTRINGLabel,
-		widget.NewSeparator(),
-	)
+		nil,
+		nil,
+		nil,
+		container.NewCenter(
+			container.NewVBox(
+				usagepercentTotalLabel,
+				widget.NewSeparator(),
+				usagePerCoreSTRINGLabel,
+				widget.NewSeparator())),
+	))
 
 	//cpuTimesusagePage
 	cpuTimesusagePage := container.NewVBox(
@@ -464,7 +493,8 @@ func CpuTabs() fyne.CanvasObject {
 		widget.NewSeparator(),
 		timesHms,
 		widget.NewSeparator(),
-		widget.NewLabel("[ ความหมาย ]\n[ User : โปรแกรมผู้ใช้ ]\n[ System : ระบบ ]\n[ Idle : ไม่ได้ทำอะไร ]\n[ Nice : เวลาปรับ priority ]\n[ Iowait : CPU รอ I/O ]\n[ Irq : Hardware ขัด ]\n[ Softirq : Software ขัดจังหวะ ]\n[ Steal : VM ถูก hyper แย่ง ]\n[ Guest : ใช้ guest virtual ]\n[ GuestNice : VM ใช้แบบ nice priority ]"),
+		widget.NewLabel("[ ความหมาย ]\n[ User : CPU กำลังรันโปรแกรมทั่วไปของผู้ใช้ (โหมด user space) ]\n[ System : CPU กำลังทำงานในโหมดเคอร์เนล (เช่น ระบบเรียกไฟล์, จัดการหน่วยความจำ) ]\n[ Idle : CPU ไม่ได้ทำอะไร ไม่มีงานรอทำ ]\n[ Nice : เหมือน user mode แต่เป็นกระบวนการที่ถูกลด priority (nice value > 0) ]\n[ Iowait : ว่าง แต่มีกระบวนการรอ I/O (disk/SSD) อยู่ ถ้าค่าสูงแสดงว่า ssd ช้า ]\n[ Irq : กำลังทำงานตาม hardware interrupt (เช่น เมาส์, การ์ดเน็ตเวิร์ก) ]\n[ Softirq : งานต่อเนื่องจาก interrupt (มักเป็นงานเครือข่ายหรือ task scheduling) ]\n[ Steal : บน VM: CPU ถูก hypervisor แย่งไปให้ VM อื่น ]\n[ Guest : กำลังรัน VM อื่น (CPU ทำงานในโหมด guest OS) ]\n[ GuestNice : VM ใช้แบบ nice priority *ทำงาน แต่โดนลด priority บน host ]\n      **VM = Virtual Machine"),
+		widget.NewSeparator(),
 	)
 
 	return container.NewAppTabs(
