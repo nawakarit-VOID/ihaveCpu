@@ -46,13 +46,15 @@ func CpuThreadCount() int {
 	return logical
 }
 
-func CpuPercentAVG() []float64 {
+func CpuPercentAVG() []float64 { //*[]float64
 	// ดึง CPU usage รวม
 	percentAVG, err := cpu.Percent(100*time.Millisecond, false)
 	if err != nil || len(percentAVG) == 0 {
 		log.Println(err)
 		return []float64{0.0}
+
 	}
+
 	return percentAVG
 }
 
@@ -60,8 +62,9 @@ func CpuPercentPercore() []float64 {
 	// ดึง CPU usage ต่อ core
 	percentPerCore, err := cpu.Percent(100*time.Millisecond, true)
 	if err != nil {
-		//return nil
-		return []float64{0.0}
+		//return []float64{0.0}
+		return nil
+
 	}
 	return percentPerCore
 }
@@ -69,7 +72,7 @@ func CpuPercentPercore() []float64 {
 //////////////////////////////////////////////////
 // 📊 CPU
 //////////////////////////////////////////////////
-
+/*
 func getCPU() []float64 {
 	v, err := cpu.Percent(0, true)
 	if err != nil {
@@ -78,7 +81,7 @@ func getCPU() []float64 {
 	}
 	return v
 }
-
+*/
 func CPUdata() map[string]interface{} {
 	// gopsutil
 	info, _ := cpu.Info()
@@ -213,6 +216,8 @@ func NewCPUMonitor(interval time.Duration, callback func(StCPUData)) *CPUMonitor
 func (m *CPUMonitor) Start() {
 	go func() {
 		for range m.ticker.C {
+
+			percentTotal := CpuPercentAVG()
 			/*
 			   			func CpuPercentAVG() []float64 {
 			   	// ดึง CPU usage รวม
@@ -236,13 +241,13 @@ func (m *CPUMonitor) Start() {
 			   }
 
 			*/
-
-			// ดึง CPU usage รวม
-			percentTotal, err := cpu.Percent(100*time.Millisecond, false)
-			if err != nil || len(percentTotal) == 0 {
-				continue
-			}
-
+			/*
+				// ดึง CPU usage รวม
+				percentTotal, err := cpu.Percent(100*time.Millisecond, false)
+				if err != nil || len(percentTotal) == 0 {
+					continue
+				}
+			*/
 			/*
 				// ดึง CPU usage ต่อ core
 				percentPerCore, err := cpu.Percent(100*time.Millisecond, true)
@@ -463,7 +468,7 @@ func grid() fyne.CanvasObject {
 					c.raster.Refresh()
 				}
 			})
-
+			//time.Sleep(100 * time.Millisecond)
 			time.Sleep(100 * time.Millisecond)
 		}
 
