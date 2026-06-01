@@ -16,17 +16,7 @@ import (
 	"github.com/shirou/gopsutil/v3/cpu"
 )
 
-/*
-	func getCPU() []float64 {
-		v, err := cpu.Percent(0, true)
-		if err != nil {
-			log.Println(err)
-			return nil
-		}
-		return v
-	}
-*/
-//จำนวนคอร์
+// จำนวนคอร์
 func CpuCoreCount() int {
 	physical, err := cpu.Counts(false) //core
 	if err != nil {
@@ -69,26 +59,27 @@ func CpuPercentPercore() []float64 {
 	return percentPerCore
 }
 
-//////////////////////////////////////////////////
-// 📊 CPU
-//////////////////////////////////////////////////
-/*
-func getCPU() []float64 {
-	v, err := cpu.Percent(0, true)
-	if err != nil {
-		log.Println(err)
+func CpuTime() []cpu.TimesStat { //[]cpu.TimesStat
+	times, err := cpu.Times(true)
+	if err != nil || len(times) == 0 {
 		return nil
 	}
-	return v
+	return times
 }
-*/
+
+func CpuInfo() []cpu.InfoStat { //[]cpu.InfoStat
+	info, err := cpu.Info()
+	if err != nil || len(info) == 0 {
+		return nil
+	}
+	return info
+}
+
 func CPUdata() map[string]interface{} {
 	// gopsutil
-	info, _ := cpu.Info()
-	//physical, _ := cpu.Counts(false) //core
+	info := CpuInfo()
 	physical := CpuCoreCount()  //core
 	logical := CpuThreadCount() //thread
-	//times, _ := cpu.Times(true)
 
 	// ============================================================================
 	// Overview
@@ -218,43 +209,8 @@ func (m *CPUMonitor) Start() {
 		for range m.ticker.C {
 
 			percentTotal := CpuPercentAVG()
-			/*
-			   			func CpuPercentAVG() []float64 {
-			   	// ดึง CPU usage รวม
-			   	percentAVG, err := cpu.Percent(100*time.Millisecond, false)
-			   	if err != nil || len(percentAVG) == 0 {
-			   		log.Println(err)
-			   		return []float64{0.0}
-			   	}
-			   	return percentAVG
-			   }
-			*/
-
 			percentPerCore := CpuPercentPercore()
-			/*
-			   	// ดึง CPU usage ต่อ core
-			   	percentPerCore, err := cpu.Percent(100*time.Millisecond, true)
-			   	if err != nil {
-			   		return nil
-			   	}
-			   	return percentPerCore
-			   }
 
-			*/
-			/*
-				// ดึง CPU usage รวม
-				percentTotal, err := cpu.Percent(100*time.Millisecond, false)
-				if err != nil || len(percentTotal) == 0 {
-					continue
-				}
-			*/
-			/*
-				// ดึง CPU usage ต่อ core
-				percentPerCore, err := cpu.Percent(100*time.Millisecond, true)
-				if err != nil {
-					continue
-				}
-			*/
 			//จัดเรียง usage
 			usagepercentTotal := fmt.Sprintf("[ Usage Avg ] : %.2f%%", percentTotal[0])
 
@@ -263,12 +219,6 @@ func (m *CPUMonitor) Start() {
 			usagepercentPerCore += "[ Usage PerCore ]\n"
 			for i, pc := range percentPerCore {
 				usagepercentPerCore += fmt.Sprintf("\nCore [ %d ] : %.1f%%", i, pc)
-			}
-
-			//cpu.Times()
-			times, err := cpu.Times(true)
-			if err != nil || len(times) == 0 {
-				continue
 			}
 
 			var timesTotalAvg string
@@ -287,8 +237,10 @@ func (m *CPUMonitor) Start() {
 			var totalGuest float64
 			var totalGuestNice float64
 
-			for _, d := range times {
+			//Times
+			times := CpuTime()
 
+			for _, d := range times {
 				totalUser += d.User
 				totalSystem += d.System
 				totalIdle += d.Idle //รวม idle
@@ -365,7 +317,7 @@ func (m *CPUMonitor) Start() {
 func processValue(value int) (int, string) {
 	// ตัวอักษร flag ที่สัมผัส
 	var x string = ""
-	// ตรวจสอบเงื่อนไข
+	// ตรวจสอบเงื่อนไข //แบบ บนลงล่าง
 	switch {
 	case value >= 1099511627776:
 		value = value / 1099511627776
@@ -452,7 +404,6 @@ func grid() fyne.CanvasObject {
 
 	go func() {
 		for {
-			//values := getCPU()
 			values := CpuPercentPercore()
 
 			for i, c := range cards {
@@ -468,7 +419,6 @@ func grid() fyne.CanvasObject {
 					c.raster.Refresh()
 				}
 			})
-			//time.Sleep(100 * time.Millisecond)
 			time.Sleep(100 * time.Millisecond)
 		}
 
@@ -477,7 +427,7 @@ func grid() fyne.CanvasObject {
 }
 
 // ============================================================================
-// รวม + เอาออก CpuTabs
+// CpuTabs
 // ============================================================================
 func CpuTabs() fyne.CanvasObject {
 	grid := grid()
@@ -537,7 +487,7 @@ func CpuTabs() fyne.CanvasObject {
 		})
 	})
 	monitor.Start() // เริ่ม monitoring
-	//********************************
+	//layout
 	Grid := container.NewBorder(nil, nil, nil, nil, grid)
 
 	cpuUsagePage := container.NewVBox(container.NewBorder(
