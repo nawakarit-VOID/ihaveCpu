@@ -17,15 +17,24 @@ import (
 )
 
 /*
-func getCPU() []float64 {
-	v, err := cpu.Percent(0, true)
+	func getCPU() []float64 {
+		v, err := cpu.Percent(0, true)
+		if err != nil {
+			log.Println(err)
+			return nil
+		}
+		return v
+	}
+*/
+func getCPUcount() int {
+	physical, err := cpu.Counts(false) //core
 	if err != nil {
 		log.Println(err)
-		return nil
+		return (0)
 	}
-	return v
+	return physical
+
 }
-*/
 
 //////////////////////////////////////////////////
 // 📊 CPU
@@ -43,8 +52,9 @@ func getCPU() []float64 {
 func CPUdata() map[string]interface{} {
 	// gopsutil
 	info, _ := cpu.Info()
-	physical, _ := cpu.Counts(false) //core
-	logical, _ := cpu.Counts(true)   //thread
+	//physical, _ := cpu.Counts(false) //core
+	physical := getCPUcount()      //core
+	logical, _ := cpu.Counts(true) //thread
 	//times, _ := cpu.Times(true)
 
 	// ============================================================================
@@ -345,7 +355,7 @@ func numSumAndCount(value []int) (int, int) {
 }
 
 func Avg(value float64) (int, int, int) {
-	physical, _ := cpu.Counts(false)
+	physical := getCPUcount()
 	AA1 := int(value) / int(physical)
 	AA2 := float64(AA1)
 	A1, A2, A3 := processTimeS(AA2)
