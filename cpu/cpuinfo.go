@@ -42,18 +42,17 @@ func CpuPercentAVG() []float64 { //*[]float64
 	if err != nil || len(percentAVG) == 0 {
 		log.Println(err)
 		return []float64{0.0}
-
 	}
-
 	return percentAVG
 }
 
 func CpuPercentPercore() []float64 {
 	// ดึง CPU usage ต่อ core
 	percentPerCore, err := cpu.Percent(100*time.Millisecond, true)
-	if err != nil {
-		//return []float64{0.0}
-		return nil
+	if err != nil || len(percentPerCore) == 0 {
+		log.Println(err)
+		return []float64{0.0}
+		//return nil
 
 	}
 	return percentPerCore
@@ -189,6 +188,7 @@ type StCPUData struct {
 	PercentPerCore            string
 	Times                     []cpu.TimesStat
 	//////////////////////
+
 }
 type CPUMonitor struct {
 	ticker   *time.Ticker
@@ -210,10 +210,9 @@ func (m *CPUMonitor) Start() {
 
 			percentTotal := CpuPercentAVG()
 			percentPerCore := CpuPercentPercore()
-
 			//จัดเรียง usage
-			usagepercentTotal := fmt.Sprintf("[ Usage Avg ] : %.2f%%", percentTotal[0])
 
+			usagepercentTotal := fmt.Sprintf("[ Usage Avg ] : %.2f%%", percentTotal)
 			// แสดง usage ต่อ core
 			var usagepercentPerCore string
 			usagepercentPerCore += "[ Usage PerCore ]\n"
@@ -304,9 +303,13 @@ func (m *CPUMonitor) Start() {
 					TimesSec:                  timesSec,
 					TimesHms:                  timesHms,
 				}
+
 				m.callback(data)
+
 			}
+
 		}
+
 	}()
 }
 
@@ -471,6 +474,12 @@ func CpuTabs() fyne.CanvasObject {
 	usagepercentTotalLabel.Alignment = fyne.TextAlignCenter
 	usagePerCoreSTRINGLabel := widget.NewLabel("usagePerCoreSTRINGLabel...")
 	usagePerCoreSTRINGLabel.Alignment = fyne.TextAlignCenter
+
+	usagepercentTotal0Label := widget.NewLabel("usagepercentTotal0Label...")
+	usagepercentTotal1Label := widget.NewLabel("usagepercentTotal1Label...")
+	usagepercentTotal2Label := widget.NewLabel("usagepercentTotal2Label...")
+	usagepercentTotal3Label := widget.NewLabel("usagepercentTotal3Label...")
+
 	//cpuTimesusagePage//
 	timesTotalAvg := widget.NewLabel("timesTotalAvg...")
 	timesSec := widget.NewLabel("timesSec...")
@@ -484,6 +493,7 @@ func CpuTabs() fyne.CanvasObject {
 			timesTotalAvg.SetText(fmt.Sprintf("%s", data.TimesTotalAvg))
 			timesSec.SetText(fmt.Sprintf("%s", data.TimesSec))
 			timesHms.SetText(fmt.Sprintf("%s", data.TimesHms))
+
 		})
 	})
 	monitor.Start() // เริ่ม monitoring
@@ -502,7 +512,11 @@ func CpuTabs() fyne.CanvasObject {
 				usagepercentTotalLabel,
 				widget.NewSeparator(),
 				usagePerCoreSTRINGLabel,
-				widget.NewSeparator())),
+				widget.NewSeparator(),
+				usagepercentTotal0Label,
+				usagepercentTotal1Label,
+				usagepercentTotal2Label,
+				usagepercentTotal3Label)),
 	))
 
 	//cpuTimesusagePage

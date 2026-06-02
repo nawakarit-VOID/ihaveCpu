@@ -5,7 +5,6 @@ package Ppackage_cpuinfo
 
 import (
 	"fmt"
-	"image/color"
 	"os"
 	"os/exec"
 	"strconv"
@@ -122,9 +121,6 @@ func onButtonClick() {
 		fmt.Println("สำเร็จ 2GHz")
 	}()
 }
-
-var overlayW = color.NRGBA{250, 0, 0, 80}
-var overlayB = color.NRGBA{0, 0, 0, 80}
 
 func getCPU555() float64 {
 	v, _ := cpu.Percent(0, false)
