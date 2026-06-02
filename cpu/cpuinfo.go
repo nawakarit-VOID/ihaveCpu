@@ -212,8 +212,7 @@ func (m *CPUMonitor) Start() {
 			percentPerCore := CpuPercentPercore()
 			//จัดเรียง usage
 
-			usagepercentTotal := fmt.Sprintf("[ Usage Avg ] : %.2f%%", percentTotal)
-			// แสดง usage ต่อ core
+			usagepercentTotal := fmt.Sprintf("[ Usage Avg ] : %.2f%%", percentTotal) //percentTotal[0]			// แสดง usage ต่อ core
 			var usagepercentPerCore string
 			usagepercentPerCore += "[ Usage PerCore ]\n"
 			for i, pc := range percentPerCore {
