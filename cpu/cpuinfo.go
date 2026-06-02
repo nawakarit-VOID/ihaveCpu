@@ -430,7 +430,7 @@ func grid() fyne.CanvasObject {
 // CpuTabs
 // ============================================================================
 func CpuTabs() fyne.CanvasObject {
-	grid := grid()
+
 	dataCPUInfo := CPUdata()
 
 	cpuOverviewPage := container.NewVBox(
@@ -487,6 +487,8 @@ func CpuTabs() fyne.CanvasObject {
 		})
 	})
 	monitor.Start() // เริ่ม monitoring
+
+	grid := grid()
 	//layout
 	Grid := container.NewBorder(nil, nil, nil, nil, grid)
 
@@ -515,11 +517,14 @@ func CpuTabs() fyne.CanvasObject {
 		widget.NewSeparator(),
 	)
 
+	cpuControlPage := CpuControl()
+
 	return container.NewAppTabs(
 		container.NewTabItem("Overview", container.NewScroll(cpuOverviewPage)),
 		container.NewTabItem("Detail", container.NewScroll(cpuDetailPage)),
 		container.NewTabItem("Flags Feature", container.NewScroll(cpuFlagsFeaturePage)),
 		container.NewTabItem("Usage", container.NewScroll(cpuUsagePage)),
 		container.NewTabItem("TimeUsage", container.NewScroll(cpuTimesusagePage)),
+		container.NewTabItem("CpuControl", container.NewScroll(cpuControlPage)),
 	)
 }

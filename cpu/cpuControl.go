@@ -13,11 +13,9 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 
-	//"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/v3/cpu"
 )
 
@@ -133,31 +131,22 @@ func getCPU555() float64 {
 	return v[0] / 100.0 // แปลงเป็น 0.0 - 1.0
 }
 
-// ============================================================================
-// MAIN
-// ============================================================================
-
-func main() {
-
-	a := app.NewWithID("com.nawakarit.iHertz")
-
-	w := a.NewWindow("iHertz")
-
-	//w.Resize(fyne.NewSize(200, 200))
+// ส่งออก
+func CpuControl() fyne.CanvasObject {
 
 	bar := widget.NewProgressBar()
 	label := widget.NewLabel("0%")
-
-	//w.SetContent(container.NewVBox(bar, label))
-	w.Resize(fyne.NewSize(300, 100))
 
 	go func() {
 		for {
 			val := getCPU555()
 
-			// อัปเดต UI
-			bar.SetValue(val)
-			label.SetText(fmt.Sprintf("%.0f%%", val*100))
+			fyne.Do(func() { //กันพัง'
+
+				// อัปเดต UI
+				bar.SetValue(val)
+				label.SetText(fmt.Sprintf("%.0f%%", val*100))
+			})
 
 			time.Sleep(500 * time.Millisecond)
 		}
@@ -186,13 +175,12 @@ func main() {
 		onButtonClick()
 	})
 
-	w.SetContent(container.NewBorder(
+	x := container.NewBorder(
 		container.NewVBox(bar, label),
 		nil,
 		nil,
 		nil,
-		bt1),
-	)
+		bt1)
 
-	w.ShowAndRun()
+	return x
 }
