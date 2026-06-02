@@ -475,11 +475,6 @@ func CpuTabs() fyne.CanvasObject {
 	usagePerCoreSTRINGLabel := widget.NewLabel("usagePerCoreSTRINGLabel...")
 	usagePerCoreSTRINGLabel.Alignment = fyne.TextAlignCenter
 
-	usagepercentTotal0Label := widget.NewLabel("usagepercentTotal0Label...")
-	usagepercentTotal1Label := widget.NewLabel("usagepercentTotal1Label...")
-	usagepercentTotal2Label := widget.NewLabel("usagepercentTotal2Label...")
-	usagepercentTotal3Label := widget.NewLabel("usagepercentTotal3Label...")
-
 	//cpuTimesusagePage//
 	timesTotalAvg := widget.NewLabel("timesTotalAvg...")
 	timesSec := widget.NewLabel("timesSec...")
@@ -513,10 +508,7 @@ func CpuTabs() fyne.CanvasObject {
 				widget.NewSeparator(),
 				usagePerCoreSTRINGLabel,
 				widget.NewSeparator(),
-				usagepercentTotal0Label,
-				usagepercentTotal1Label,
-				usagepercentTotal2Label,
-				usagepercentTotal3Label)),
+			)),
 	))
 
 	//cpuTimesusagePage
