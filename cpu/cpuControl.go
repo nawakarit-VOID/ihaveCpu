@@ -19,17 +19,19 @@ import (
 
 // getCPUFreqInfo อ่านข้อมูลความถี่ของ CPU
 func getCPUFreqInfo(cpuIndex int) fyne.CanvasObject {
+
 	base := fmt.Sprintf("/sys/devices/system/cpu/cpu%d/cpufreq/", cpuIndex)
 	files := map[string]string{
 		"scaling_cur_freq": "ความถี่ปัจจุบัน",
 		"scaling_max_freq": "ความถี่สูงสุด (เพดาน)",
 		"scaling_min_freq": "ความถี่ต่ำสุด",
 		"cpuinfo_max_freq": "ความถี่สูงสุดของ hardware",
-		"scaling_governor": "governor ที่ใช้อยู่",
+		"scaling_governor": "Governor ที่ใช้อยู่",
 	}
 
 	x := widget.NewLabel("x...")
-	x1 := ""
+	var x1 string
+	x1 += "ยังไม่รองรับหลาย cpu"
 	for file, label := range files {
 		data, err := os.ReadFile(base + file)
 		if err != nil {
@@ -47,6 +49,32 @@ func getCPUFreqInfo(cpuIndex int) fyne.CanvasObject {
 		x.SetText(x1)
 	}
 	return x
+}
+
+// ============================================================================
+// แบ่งตามจำนวนคอร์
+// ============================================================================
+func sysCPUFreqInfo() fyne.CanvasObject {
+	info := CpuInfo()
+	percentTotal := CpuPercentAVG()
+
+	h := widget.NewLabel("h...")
+	//h2 := widget.NewLabel("h2...")
+
+	var h1 string
+
+	for i, cpu := range info {
+
+		h1 += fmt.Sprintf("\n%d Core [%s]", i, cpu.CoreID)
+
+	}
+
+	h.SetText(h1)
+
+	if len(percentTotal) > 0 {
+
+	}
+	return h
 }
 
 func onButtonClick() {
@@ -91,18 +119,20 @@ func CpuControl() fyne.CanvasObject {
 			}
 		}()
 	*/
-	xu1 := getCPUFreqInfo(0)
+	//xu0 := widget.NewLabel("ยังไม่รองรับหลาย cpu")
+	xu1 := getCPUFreqInfo(0) //เลือก คอร์ 0
+	xu2 := sysCPUFreqInfo()
 
 	bt1 := widget.NewButton("TTT", func() {
 		onButtonClick()
 	})
 
 	x := container.NewBorder(
-		container.NewVBox(xu1),
+		container.NewVBox(xu1, bt1, xu2),
 		nil,
 		nil,
 		nil,
-		bt1)
+	)
 
 	return x
 }

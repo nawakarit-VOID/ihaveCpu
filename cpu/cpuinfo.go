@@ -18,12 +18,12 @@ import (
 
 // จำนวนคอร์
 func CpuCoreCount() int {
-	physical, err := cpu.Counts(false) //core
+	physicalCore, err := cpu.Counts(false) //core
 	if err != nil {
 		log.Println(err)
 		return (0)
 	}
-	return physical
+	return physicalCore //core จริง
 }
 
 // จำนวนเทรด
@@ -115,7 +115,7 @@ func CPUdata() map[string]interface{} {
 	cpuThreadCoreSocketresult += ("[  Thread  ] : [ Core ] : [ Socket ]\n")
 	for i, cpu := range info {
 		cpuThreadCoreSocketresult += fmt.Sprintf("\nThread [%d] : Core [%s] : Socket [%s]",
-			i, cpu.CoreID, cpu.PhysicalID)
+			i, cpu.CoreID, cpu.PhysicalID) //PhysicalID*socket จำนวน cpu ในบอรฺ์ด
 	}
 
 	// cpuid
