@@ -55,26 +55,36 @@ func getCPUFreqInfo(cpuIndex int) fyne.CanvasObject {
 // แบ่งตามจำนวนคอร์
 // ============================================================================
 func sysCPUFreqInfo() fyne.CanvasObject {
-	info := CpuInfo()
-	percentTotal := CpuPercentAVG()
+
+	coreCount := CpuCoreCount()
+	//percentTotal := CpuPercentAVG()
 
 	h := widget.NewLabel("h...")
 	//h2 := widget.NewLabel("h2...")
+	base5 := widget.NewLabel("base...")
 
 	var h1 string
+	var base string
 
-	for i, cpu := range info {
+	for i := 0; i < coreCount; i++ {
 
-		h1 += fmt.Sprintf("\n%d Core [%s]", i, cpu.CoreID)
+		base += fmt.Sprintf("/sys/devices/system/cpu/cpu%d/cpufreq/\n", i)
+		//fmt.Printf("/sys/devices/system/cpu/cpu%d/cpufreq/", i)
+
+		//h1 += fmt.Sprintf("\n%d Core [%s]", i, cpu.CoreID)
 
 	}
 
 	h.SetText(h1)
+	base5.SetText(base)
 
-	if len(percentTotal) > 0 {
+	//if len(percentTotal) > 0 {
 
-	}
-	return h
+	//}
+
+	//return h
+	return base5
+
 }
 
 func onButtonClick() {
@@ -121,6 +131,7 @@ func CpuControl() fyne.CanvasObject {
 	*/
 	//xu0 := widget.NewLabel("ยังไม่รองรับหลาย cpu")
 	xu1 := getCPUFreqInfo(0) //เลือก คอร์ 0
+
 	xu2 := sysCPUFreqInfo()
 
 	bt1 := widget.NewButton("TTT", func() {
