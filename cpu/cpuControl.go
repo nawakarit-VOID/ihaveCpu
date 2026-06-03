@@ -19,7 +19,7 @@ import (
 //-------------------------------------------------------------------------------------------
 
 // getCPUFreqInfo อ่านข้อมูลความถี่ของ CPU
-func getCPUFreqInfo(cpuIndex int) string {
+func getCPUFreqInfo(cpuIndex int) fyne.CanvasObject {
 	base := fmt.Sprintf("/sys/devices/system/cpu/cpu%d/cpufreq/", cpuIndex)
 	files := map[string]string{
 		"scaling_cur_freq": "ความถี่ปัจจุบัน",
@@ -29,8 +29,8 @@ func getCPUFreqInfo(cpuIndex int) string {
 		"scaling_governor": "governor ที่ใช้อยู่",
 	}
 
-	x := ""
-
+	x := widget.NewLabel("x...")
+	x1 := ""
 	for file, label := range files {
 		data, err := os.ReadFile(base + file)
 		if err != nil {
@@ -39,13 +39,15 @@ func getCPUFreqInfo(cpuIndex int) string {
 		}
 		//fmt.Printf("  %s: %s", label, strings.TrimSpace(string(data)))
 
-		x += fmt.Sprintf("  %s: %s\n", label, strings.TrimSpace(string(data)))
+		x1 += fmt.Sprintf("  %s: %s\n", label, strings.TrimSpace(string(data)))
 
 		if strings.Contains(file, "freq") {
+
 			val, _ := strconv.ParseFloat(strings.TrimSpace(string(data)), 64)
-			fmt.Printf(" kHz (%.2f GHz)", val/1e6)
+			x1 += fmt.Printf(" kHz (%.2f GHz)", val/1e6)
 		}
-		fmt.Println()
+		x.SetText(x1)
+		//y := fmt.Sprintf(x)
 
 	}
 	return x
@@ -97,7 +99,7 @@ func CpuControl() fyne.CanvasObject {
 	fmt.Println("=== ข้อมูล CPU0 ===")
 
 	//globalProgress.SetValue(float64(fi) / float64(totalFolders))
-	x1 := getCPUFreqInfo(0)
+	xu1 := getCPUFreqInfo(0)
 
 	/*
 		// ตัวอย่าง: ตั้งเพดานที่ 2.0 GHz = 2,000,000 kHz
@@ -113,14 +115,14 @@ func CpuControl() fyne.CanvasObject {
 		setGovernor(0, "powersave")
 		fmt.Println("สำเร็จ!")
 	*/
-	x2 := widget.NewLabel(x1)
+	//x2 := widget.NewLabel(xu1)
 
 	bt1 := widget.NewButton("TTT", func() {
 		onButtonClick()
 	})
 
 	x := container.NewBorder(
-		container.NewVBox(bar, label, x2),
+		container.NewVBox(bar, label, xu1),
 		nil,
 		nil,
 		nil,
