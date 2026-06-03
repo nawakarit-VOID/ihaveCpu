@@ -9,7 +9,6 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
-	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -37,18 +36,15 @@ func getCPUFreqInfo(cpuIndex int) fyne.CanvasObject {
 			fmt.Printf("  %s: ไม่สามารถอ่านได้\n", label)
 			continue
 		}
-		//fmt.Printf("  %s: %s", label, strings.TrimSpace(string(data)))
 
-		x1 += fmt.Sprintf("  %s: %s\n", label, strings.TrimSpace(string(data)))
+		//fmt.Printf("  %s: %s", label, strings.TrimSpace(string(data)))
+		x1 += fmt.Sprintf("\n%s: %s", label, strings.TrimSpace(string(data)))
 
 		if strings.Contains(file, "freq") {
-
 			val, _ := strconv.ParseFloat(strings.TrimSpace(string(data)), 64)
-			x1 += fmt.Printf(" kHz (%.2f GHz)", val/1e6)
+			x1 += fmt.Sprintf(" kHz (%.2f GHz)", val/1e6)
 		}
 		x.SetText(x1)
-		//y := fmt.Sprintf(x)
-
 	}
 	return x
 }
@@ -66,7 +62,6 @@ func onButtonClick() {
 		if err != nil {
 			// แสดง error dialog
 			fmt.Println("ล้มเหลว")
-
 		}
 		// แสดง success dialog
 		fmt.Println("สำเร็จ 2GHz")
@@ -76,53 +71,34 @@ func onButtonClick() {
 // ส่งออก
 func CpuControl() fyne.CanvasObject {
 
-	bar := widget.NewProgressBar()
-	label := widget.NewLabel("0%")
-
-	go func() {
-		for {
-			v := CpuPercentAVG()
-			val := v[0] / 100.0
-
-			fyne.Do(func() { //กันพัง'
-				// อัปเดต UI
-				bar.SetValue(val)
-				label.SetText(fmt.Sprintf("%.0f%%", val*100))
-
-			})
-
-			time.Sleep(500 * time.Millisecond)
-		}
-	}()
-
-	//ProgressCpu0 := widget.NewProgressBar()
-	fmt.Println("=== ข้อมูล CPU0 ===")
-
-	//globalProgress.SetValue(float64(fi) / float64(totalFolders))
-	xu1 := getCPUFreqInfo(0)
+	//bar := widget.NewProgressBar()
+	//label := widget.NewLabel("0%")
 
 	/*
-		// ตัวอย่าง: ตั้งเพดานที่ 2.0 GHz = 2,000,000 kHz
-		targetFreq := uint64(2_000_000)
-		fmt.Printf("\nตั้งเพดานความถี่ CPU0 เป็น %.1f GHz...\n", float64(targetFreq)/1e6)
+		go func() {
+			for {
+				//v := CpuPercentAVG()
+				//val := v[0] / 100.0
 
-		if err := setCPUMaxFreq(0, targetFreq); err != nil {
-			fmt.Printf("เกิดข้อผิดพลาด: %v (ต้องรันด้วย root)\n", err)
-			return
-		}
+				fyne.Do(func() { //กันพัง'
+					 อัปเดต UI
+					bar.SetValue(val)
+					label.SetText(fmt.Sprintf("%.0f%%", val*100))
 
-		// governor ที่ใช้บ่อย: "powersave", "performance", "schedutil", "ondemand"
-		setGovernor(0, "powersave")
-		fmt.Println("สำเร็จ!")
+				})
+
+				time.Sleep(500 * time.Millisecond)
+			}
+		}()
 	*/
-	//x2 := widget.NewLabel(xu1)
+	xu1 := getCPUFreqInfo(0)
 
 	bt1 := widget.NewButton("TTT", func() {
 		onButtonClick()
 	})
 
 	x := container.NewBorder(
-		container.NewVBox(bar, label, xu1),
+		container.NewVBox(xu1),
 		nil,
 		nil,
 		nil,
