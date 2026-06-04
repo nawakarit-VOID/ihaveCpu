@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -29,27 +30,43 @@ func getCPUFreqInfo(cpuIndex int) fyne.CanvasObject {
 		"scaling_governor": "Governor ที่ใช้อยู่",
 	}
 
-	x := widget.NewLabel("x...")
-	var x1 string
-	x1 += "ยังไม่รองรับหลาย cpu"
-	x1 += fmt.Sprintf("\ncore %d ", cpuIndex)
+	x := widget.NewLabel("กำลังโหลด...")
 
-	for file, label := range files {
-		data, err := os.ReadFile(base + file)
-		if err != nil {
-			fmt.Printf("  %s: ไม่สามารถอ่านได้\n", label)
-			continue
+	update := func() {
+		var x1 strings.Builder
+		x1.WriteString("ยังไม่รองรับหลาย cpu")
+		x1.WriteString(fmt.Sprintf("\ncore %d ", cpuIndex))
+
+		for file, label := range files {
+			data, err := os.ReadFile(base + file)
+			if err != nil {
+				x1.WriteString(fmt.Sprintf("\n%s: ไม่สามารถอ่านได้", label))
+				continue
+			}
+
+			value := strings.TrimSpace(string(data))
+			x1.WriteString(fmt.Sprintf("\n%s: %s", label, value))
+
+			if strings.Contains(file, "freq") {
+				val, _ := strconv.ParseFloat(value, 64)
+				x1.WriteString(fmt.Sprintf(" kHz (%.2f GHz)", val/1e6))
+			}
 		}
 
-		//fmt.Printf("  %s: %s", label, strings.TrimSpace(string(data)))
-		x1 += fmt.Sprintf("\n%s: %s", label, strings.TrimSpace(string(data)))
-
-		if strings.Contains(file, "freq") {
-			val, _ := strconv.ParseFloat(strings.TrimSpace(string(data)), 64)
-			x1 += fmt.Sprintf(" kHz (%.2f GHz)", val/1e6)
-		}
-		x.SetText(x1)
+		fyne.Do(func() {
+			x.SetText(x1.String())
+		})
 	}
+
+	update()
+	go func() {
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
+		for range ticker.C {
+			update()
+		}
+	}()
+
 	return x
 }
 
@@ -64,11 +81,9 @@ func sysCPUFreqInfo() fyne.CanvasObject {
 		coreInfo := getCPUFreqInfo(i)
 		box.Add(coreInfo)
 	}
-
 	if coreCount == 0 {
 		return widget.NewLabel("ไม่พบข้อมูลจำนวนคอร์ CPU")
 	}
-
 	return box
 }
 
@@ -115,7 +130,7 @@ func CpuControl() fyne.CanvasObject {
 		}()
 	*/
 	//xu0 := widget.NewLabel("ยังไม่รองรับหลาย cpu")
-	xu1 := getCPUFreqInfo(0) //เลือก คอร์ 0
+	//xu1 := getCPUFreqInfo(0) //เลือก คอร์ 0
 
 	xu2 := sysCPUFreqInfo()
 
@@ -124,7 +139,7 @@ func CpuControl() fyne.CanvasObject {
 	})
 
 	x := container.NewBorder(
-		container.NewVBox(xu1, bt1, xu2),
+		container.NewVBox(bt1, xu2),
 		nil,
 		nil,
 		nil,
