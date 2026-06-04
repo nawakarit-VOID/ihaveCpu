@@ -59,31 +59,37 @@ func sysCPUFreqInfo() fyne.CanvasObject {
 	coreCount := CpuCoreCount()
 	//percentTotal := CpuPercentAVG()
 
-	h := widget.NewLabel("h...")
-	//h2 := widget.NewLabel("h2...")
-	base5 := widget.NewLabel("base...")
+	label1 := widget.NewLabel("label1...")
+	label2 := widget.NewLabel("label2...")
+	//label3 := widget.NewLabel("label3...")
 
-	var h1 string
-	var base string
+	var string_1 string
+	var string_2 string
+	var string_3 fyne.CanvasObject
 
 	for i := 0; i < coreCount; i++ {
 
-		base += fmt.Sprintf("/sys/devices/system/cpu/cpu%d/cpufreq/\n", i)
+		string_2 += fmt.Sprintf("/sys/devices/system/cpu/cpu%d/cpufreq/\n", i)
+		string_3 := getCPUFreqInfo(i)
 		//fmt.Printf("/sys/devices/system/cpu/cpu%d/cpufreq/", i)
-
 		//h1 += fmt.Sprintf("\n%d Core [%s]", i, cpu.CoreID)
-
 	}
+	label1.SetText(string_1)
+	label2.SetText(string_2)
+	//label3.SetText(string_3)
 
-	h.SetText(h1)
-	base5.SetText(base)
+	x := container.NewBorder(
+		string_3,
+		nil,
+		nil,
+		nil,
+	)
 
 	//if len(percentTotal) > 0 {
-
 	//}
 
 	//return h
-	return base5
+	return x
 
 }
 
