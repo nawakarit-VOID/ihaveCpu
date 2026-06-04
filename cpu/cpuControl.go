@@ -22,12 +22,15 @@ import (
 func getCPUFreqInfo(cpuIndex int) fyne.CanvasObject {
 
 	base := fmt.Sprintf("/sys/devices/system/cpu/cpu%d/cpufreq/", cpuIndex)
-	files := map[string]string{
-		"scaling_cur_freq": "ความถี่ปัจจุบัน",
-		"scaling_max_freq": "ความถี่สูงสุด (เพดาน)",
-		"scaling_min_freq": "ความถี่ต่ำสุด",
-		"cpuinfo_max_freq": "ความถี่สูงสุดของ hardware",
-		"scaling_governor": "Governor ที่ใช้อยู่",
+	files := []struct {
+		file  string
+		label string
+	}{
+		{"scaling_cur_freq", "ความถี่ปัจจุบัน"},
+		{"scaling_max_freq", "ความถี่สูงสุด (เพดาน)"},
+		{"scaling_min_freq", "ความถี่ต่ำสุด"},
+		{"cpuinfo_max_freq", "ความถี่สูงสุดของ hardware"},
+		{"scaling_governor", "Governor ที่ใช้อยู่"},
 	}
 
 	x := widget.NewLabel("กำลังโหลด...")
@@ -37,17 +40,17 @@ func getCPUFreqInfo(cpuIndex int) fyne.CanvasObject {
 		x1.WriteString("ยังไม่รองรับหลาย cpu")
 		x1.WriteString(fmt.Sprintf("\ncore %d ", cpuIndex))
 
-		for file, label := range files {
-			data, err := os.ReadFile(base + file)
+		for _, item := range files {
+			data, err := os.ReadFile(base + item.file)
 			if err != nil {
-				x1.WriteString(fmt.Sprintf("\n%s: ไม่สามารถอ่านได้", label))
+				x1.WriteString(fmt.Sprintf("\n%s: ไม่สามารถอ่านได้", item.label))
 				continue
 			}
 
 			value := strings.TrimSpace(string(data))
-			x1.WriteString(fmt.Sprintf("\n%s: %s", label, value))
+			x1.WriteString(fmt.Sprintf("\n%s: %s", item.label, value))
 
-			if strings.Contains(file, "freq") {
+			if strings.Contains(item.file, "freq") {
 				val, _ := strconv.ParseFloat(value, 64)
 				x1.WriteString(fmt.Sprintf(" kHz (%.2f GHz)", val/1e6))
 			}
