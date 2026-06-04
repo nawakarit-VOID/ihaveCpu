@@ -18,18 +18,15 @@ import (
 
 //-------------------------------------------------------------------------------------------
 
-// getCPUFreqInfo อ่านข้อมูลความถี่ของ CPU
-func getCPUFreqInfo(cpuIndex int) fyne.CanvasObject {
-
+func getCPUhardware(cpuIndex int) fyne.CanvasObject {
 	base := fmt.Sprintf("/sys/devices/system/cpu/cpu%d/cpufreq/", cpuIndex)
 	files := []struct {
 		file  string
 		label string
 	}{
-		{"scaling_cur_freq", "ความถี่ปัจจุบัน"},
-		{"scaling_max_freq", "ความถี่สูงสุด (เพดาน)"},
-		{"scaling_min_freq", "ความถี่ต่ำสุด"},
-		{"cpuinfo_max_freq", "ความถี่สูงสุดของ hardware"},
+		{"cpuinfo_min_freq", "ความถี่ต่ำสุด"},
+		{"cpuinfo_max_freq", "ความถี่สูงสุด"},
+		{"cpuinfo_transition_latency", "เวลาในการเปลี่ยนความเร็ว"},
 		{"scaling_governor", "Governor ที่ใช้อยู่"},
 	}
 
@@ -37,8 +34,8 @@ func getCPUFreqInfo(cpuIndex int) fyne.CanvasObject {
 
 	update := func() {
 		var x1 strings.Builder
-		x1.WriteString("ยังไม่รองรับหลาย cpu")
-		x1.WriteString(fmt.Sprintf("\ncore %d ", cpuIndex))
+		x1.WriteString("Min - Max Hardware")
+		x1.WriteString("|")
 
 		for _, item := range files {
 			data, err := os.ReadFile(base + item.file)
@@ -48,11 +45,58 @@ func getCPUFreqInfo(cpuIndex int) fyne.CanvasObject {
 			}
 
 			value := strings.TrimSpace(string(data))
-			x1.WriteString(fmt.Sprintf("\n%s: %s", item.label, value))
+			x1.WriteString(fmt.Sprintf("\n%s : %s", item.label, value))
 
 			if strings.Contains(item.file, "freq") {
 				val, _ := strconv.ParseFloat(value, 64)
-				x1.WriteString(fmt.Sprintf(" kHz (%.2f GHz)", val/1e6))
+				x1.WriteString(fmt.Sprintf(" kHz // (%.2f GHz)", val/1e6))
+			}
+			if strings.Contains(item.file, "latency") {
+				val, _ := strconv.ParseFloat(value, 64)
+				x1.WriteString(fmt.Sprintf(" nS // (%.f uS)", val/1e3))
+			}
+		}
+		fyne.Do(func() {
+			x.SetText(x1.String())
+		})
+	}
+	update()
+	return x
+}
+
+// getCPUFreqInfo อ่านข้อมูลความถี่ของ CPU
+func getCPUFreqUpdate(cpuIndex int) fyne.CanvasObject {
+
+	base := fmt.Sprintf("/sys/devices/system/cpu/cpu%d/cpufreq/", cpuIndex)
+	files := []struct {
+		file  string
+		label string
+	}{
+		{"scaling_cur_freq", "ความถี่ปัจจุบัน"},
+		{"scaling_max_freq", "ความถี่สูงสุด (จำกัด)"},
+		{"scaling_min_freq", "ความถี่ต่ำสุด (จำกัด)"},
+	}
+
+	x := widget.NewLabel("กำลังโหลด...")
+
+	update := func() {
+		var x1 strings.Builder
+		//x1.WriteString("ยังไม่รองรับหลาย cpu")
+		x1.WriteString(fmt.Sprintf("core [ %d ]", cpuIndex))
+
+		for _, item := range files {
+			data, err := os.ReadFile(base + item.file)
+			if err != nil {
+				x1.WriteString(fmt.Sprintf("\n%s: ไม่สามารถอ่านได้", item.label))
+				continue
+			}
+
+			value := strings.TrimSpace(string(data))
+			x1.WriteString(fmt.Sprintf("\n%s : %s", item.label, value))
+
+			if strings.Contains(item.file, "freq") {
+				val, _ := strconv.ParseFloat(value, 64)
+				x1.WriteString(fmt.Sprintf(" kHz // (%.2f GHz)", val/1e6))
 			}
 		}
 
@@ -76,12 +120,12 @@ func getCPUFreqInfo(cpuIndex int) fyne.CanvasObject {
 // ============================================================================
 // แบ่งตามจำนวนคอร์
 // ============================================================================
-func sysCPUFreqInfo() fyne.CanvasObject {
+func sysCPUFreqUpdate() fyne.CanvasObject {
 	coreCount := CpuCoreCount()
 	box := container.NewVBox()
 
 	for i := 0; i < coreCount; i++ {
-		coreInfo := getCPUFreqInfo(i)
+		coreInfo := getCPUFreqUpdate(i)
 		box.Add(coreInfo)
 	}
 	if coreCount == 0 {
@@ -134,15 +178,15 @@ func CpuControl() fyne.CanvasObject {
 	*/
 	//xu0 := widget.NewLabel("ยังไม่รองรับหลาย cpu")
 	//xu1 := getCPUFreqInfo(0) //เลือก คอร์ 0
-
-	xu2 := sysCPUFreqInfo()
+	perCore := sysCPUFreqUpdate()
+	info := getCPUhardware(0)
 
 	bt1 := widget.NewButton("TTT", func() {
 		onButtonClick()
 	})
 
 	x := container.NewBorder(
-		container.NewVBox(bt1, xu2),
+		container.NewVBox(info, bt1, perCore),
 		nil,
 		nil,
 		nil,
