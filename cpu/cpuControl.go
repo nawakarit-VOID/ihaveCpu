@@ -32,6 +32,8 @@ func getCPUFreqInfo(cpuIndex int) fyne.CanvasObject {
 	x := widget.NewLabel("x...")
 	var x1 string
 	x1 += "ยังไม่รองรับหลาย cpu"
+	x1 += fmt.Sprintf("\ncore %d ", cpuIndex)
+
 	for file, label := range files {
 		data, err := os.ReadFile(base + file)
 		if err != nil {
@@ -55,42 +57,19 @@ func getCPUFreqInfo(cpuIndex int) fyne.CanvasObject {
 // แบ่งตามจำนวนคอร์
 // ============================================================================
 func sysCPUFreqInfo() fyne.CanvasObject {
-
 	coreCount := CpuCoreCount()
-	//percentTotal := CpuPercentAVG()
-
-	label1 := widget.NewLabel("label1...")
-	label2 := widget.NewLabel("label2...")
-	//label3 := widget.NewLabel("label3...")
-
-	var string_1 string
-	var string_2 string
-	var string_3 fyne.CanvasObject
+	box := container.NewVBox()
 
 	for i := 0; i < coreCount; i++ {
-
-		string_2 += fmt.Sprintf("/sys/devices/system/cpu/cpu%d/cpufreq/\n", i)
-		string_3 := getCPUFreqInfo(i)
-		//fmt.Printf("/sys/devices/system/cpu/cpu%d/cpufreq/", i)
-		//h1 += fmt.Sprintf("\n%d Core [%s]", i, cpu.CoreID)
+		coreInfo := getCPUFreqInfo(i)
+		box.Add(coreInfo)
 	}
-	label1.SetText(string_1)
-	label2.SetText(string_2)
-	//label3.SetText(string_3)
 
-	x := container.NewBorder(
-		string_3,
-		nil,
-		nil,
-		nil,
-	)
+	if coreCount == 0 {
+		return widget.NewLabel("ไม่พบข้อมูลจำนวนคอร์ CPU")
+	}
 
-	//if len(percentTotal) > 0 {
-	//}
-
-	//return h
-	return x
-
+	return box
 }
 
 func onButtonClick() {
