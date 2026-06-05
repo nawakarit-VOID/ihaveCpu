@@ -35,7 +35,7 @@ func getCPUhardware(cpuIndex int) fyne.CanvasObject {
 	update := func() {
 		var x1 strings.Builder
 		x1.WriteString("Min - Max Hardware")
-		x1.WriteString("|")
+		x1.WriteString("\n|")
 
 		for _, item := range files {
 			data, err := os.ReadFile(base + item.file)
@@ -135,6 +135,18 @@ func sysCPUFreqUpdate() fyne.CanvasObject {
 }
 
 func onButtonClick() {
+
+	/*
+		cpuSlider := widget.NewSlider(1, float64(maxCPU)) // สร้าง slider สำหรับเลือกจำนวน CPU ที่จะใช้ โดยมีค่าตั้งแต่ 1 ถึงจำนวน CPU สูงสุดของเครื่อง
+		cpuSlider.Step = 1                                //ใช้เฉพาะจำนวนเต็ม เพราะ workers และ parallelism ต้องเป็นจำนวนเต็ม
+		cpuSlider.Value = float64(maxCPU)                 //ตั้งค่าเริ่มต้นของ slider ให้เป็นจำนวน CPU สูงสุด (ใช้ทุก core ที่มี)
+		cpuSlider.OnChanged = func(v float64) {           //เมื่อ slider ถูกเปลี่ยนค่า จะคำนวณเปอร์เซ็นต์การใช้ CPU ใหม่และอัปเดตข้อความใน cpuLabel ตามค่าที่เลือก
+			pvcpus := pmcpu * v
+			symbol := SpeedSymbol(pvcpus) //แสดงสัญลักษณ์ความเร็วตามเปอร์เซ็นต์การใช้ CPU เริ่มต้น
+			cpuLabel.Text = fmt.Sprintf("CPU Speed x%.1f %s ( %.0f%% / cores ) %s", v, symbol, pvcpus, symbol)
+			cpuLabel.Refresh()
+		}
+	*/
 	freq := uint64(2000000) // อ่านจาก input field
 
 	go func() { // รันใน goroutine ไม่ให้ UI ค้าง
@@ -156,28 +168,6 @@ func onButtonClick() {
 // ส่งออก
 func CpuControl() fyne.CanvasObject {
 
-	//bar := widget.NewProgressBar()
-	//label := widget.NewLabel("0%")
-
-	/*
-		go func() {
-			for {
-				//v := CpuPercentAVG()
-				//val := v[0] / 100.0
-
-				fyne.Do(func() { //กันพัง'
-					 อัปเดต UI
-					bar.SetValue(val)
-					label.SetText(fmt.Sprintf("%.0f%%", val*100))
-
-				})
-
-				time.Sleep(500 * time.Millisecond)
-			}
-		}()
-	*/
-	//xu0 := widget.NewLabel("ยังไม่รองรับหลาย cpu")
-	//xu1 := getCPUFreqInfo(0) //เลือก คอร์ 0
 	perCore := sysCPUFreqUpdate()
 	info := getCPUhardware(0)
 
@@ -186,7 +176,13 @@ func CpuControl() fyne.CanvasObject {
 	})
 
 	x := container.NewBorder(
-		container.NewVBox(info, bt1, perCore),
+		container.NewVBox(
+			info,
+			widget.NewSeparator(),
+			bt1,
+			widget.NewSeparator(),
+			perCore),
+		nil,
 		nil,
 		nil,
 		nil,

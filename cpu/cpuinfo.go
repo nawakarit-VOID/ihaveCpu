@@ -530,6 +530,6 @@ func CpuTabs() fyne.CanvasObject {
 		container.NewTabItem("Flags Feature", container.NewScroll(cpuFlagsFeaturePage)),
 		container.NewTabItem("Usage", container.NewScroll(cpuUsagePage)),
 		container.NewTabItem("TimeUsage", container.NewScroll(cpuTimesusagePage)),
-		container.NewTabItem("CpuControl", container.NewScroll(cpuControlPage)),
+		container.NewTabItem("Control", container.NewScroll(cpuControlPage)),
 	)
 }
