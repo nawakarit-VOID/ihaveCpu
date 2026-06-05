@@ -16,7 +16,13 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-//-------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------
+type xx struct {
+	Usage string //
+	//Timesusage string
+
+	//////////////////////
+}
 
 func getCPUhardware(cpuIndex int) fyne.CanvasObject {
 	base := fmt.Sprintf("/sys/devices/system/cpu/cpu%d/cpufreq/", cpuIndex)
@@ -134,7 +140,49 @@ func sysCPUFreqUpdate() fyne.CanvasObject {
 	return box
 }
 
-func onButtonClick() {
+func cpuSlider(cpuIndex int) uint64 {
+	base := fmt.Sprintf("/sys/devices/system/cpu/cpu%d/cpufreq/", cpuIndex)
+	files := []struct {
+		file  string
+		label string
+	}{
+		{"cpuinfo_min_freq", "ความถี่ต่ำสุด"},
+		{"cpuinfo_max_freq", "ความถี่สูงสุด"},
+		{"cpuinfo_transition_latency", "เวลาในการเปลี่ยนความเร็ว"},
+	}
+
+	x := widget.NewLabel("กำลังโหลด...")
+
+	update := func() {
+		var x1 strings.Builder
+		x1.WriteString("Min - Max Hardware")
+		x1.WriteString("\n|")
+
+		for _, item := range files {
+			data, err := os.ReadFile(base + item.file)
+			if err != nil {
+				x1.WriteString(fmt.Sprintf("\n%s: ไม่สามารถอ่านได้", item.label))
+				continue
+			}
+
+			value := strings.TrimSpace(string(data))
+			x1.WriteString(fmt.Sprintf("\n%s : %s", item.label, value))
+
+			if strings.Contains(item.file, "freq") {
+				val, _ := strconv.ParseFloat(value, 64)
+				x1.WriteString(fmt.Sprintf(" kHz // (%.2f GHz)", val/1e6))
+			}
+			if strings.Contains(item.file, "latency") {
+				val, _ := strconv.ParseFloat(value, 64)
+				x1.WriteString(fmt.Sprintf(" nS // (%.f uS)", val/1e3))
+			}
+		}
+		fyne.Do(func() {
+			x.SetText(x1.String())
+		})
+	}
+	update()
+	return x
 
 	/*
 		cpuSlider := widget.NewSlider(1, float64(maxCPU)) // สร้าง slider สำหรับเลือกจำนวน CPU ที่จะใช้ โดยมีค่าตั้งแต่ 1 ถึงจำนวน CPU สูงสุดของเครื่อง
@@ -146,7 +194,21 @@ func onButtonClick() {
 			cpuLabel.Text = fmt.Sprintf("CPU Speed x%.1f %s ( %.0f%% / cores ) %s", v, symbol, pvcpus, symbol)
 			cpuLabel.Refresh()
 		}
-	*/
+
+
+			if strings.Contains(item.file, "cpuinfo_max_freq") {
+				val_cpuinfo_max_freq, _ := strconv.ParseFloat(value, 64)
+			}
+
+
+
+
+	return */
+
+}
+
+func onButtonClick() {
+
 	freq := uint64(2000000) // อ่านจาก input field
 
 	go func() { // รันใน goroutine ไม่ให้ UI ค้าง
