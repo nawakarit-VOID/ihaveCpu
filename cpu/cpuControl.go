@@ -17,14 +17,8 @@ import (
 )
 
 // -------------------------------------------------------------------------------------------
-type xx struct {
-	Usage string //
-	//Timesusage string
 
-	//////////////////////
-}
-
-func getCPUhardware(cpuIndex int) fyne.CanvasObject {
+func getCPUhardware(cpuIndex int) (fyne.CanvasObject, uint64, uint64, uint64) {
 	base := fmt.Sprintf("/sys/devices/system/cpu/cpu%d/cpufreq/", cpuIndex)
 	files := []struct {
 		file  string
@@ -35,39 +29,53 @@ func getCPUhardware(cpuIndex int) fyne.CanvasObject {
 		{"cpuinfo_transition_latency", "เวลาในการเปลี่ยนความเร็ว"},
 		{"scaling_governor", "Governor ที่ใช้อยู่"},
 	}
-
 	x := widget.NewLabel("กำลังโหลด...")
 
-	update := func() {
-		var x1 strings.Builder
-		x1.WriteString("Min - Max Hardware")
-		x1.WriteString("\n|")
+	var x1 strings.Builder
+	var val_cpuinfo_min_freq uint64
+	var val_cpuinfo_max_freq uint64
+	var val_cpuinfo_transition_latency uint64
 
-		for _, item := range files {
-			data, err := os.ReadFile(base + item.file)
-			if err != nil {
-				x1.WriteString(fmt.Sprintf("\n%s: ไม่สามารถอ่านได้", item.label))
-				continue
-			}
+	x1.WriteString("Min - Max Hardware")
+	x1.WriteString("\n|")
 
-			value := strings.TrimSpace(string(data))
-			x1.WriteString(fmt.Sprintf("\n%s : %s", item.label, value))
-
-			if strings.Contains(item.file, "freq") {
-				val, _ := strconv.ParseFloat(value, 64)
-				x1.WriteString(fmt.Sprintf(" kHz // (%.2f GHz)", val/1e6))
-			}
-			if strings.Contains(item.file, "latency") {
-				val, _ := strconv.ParseFloat(value, 64)
-				x1.WriteString(fmt.Sprintf(" nS // (%.f uS)", val/1e3))
-			}
+	for _, item := range files {
+		data, err := os.ReadFile(base + item.file)
+		if err != nil {
+			x1.WriteString(fmt.Sprintf("\n%s: ไม่สามารถอ่านได้", item.label))
+			continue
 		}
-		fyne.Do(func() {
-			x.SetText(x1.String())
-		})
+
+		value := strings.TrimSpace(string(data))
+		x1.WriteString(fmt.Sprintf("\n%s : %s", item.label, value))
+
+		if strings.Contains(item.file, "freq") {
+			val, _ := strconv.ParseFloat(value, 64)
+			x1.WriteString(fmt.Sprintf(" kHz // (%.2f GHz)", val/1e6))
+		}
+		if strings.Contains(item.file, "latency") {
+			val, _ := strconv.ParseFloat(value, 64)
+			x1.WriteString(fmt.Sprintf(" nS // (%.f uS)", val/1e3))
+		}
+		//เอาค่าออกมา
+		if strings.Contains(item.file, "cpuinfo_min_freq") {
+			val, _ := strconv.ParseFloat(value, 64)
+			val_cpuinfo_min_freq = uint64(val)
+		}
+		if strings.Contains(item.file, "cpuinfo_max_freq") {
+			val, _ := strconv.ParseFloat(value, 64)
+			val_cpuinfo_max_freq = uint64(val)
+		}
+		if strings.Contains(item.file, "cpuinfo_transition_latency") {
+			val, _ := strconv.ParseFloat(value, 64)
+			val_cpuinfo_transition_latency = uint64(val)
+		}
 	}
-	update()
-	return x
+	fyne.Do(func() {
+		x.SetText(x1.String())
+	})
+
+	return x, val_cpuinfo_min_freq, val_cpuinfo_max_freq, val_cpuinfo_transition_latency
 }
 
 // getCPUFreqInfo อ่านข้อมูลความถี่ของ CPU
@@ -140,72 +148,23 @@ func sysCPUFreqUpdate() fyne.CanvasObject {
 	return box
 }
 
-func cpuSlider(cpuIndex int) uint64 {
-	base := fmt.Sprintf("/sys/devices/system/cpu/cpu%d/cpufreq/", cpuIndex)
-	files := []struct {
-		file  string
-		label string
-	}{
-		{"cpuinfo_min_freq", "ความถี่ต่ำสุด"},
-		{"cpuinfo_max_freq", "ความถี่สูงสุด"},
-		{"cpuinfo_transition_latency", "เวลาในการเปลี่ยนความเร็ว"},
+/*
+	cpuSlider := widget.NewSlider(1, float64(maxCPU)) // สร้าง slider สำหรับเลือกจำนวน CPU ที่จะใช้ โดยมีค่าตั้งแต่ 1 ถึงจำนวน CPU สูงสุดของเครื่อง
+	cpuSlider.Step = 1                                //ใช้เฉพาะจำนวนเต็ม เพราะ workers และ parallelism ต้องเป็นจำนวนเต็ม
+	cpuSlider.Value = float64(maxCPU)                 //ตั้งค่าเริ่มต้นของ slider ให้เป็นจำนวน CPU สูงสุด (ใช้ทุก core ที่มี)
+	cpuSlider.OnChanged = func(v float64) {           //เมื่อ slider ถูกเปลี่ยนค่า จะคำนวณเปอร์เซ็นต์การใช้ CPU ใหม่และอัปเดตข้อความใน cpuLabel ตามค่าที่เลือก
+		pvcpus := pmcpu * v
+		symbol := SpeedSymbol(pvcpus) //แสดงสัญลักษณ์ความเร็วตามเปอร์เซ็นต์การใช้ CPU เริ่มต้น
+		cpuLabel.Text = fmt.Sprintf("CPU Speed x%.1f %s ( %.0f%% / cores ) %s", v, symbol, pvcpus, symbol)
+		cpuLabel.Refresh()
 	}
 
-	x := widget.NewLabel("กำลังโหลด...")
 
-	update := func() {
-		var x1 strings.Builder
-		x1.WriteString("Min - Max Hardware")
-		x1.WriteString("\n|")
-
-		for _, item := range files {
-			data, err := os.ReadFile(base + item.file)
-			if err != nil {
-				x1.WriteString(fmt.Sprintf("\n%s: ไม่สามารถอ่านได้", item.label))
-				continue
-			}
-
-			value := strings.TrimSpace(string(data))
-			x1.WriteString(fmt.Sprintf("\n%s : %s", item.label, value))
-
-			if strings.Contains(item.file, "freq") {
-				val, _ := strconv.ParseFloat(value, 64)
-				x1.WriteString(fmt.Sprintf(" kHz // (%.2f GHz)", val/1e6))
-			}
-			if strings.Contains(item.file, "latency") {
-				val, _ := strconv.ParseFloat(value, 64)
-				x1.WriteString(fmt.Sprintf(" nS // (%.f uS)", val/1e3))
-			}
-		}
-		fyne.Do(func() {
-			x.SetText(x1.String())
-		})
-	}
-	update()
-	return x
-
-	/*
-		cpuSlider := widget.NewSlider(1, float64(maxCPU)) // สร้าง slider สำหรับเลือกจำนวน CPU ที่จะใช้ โดยมีค่าตั้งแต่ 1 ถึงจำนวน CPU สูงสุดของเครื่อง
-		cpuSlider.Step = 1                                //ใช้เฉพาะจำนวนเต็ม เพราะ workers และ parallelism ต้องเป็นจำนวนเต็ม
-		cpuSlider.Value = float64(maxCPU)                 //ตั้งค่าเริ่มต้นของ slider ให้เป็นจำนวน CPU สูงสุด (ใช้ทุก core ที่มี)
-		cpuSlider.OnChanged = func(v float64) {           //เมื่อ slider ถูกเปลี่ยนค่า จะคำนวณเปอร์เซ็นต์การใช้ CPU ใหม่และอัปเดตข้อความใน cpuLabel ตามค่าที่เลือก
-			pvcpus := pmcpu * v
-			symbol := SpeedSymbol(pvcpus) //แสดงสัญลักษณ์ความเร็วตามเปอร์เซ็นต์การใช้ CPU เริ่มต้น
-			cpuLabel.Text = fmt.Sprintf("CPU Speed x%.1f %s ( %.0f%% / cores ) %s", v, symbol, pvcpus, symbol)
-			cpuLabel.Refresh()
+		if strings.Contains(item.file, "cpuinfo_max_freq") {
+			val_cpuinfo_max_freq, _ := strconv.ParseFloat(value, 64)
 		}
 
-
-			if strings.Contains(item.file, "cpuinfo_max_freq") {
-				val_cpuinfo_max_freq, _ := strconv.ParseFloat(value, 64)
-			}
-
-
-
-
-	return */
-
-}
+return */
 
 func onButtonClick() {
 
@@ -231,7 +190,8 @@ func onButtonClick() {
 func CpuControl() fyne.CanvasObject {
 
 	perCore := sysCPUFreqUpdate()
-	info := getCPUhardware(0)
+	//info, _, _, _ := getCPUhardware(0)
+	info, g, h, i := getCPUhardware(0)
 
 	bt1 := widget.NewButton("TTT", func() {
 		onButtonClick()
@@ -243,7 +203,12 @@ func CpuControl() fyne.CanvasObject {
 			widget.NewSeparator(),
 			bt1,
 			widget.NewSeparator(),
-			perCore),
+			perCore,
+			widget.NewSeparator(),
+			widget.NewLabel(fmt.Sprintf("%d", g)),
+			widget.NewLabel(fmt.Sprintf("%d", h)),
+			widget.NewLabel(fmt.Sprintf("%d", i)),
+		),
 		nil,
 		nil,
 		nil,
