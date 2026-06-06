@@ -45,7 +45,7 @@ func getCPUhardware(cpuIndex int) (fyne.CanvasObject, uint64, uint64, uint64) {
 			x1.WriteString(fmt.Sprintf("\n%s: ไม่สามารถอ่านได้", item.label))
 			continue
 		}
-
+		//string ไม่จำเป็นต้อง update()
 		value := strings.TrimSpace(string(data))
 		x1.WriteString(fmt.Sprintf("\n%s : %s", item.label, value))
 
@@ -147,28 +147,46 @@ func sysCPUFreqUpdate() fyne.CanvasObject {
 	}
 	return box
 }
+func slider() (fyne.CanvasObject, fyne.CanvasObject, fyne.CanvasObject, *widget.Label, *widget.Label, *widget.Label, uint64, uint64, uint64) {
+	_, val_min, val_max, val_latency := getCPUhardware(0)
+	val_ch_min := val_min
+	val_ch_max := val_max
+	val_ch_latency := val_latency
 
-/*
-	cpuSlider := widget.NewSlider(1, float64(maxCPU)) // สร้าง slider สำหรับเลือกจำนวน CPU ที่จะใช้ โดยมีค่าตั้งแต่ 1 ถึงจำนวน CPU สูงสุดของเครื่อง
-	cpuSlider.Step = 1                                //ใช้เฉพาะจำนวนเต็ม เพราะ workers และ parallelism ต้องเป็นจำนวนเต็ม
-	cpuSlider.Value = float64(maxCPU)                 //ตั้งค่าเริ่มต้นของ slider ให้เป็นจำนวน CPU สูงสุด (ใช้ทุก core ที่มี)
-	cpuSlider.OnChanged = func(v float64) {           //เมื่อ slider ถูกเปลี่ยนค่า จะคำนวณเปอร์เซ็นต์การใช้ CPU ใหม่และอัปเดตข้อความใน cpuLabel ตามค่าที่เลือก
-		pvcpus := pmcpu * v
-		symbol := SpeedSymbol(pvcpus) //แสดงสัญลักษณ์ความเร็วตามเปอร์เซ็นต์การใช้ CPU เริ่มต้น
-		cpuLabel.Text = fmt.Sprintf("CPU Speed x%.1f %s ( %.0f%% / cores ) %s", v, symbol, pvcpus, symbol)
-		cpuLabel.Refresh()
+	min_freq_Label := widget.NewLabel(fmt.Sprintf("%d kHz [ %.2f Ghz ]", val_ch_min, float64(val_ch_min)/1e6))
+	max_freq_Label := widget.NewLabel(fmt.Sprintf("%d kHz [ %.2f Ghz ]", val_ch_max, float64(val_ch_max)/1e6))
+	latency_Label := widget.NewLabel(fmt.Sprintf("%d nS [ %.2f uS ]", val_ch_latency, float64(val_ch_latency)/1e3))
+
+	min_freq_Slider := widget.NewSlider(float64(val_min), float64(val_max))
+	min_freq_Slider.Step = 1
+	min_freq_Slider.Value = float64(val_min) //ตั้งค่าเริ่มต้นของ slider
+	min_freq_Slider.OnChanged = func(v float64) {
+		val_ch_min = uint64(v) //แปลงเป็น uint64
+		min_freq_Label.SetText(fmt.Sprintf("%d kHz [ %.2f Ghz ]", val_ch_min, float64(val_ch_min)/1e6))
 	}
 
+	max_freq_Slider := widget.NewSlider(float64(val_min), float64(val_max))
+	max_freq_Slider.Step = 1
+	max_freq_Slider.Value = float64(val_max)
+	max_freq_Slider.OnChanged = func(v float64) {
+		val_ch_max = uint64(v)
+		max_freq_Label.SetText(fmt.Sprintf("%d kHz [ %.2f Ghz ]", val_ch_max, float64(val_ch_max)/1e6))
+	}
+	latency_Slider := widget.NewSlider(500, 50000)
+	latency_Slider.Step = 1
+	latency_Slider.Value = float64(val_latency)
+	latency_Slider.OnChanged = func(v float64) {
+		val_ch_latency = uint64(v)
+		latency_Label.SetText(fmt.Sprintf("%d nS [ %.2f uS ]", val_ch_latency, float64(val_ch_latency)/1e3))
+	}
 
-		if strings.Contains(item.file, "cpuinfo_max_freq") {
-			val_cpuinfo_max_freq, _ := strconv.ParseFloat(value, 64)
-		}
-
-return */
+	return min_freq_Slider, max_freq_Slider, latency_Slider, min_freq_Label, max_freq_Label, latency_Label, val_ch_min, val_ch_max, val_ch_latency
+}
 
 func onButtonClick() {
 
-	freq := uint64(2000000) // อ่านจาก input field
+	_, _, _, _, _, _, freq_min, freq_max, latency := slider()
+	//freq := uint64(2000000) // อ่านจาก input field
 
 	go func() { // รันใน goroutine ไม่ให้ UI ค้าง
 		script := fmt.Sprintf(
@@ -190,8 +208,8 @@ func onButtonClick() {
 func CpuControl() fyne.CanvasObject {
 
 	perCore := sysCPUFreqUpdate()
-	//info, _, _, _ := getCPUhardware(0)
-	info, g, h, i := getCPUhardware(0)
+	info, _, _, _ := getCPUhardware(0)
+	slider_min, slider_max, slider_latency, label_min, label_max, label_latency, _, _, _ := slider()
 
 	bt1 := widget.NewButton("TTT", func() {
 		onButtonClick()
@@ -205,9 +223,15 @@ func CpuControl() fyne.CanvasObject {
 			widget.NewSeparator(),
 			perCore,
 			widget.NewSeparator(),
-			widget.NewLabel(fmt.Sprintf("%d", g)),
-			widget.NewLabel(fmt.Sprintf("%d", h)),
-			widget.NewLabel(fmt.Sprintf("%d", i)),
+			slider_min,
+			label_min,
+			widget.NewSeparator(),
+			slider_max,
+			label_max,
+			widget.NewSeparator(),
+			slider_latency,
+			label_latency,
+			widget.NewSeparator(),
 		),
 		nil,
 		nil,
