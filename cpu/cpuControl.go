@@ -147,7 +147,7 @@ func sysCPUFreqUpdate() fyne.CanvasObject {
 	}
 	return box
 }
-func slider() (fyne.CanvasObject, fyne.CanvasObject, fyne.CanvasObject, *widget.Label, *widget.Label, *widget.Label, uint64, uint64, uint64) {
+func slider() (*widget.Slider, *widget.Slider, *widget.Slider, *widget.Label, *widget.Label, *widget.Label) {
 	_, val_min, val_max, val_latency := getCPUhardware(0)
 	val_ch_min := val_min
 	val_ch_max := val_max
@@ -180,13 +180,15 @@ func slider() (fyne.CanvasObject, fyne.CanvasObject, fyne.CanvasObject, *widget.
 		latency_Label.SetText(fmt.Sprintf("%d nS [ %.2f uS ]", val_ch_latency, float64(val_ch_latency)/1e3))
 	}
 
-	return min_freq_Slider, max_freq_Slider, latency_Slider, min_freq_Label, max_freq_Label, latency_Label, val_ch_min, val_ch_max, val_ch_latency
+	return min_freq_Slider, max_freq_Slider, latency_Slider, min_freq_Label, max_freq_Label, latency_Label
 }
 
-func onButtonClick() {
+func onButtonClick(min_freq_Slider, max_freq_Slider, latency_Slider *widget.Slider) {
 
-	_, _, _, _, _, _, freq_min, freq_max, latency := slider()
-	//freq := uint64(2000000) // อ่านจาก input field
+	// อ่านค่าจากวิดเจต slider โดยตรง
+	freq_min := uint64(min_freq_Slider.Value)
+	freq_max := uint64(max_freq_Slider.Value)
+	latency := uint64(latency_Slider.Value)
 
 	go func() { // รันใน goroutine ไม่ให้ UI ค้าง
 		//		script := fmt.Sprintf(
@@ -210,7 +212,7 @@ echo %d | tee /sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_transition_latency`,
 			fmt.Println("ล้มเหลว")
 		}
 		// แสดง success dialog
-		fmt.Println("สำเร็จ 2GHz")
+		fmt.Println("สำเร็จ", freq_min, freq_max, latency)
 	}()
 }
 
@@ -219,10 +221,10 @@ func CpuControl() fyne.CanvasObject {
 
 	perCore := sysCPUFreqUpdate()
 	info, _, _, _ := getCPUhardware(0)
-	slider_min, slider_max, slider_latency, label_min, label_max, label_latency, _, _, _ := slider()
+	slider_min, slider_max, slider_latency, label_min, label_max, label_latency := slider()
 
 	bt1 := widget.NewButton("TTT", func() {
-		onButtonClick()
+		onButtonClick(slider_min, slider_max, slider_latency)
 	})
 
 	x := container.NewBorder(
