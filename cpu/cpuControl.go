@@ -189,10 +189,20 @@ func onButtonClick() {
 	//freq := uint64(2000000) // อ่านจาก input field
 
 	go func() { // รันใน goroutine ไม่ให้ UI ค้าง
+		//		script := fmt.Sprintf(
+		//		"echo %d | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq",
+		//		freq,
+		//	)
+
 		script := fmt.Sprintf(
-			"echo %d | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq",
-			freq,
+			`echo %d | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq
+echo %d | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_min_freq
+echo %d | tee /sys/devices/system/cpu/cpu*/cpufreq/cpuinfo_transition_latency`,
+			freq_max,
+			freq_min,
+			latency,
 		)
+
 		cmd := exec.Command("pkexec", "bash", "-c", script)
 		err := cmd.Run()
 		if err != nil {
