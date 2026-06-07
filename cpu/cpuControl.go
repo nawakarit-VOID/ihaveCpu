@@ -146,8 +146,11 @@ func sysCPUFreqUpdate() fyne.CanvasObject {
 	return box
 }
 
-func slider() (*widget.Slider, *widget.Slider, *widget.Label, *widget.Label) {
+func slider() (*widget.Slider, *widget.Slider, *widget.Label, *widget.Label, *widget.Entry, *widget.Entry) {
 	_, val_min, val_max := getCPUhardware(0)
+
+	entry_min := widget.NewEntry()
+	entry_max := widget.NewEntry()
 
 	val_ch_min := val_min
 	val_ch_max := val_max
@@ -161,6 +164,13 @@ func slider() (*widget.Slider, *widget.Slider, *widget.Label, *widget.Label) {
 	max_freq_Slider := widget.NewSlider(float64(val_min), float64(val_max)) //*max
 
 	//*min
+	entry_min.OnChanged = func(s string) {
+		v, err := strconv.ParseFloat(s, 64)
+		if err == nil {
+			min_freq_Slider.SetValue(v)
+		}
+	}
+	//slider_min
 	min_freq_Slider.Step = 1
 	min_freq_Slider.Value = float64(val_min) //ตั้งค่าเริ่มต้นของ slider
 	min_freq_Slider.OnChanged = func(v float64) {
@@ -168,13 +178,21 @@ func slider() (*widget.Slider, *widget.Slider, *widget.Label, *widget.Label) {
 		if v > max_freq_Slider.Value {
 			max_freq_Slider.SetValue(v)
 			//fmt.Println("max <= min")
-
 		}
+
+		entry_min.SetText(fmt.Sprintf("%.f", v))
 		val_ch_min = uint64(v) //แปลงเป็น uint64
 		min_freq_Label.SetText(fmt.Sprintf("[ จำกัด - ความถี่ต่ำสุด ] %d kHz [ %.2f Ghz ]", val_ch_min, float64(val_ch_min)/1e6))
 	}
 
 	//*max
+	entry_min.OnChanged = func(s string) {
+		v, err := strconv.ParseFloat(s, 64)
+		if err == nil {
+			min_freq_Slider.SetValue(v)
+		}
+	}
+	//slider_max
 	max_freq_Slider.Step = 1
 	max_freq_Slider.Value = float64(val_max)
 	max_freq_Slider.OnChanged = func(v float64) {
@@ -184,10 +202,11 @@ func slider() (*widget.Slider, *widget.Slider, *widget.Label, *widget.Label) {
 			//fmt.Println("min >= max")
 		}
 		val_ch_max = uint64(v)
+		entry_max.SetText(fmt.Sprintf("%.f", v))
 		max_freq_Label.SetText(fmt.Sprintf("[ จำกัด - ความถี่สูงสุด ] %d kHz [ %.2f Ghz ]", val_ch_max, float64(val_ch_max)/1e6))
 	}
 
-	return min_freq_Slider, max_freq_Slider, min_freq_Label, max_freq_Label
+	return min_freq_Slider, max_freq_Slider, min_freq_Label, max_freq_Label, entry_min, entry_max
 }
 
 func onButtonClick(min_freq_Slider, max_freq_Slider *widget.Slider) {
@@ -197,10 +216,6 @@ func onButtonClick(min_freq_Slider, max_freq_Slider *widget.Slider) {
 	freq_max := uint64(max_freq_Slider.Value)
 
 	go func() { // รันใน goroutine ไม่ให้ UI ค้าง
-		//		script := fmt.Sprintf(
-		//		"echo %d | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq",
-		//		freq,
-		//	)
 
 		script := fmt.Sprintf(
 			`echo %d | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq
@@ -216,8 +231,13 @@ echo %d | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_min_freq`,
 			fmt.Println("ล้มเหลว")
 		}
 		// แสดง success dialog
-		fmt.Println("สำเร็จ", freq_min, freq_max)
+		fmt.Println("สำเร็จ", "[ min ]", freq_min, "kHz", "[ max ]", freq_max, "kHz")
 	}()
+}
+
+func checkCoreCpu() {
+	//coreCount := CpuCoreCount()
+	//widget.NewCheck()
 }
 
 // ส่งออก
@@ -225,7 +245,7 @@ func CpuControl() fyne.CanvasObject {
 
 	perCore := sysCPUFreqUpdate()
 	info, _, _ := getCPUhardware(0)
-	slider_min, slider_max, label_min, label_max := slider()
+	slider_min, slider_max, label_min, label_max, entry_min, entry_max := slider()
 
 	apply := widget.NewButton("Apply", func() {
 		onButtonClick(slider_min, slider_max)
@@ -235,11 +255,13 @@ func CpuControl() fyne.CanvasObject {
 		container.NewVBox(
 			info,
 			widget.NewSeparator(),
-			label_min,
+			container.NewHBox(label_min,
+				container.NewGridWrap(fyne.NewSize(100, 35), entry_min)),
 			slider_min,
 
 			widget.NewSeparator(),
-			label_max,
+			container.NewHBox(label_max,
+				container.NewGridWrap(fyne.NewSize(100, 35), entry_max)),
 			slider_max,
 			widget.NewSeparator(),
 			apply,
