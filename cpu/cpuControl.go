@@ -70,7 +70,7 @@ func getCPUhardware(cpuIndex int) (fyne.CanvasObject, uint64, uint64) {
 }
 
 // getCPUFreqInfo อ่านข้อมูลความถี่ของ CPU
-func getCPUFreqUpdate(cpuIndex int) fyne.CanvasObject {
+func getCPUFreqUpdate(cpuIndex int) (fyne.CanvasObject, uint64, uint64) {
 
 	base := fmt.Sprintf("/sys/devices/system/cpu/cpu%d/cpufreq/", cpuIndex)
 	files := []struct {
@@ -83,6 +83,9 @@ func getCPUFreqUpdate(cpuIndex int) fyne.CanvasObject {
 		{"cpuinfo_transition_latency", "เวลาในการเปลี่ยนความเร็ว"},
 		{"scaling_governor", "Governor ที่ใช้อยู่"},
 	}
+
+	var val_scaling_min_freq uint64
+	var val_scaling_mmax_freq uint64
 
 	x := widget.NewLabel("กำลังโหลด...")
 
@@ -109,6 +112,15 @@ func getCPUFreqUpdate(cpuIndex int) fyne.CanvasObject {
 				val, _ := strconv.ParseFloat(value, 64)
 				x1.WriteString(fmt.Sprintf(" nS // (%.f uS)", val/1e3))
 			}
+			//เอาค่าปัจจุบันออกมา
+			if strings.Contains(item.file, "scaling_min_freq") {
+				val, _ := strconv.ParseFloat(value, 64)
+				val_scaling_min_freq = uint64(val)
+			}
+			if strings.Contains(item.file, "scaling_max_freq") {
+				val, _ := strconv.ParseFloat(value, 64)
+				val_scaling_mmax_freq = uint64(val)
+			}
 
 		}
 
@@ -126,7 +138,7 @@ func getCPUFreqUpdate(cpuIndex int) fyne.CanvasObject {
 		}
 	}()
 
-	return x
+	return x, val_scaling_min_freq, val_scaling_mmax_freq
 }
 
 // ============================================================================
@@ -137,7 +149,7 @@ func sysCPUFreqUpdate() fyne.CanvasObject {
 	box := container.NewVBox()
 
 	for i := 0; i < coreCount; i++ {
-		coreInfo := getCPUFreqUpdate(i)
+		coreInfo, _, _ := getCPUFreqUpdate(i)
 		box.Add(coreInfo)
 	}
 	if coreCount == 0 {
@@ -147,10 +159,17 @@ func sysCPUFreqUpdate() fyne.CanvasObject {
 }
 
 func slider() (*widget.Slider, *widget.Slider, *widget.Label, *widget.Label, *widget.Entry, *widget.Entry) {
+
 	_, val_min, val_max := getCPUhardware(0)
+	_, cur_min, cur_max := getCPUFreqUpdate(0)
 
 	entry_min := widget.NewEntry()
+	entry_min.SetText(strconv.FormatUint(cur_min, 10))
+	//entry_min.SetText(fmt.Sprintf("%d", cur_min/1000)) //หรือ
+
 	entry_max := widget.NewEntry()
+	entry_max.SetText(strconv.FormatUint(cur_max, 10))
+	//entry_max.SetText(fmt.Sprintf("%d", cur_max/1000)) //หรือ
 
 	val_ch_min := val_min
 	val_ch_max := val_max
@@ -172,7 +191,7 @@ func slider() (*widget.Slider, *widget.Slider, *widget.Label, *widget.Label, *wi
 	}
 	//slider_min
 	min_freq_Slider.Step = 1
-	min_freq_Slider.Value = float64(val_min) //ตั้งค่าเริ่มต้นของ slider
+	min_freq_Slider.Value = float64(cur_min) //ตั้งค่าเริ่มต้นของ slider
 	min_freq_Slider.OnChanged = func(v float64) {
 		//ตรวจสอบ min มากกว่า max ให้ เปลี่ยนค่า max ตาม min
 		if v > max_freq_Slider.Value {
@@ -186,15 +205,15 @@ func slider() (*widget.Slider, *widget.Slider, *widget.Label, *widget.Label, *wi
 	}
 
 	//*max
-	entry_min.OnChanged = func(s string) {
+	entry_max.OnChanged = func(s string) {
 		v, err := strconv.ParseFloat(s, 64)
 		if err == nil {
-			min_freq_Slider.SetValue(v)
+			max_freq_Slider.SetValue(v)
 		}
 	}
 	//slider_max
 	max_freq_Slider.Step = 1
-	max_freq_Slider.Value = float64(val_max)
+	max_freq_Slider.Value = float64(cur_max)
 	max_freq_Slider.OnChanged = func(v float64) {
 		//ตรวจสอบ max มากกว่า min ให้ เปลี่ยนค่า min ตาม max
 		if v < min_freq_Slider.Value {
