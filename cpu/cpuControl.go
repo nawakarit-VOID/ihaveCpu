@@ -28,6 +28,7 @@ func getCPUhardware(cpuIndex int) (fyne.CanvasObject, uint64, uint64) {
 		{"cpuinfo_max_freq", "ความถี่สูงสุด"},
 	}
 	x := widget.NewLabel("กำลังโหลด...")
+	x.Alignment = fyne.TextAlignCenter //ทำให้ตรงกลาง
 
 	var x1 strings.Builder
 	var val_cpuinfo_min_freq uint64
@@ -142,7 +143,7 @@ func getCPUFreqUpdate(cpuIndex int) (fyne.CanvasObject, uint64, uint64) {
 }
 
 // ============================================================================
-// แบ่งตามจำนวนคอร์
+// เพิ่ม label ตามจำนวนคอร์
 // ============================================================================
 func sysCPUFreqUpdate() fyne.CanvasObject {
 	coreCount := CpuCoreCount()
@@ -158,17 +159,45 @@ func sysCPUFreqUpdate() fyne.CanvasObject {
 	return box
 }
 
+func onButtonMinN(min_freq_Slider *widget.Slider) { //ลดค่า min
+	freq_min := min_freq_Slider.Value - 1
+	if freq_min >= min_freq_Slider.Min {
+		min_freq_Slider.SetValue(freq_min)
+	}
+}
+
+func onButtonMinP(min_freq_Slider *widget.Slider) { //เพิ่มค่า min
+	freq_min := min_freq_Slider.Value + 1
+	if freq_min <= min_freq_Slider.Max {
+		min_freq_Slider.SetValue(freq_min)
+	}
+}
+
+func onButtonMaxN(max_freq_Slider *widget.Slider) { //ลดค่า max
+	freq_max := max_freq_Slider.Value - 1
+	if freq_max >= max_freq_Slider.Min {
+		max_freq_Slider.SetValue(freq_max)
+	}
+}
+
+func onButtonMaxP(max_freq_Slider *widget.Slider) { //เพิ่มค่า max
+	freq_max := max_freq_Slider.Value + 1
+	if freq_max <= max_freq_Slider.Max {
+		max_freq_Slider.SetValue(freq_max)
+	}
+}
+
 func slider() (*widget.Slider, *widget.Slider, *widget.Label, *widget.Label, *widget.Entry, *widget.Entry) {
 
 	_, val_min, val_max := getCPUhardware(0)
 	_, cur_min, cur_max := getCPUFreqUpdate(0)
 
 	entry_min := widget.NewEntry()
-	entry_min.SetText(strconv.FormatUint(cur_min, 10))
+	entry_min.SetText(strconv.FormatUint(cur_min, 10)) //10 คือแปลงเป็นเลขฐาน 10
 	//entry_min.SetText(fmt.Sprintf("%d", cur_min/1000)) //หรือ
 
 	entry_max := widget.NewEntry()
-	entry_max.SetText(strconv.FormatUint(cur_max, 10))
+	entry_max.SetText(strconv.FormatUint(cur_max, 10)) //10 คือแปลงเป็นเลขฐาน 10
 	//entry_max.SetText(fmt.Sprintf("%d", cur_max/1000)) //หรือ
 
 	val_ch_min := val_min
@@ -228,7 +257,7 @@ func slider() (*widget.Slider, *widget.Slider, *widget.Label, *widget.Label, *wi
 	return min_freq_Slider, max_freq_Slider, min_freq_Label, max_freq_Label, entry_min, entry_max
 }
 
-func onButtonClick(min_freq_Slider, max_freq_Slider *widget.Slider) {
+func onButtonClickApply(min_freq_Slider, max_freq_Slider *widget.Slider) {
 
 	// อ่านค่าจากวิดเจต slider โดยตรง
 	freq_min := uint64(min_freq_Slider.Value)
@@ -267,7 +296,23 @@ func CpuControl() fyne.CanvasObject {
 	slider_min, slider_max, label_min, label_max, entry_min, entry_max := slider()
 
 	apply := widget.NewButton("Apply", func() {
-		onButtonClick(slider_min, slider_max)
+		onButtonClickApply(slider_min, slider_max)
+	})
+
+	bt_min_n := widget.NewButton("-", func() {
+		onButtonMinN(slider_min)
+	})
+
+	bt_min_p := widget.NewButton("+", func() {
+		onButtonMinP(slider_min)
+	})
+
+	bt_max_n := widget.NewButton("-", func() {
+		onButtonMaxN(slider_max)
+	})
+
+	bt_max_p := widget.NewButton("+", func() {
+		onButtonMaxP(slider_max)
 	})
 
 	x := container.NewBorder(
@@ -275,12 +320,16 @@ func CpuControl() fyne.CanvasObject {
 			info,
 			widget.NewSeparator(),
 			container.NewHBox(label_min,
-				container.NewGridWrap(fyne.NewSize(100, 35), entry_min)),
+				container.NewGridWrap(fyne.NewSize(100, 35), entry_min),
+				container.NewGridWrap(fyne.NewSize(35, 35), bt_min_n),
+				container.NewGridWrap(fyne.NewSize(35, 35), bt_min_p)),
 			slider_min,
 
 			widget.NewSeparator(),
 			container.NewHBox(label_max,
-				container.NewGridWrap(fyne.NewSize(100, 35), entry_max)),
+				container.NewGridWrap(fyne.NewSize(100, 35), entry_max),
+				container.NewGridWrap(fyne.NewSize(35, 35), bt_max_n),
+				container.NewGridWrap(fyne.NewSize(35, 35), bt_max_p)),
 			slider_max,
 			widget.NewSeparator(),
 			apply,
