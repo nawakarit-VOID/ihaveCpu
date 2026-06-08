@@ -159,6 +159,30 @@ func sysCPUFreqUpdate() fyne.CanvasObject {
 	return box
 }
 
+// ============================================================================
+// checkbox
+// ============================================================================
+func checkBox() {
+
+}
+
+// ============================================================================
+// เพิ่ม checkbox ตามจำนวนคอร์
+// ============================================================================
+func checkboxNumcpu() fyne.CanvasObject {
+	coreCount := CpuCoreCount()
+	box := container.NewHBox()
+
+	for i := 0; i < coreCount; i++ {
+		coreInfo, _, _ := checkBox()
+		box.Add(coreInfo)
+	}
+	if coreCount == 0 {
+		return widget.NewLabel("ไม่พบข้อมูลจำนวนคอร์ CPU")
+	}
+	return box
+}
+
 func onButtonMinN(min_freq_Slider *widget.Slider) { //ลดค่า min
 	freq_min := min_freq_Slider.Value - 1
 	if freq_min >= min_freq_Slider.Min {
