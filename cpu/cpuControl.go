@@ -162,8 +162,10 @@ func sysCPUFreqUpdate() fyne.CanvasObject {
 // ============================================================================
 // checkbox
 // ============================================================================
-func checkBox() {
+func checkBoxCpu() fyne.CanvasObject {
+	x := widget.NewLabel("00")
 
+	return x
 }
 
 // ============================================================================
@@ -171,11 +173,20 @@ func checkBox() {
 // ============================================================================
 func checkboxNumcpu() fyne.CanvasObject {
 	coreCount := CpuCoreCount()
-	box := container.NewHBox()
 
+	//corestr := widget.NewLabel("")
+	//corestr.SetText(strconv.FormatInt(coreCount, 10))
+	//corestr := string(coreCount)
+
+	box := container.NewHBox()
+	//s := "ss"
 	for i := 0; i < coreCount; i++ {
-		coreInfo, _, _ := checkBox()
-		box.Add(coreInfo)
+
+		x := widget.NewCheck("X", nil)
+
+		//coreInfo, _, _ := checkBox()
+
+		box.Add(x)
 	}
 	if coreCount == 0 {
 		return widget.NewLabel("ไม่พบข้อมูลจำนวนคอร์ CPU")
@@ -319,6 +330,8 @@ func CpuControl() fyne.CanvasObject {
 	info, _, _ := getCPUhardware(0)
 	slider_min, slider_max, label_min, label_max, entry_min, entry_max := slider()
 
+	b := checkboxNumcpu()
+
 	apply := widget.NewButton("Apply", func() {
 		onButtonClickApply(slider_min, slider_max)
 	})
@@ -342,6 +355,7 @@ func CpuControl() fyne.CanvasObject {
 	x := container.NewBorder(
 		container.NewVBox(
 			info,
+			b,
 			widget.NewSeparator(),
 			container.NewHBox(label_min,
 				container.NewGridWrap(fyne.NewSize(100, 35), entry_min),
