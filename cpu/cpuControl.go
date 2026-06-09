@@ -173,26 +173,49 @@ func checkBoxCpu() fyne.CanvasObject {
 // ============================================================================
 func checkboxNumcpu() fyne.CanvasObject {
 	coreCount := CpuCoreCount()
-
-	//corestr := widget.NewLabel("")
-	//corestr := strconv.Itoa(coreCount)
-	//corestr := string(coreCount)
-	var corestr string
-
-	box := container.NewHBox()
-	//s := "ss"
-	for i := 0; i < coreCount; i++ {
-		corestr = strconv.Itoa(i)
-		x := widget.NewCheck(corestr, nil)
-
-		//coreInfo, _, _ := checkBox()
-
-		box.Add(x)
-	}
 	if coreCount == 0 {
 		return widget.NewLabel("ไม่พบข้อมูลจำนวนคอร์ CPU")
 	}
-	return box
+
+	selected := make([]bool, coreCount)
+	for i := 0; i < coreCount; i++ {
+		selected[i] = true
+	}
+
+	selectedLabel := widget.NewLabel(getSelectedCoresText(selected))
+	box := container.NewGridWithColumns(8)
+
+	for i := 0; i < coreCount; i++ {
+		idx := i
+		coreName := strconv.Itoa(idx)
+		x := widget.NewCheck("core "+coreName, func(checked bool) {
+			selected[idx] = checked
+			if checked {
+				fmt.Println("core", idx, "เปิด")
+			} else {
+				fmt.Println("core", idx, "ปิด")
+			}
+			selectedLabel.SetText(getSelectedCoresText(selected))
+		})
+
+		x.SetChecked(true)
+		box.Add(x)
+	}
+
+	return container.NewVBox(selectedLabel, box)
+}
+
+func getSelectedCoresText(selected []bool) string {
+	var cores []string
+	for idx, checked := range selected {
+		if checked {
+			cores = append(cores, strconv.Itoa(idx))
+		}
+	}
+	if len(cores) == 0 {
+		return "คอร์ที่เลือก: ไม่มี"
+	}
+	return "คอร์ที่เลือก: " + strings.Join(cores, ", ")
 }
 
 func onButtonMinN(min_freq_Slider *widget.Slider) { //ลดค่า min
