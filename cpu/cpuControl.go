@@ -171,10 +171,10 @@ func checkBoxCpu() fyne.CanvasObject {
 // ============================================================================
 // เพิ่ม checkbox ตามจำนวนคอร์
 // ============================================================================
-func checkboxNumcpu() fyne.CanvasObject {
+func checkboxNumcpu() (fyne.CanvasObject, []bool) {
 	coreCount := CpuCoreCount()
 	if coreCount == 0 {
-		return widget.NewLabel("ไม่พบข้อมูลจำนวนคอร์ CPU")
+		return widget.NewLabel("ไม่พบข้อมูลจำนวนคอร์ CPU"), nil
 	}
 
 	selected := make([]bool, coreCount)
@@ -182,7 +182,11 @@ func checkboxNumcpu() fyne.CanvasObject {
 		selected[i] = true
 	}
 
-	selectedLabel := widget.NewLabel(getSelectedCoresText(selected))
+	selectedGet, _ := getSelectedCoresText(selected)
+	fmt.Println("core เริ่ม", selectedGet)
+
+	selectedLabel := widget.NewLabel(selectedGet)
+
 	box := container.NewGridWithColumns(8)
 
 	for i := 0; i < coreCount; i++ {
@@ -195,27 +199,32 @@ func checkboxNumcpu() fyne.CanvasObject {
 			} else {
 				fmt.Println("core", idx, "ปิด")
 			}
-			selectedLabel.SetText(getSelectedCoresText(selected))
+			selectedGet, _ := getSelectedCoresText(selected)
+			fmt.Println("core ใน for", selectedGet)
+
+			selectedLabel.SetText(selectedGet)
 		})
 
 		x.SetChecked(true)
 		box.Add(x)
 	}
 
-	return container.NewVBox(selectedLabel, box)
+	return container.NewVBox(selectedLabel, box), selected
 }
 
-func getSelectedCoresText(selected []bool) string {
+func getSelectedCoresText(selected []bool) (string, []int) {
 	var cores []string
+	var coresIndices []int
 	for idx, checked := range selected {
 		if checked {
 			cores = append(cores, strconv.Itoa(idx))
+			coresIndices = append(coresIndices, idx)
 		}
 	}
 	if len(cores) == 0 {
-		return "คอร์ที่เลือก: ไม่มี"
+		return "คอร์ที่เลือก: ไม่มี", nil
 	}
-	return "คอร์ที่เลือก: " + strings.Join(cores, ", ")
+	return "คอร์ที่เลือก : " + strings.Join(cores, ", "), coresIndices
 }
 
 func onButtonMinN(min_freq_Slider *widget.Slider) { //ลดค่า min
@@ -316,30 +325,38 @@ func slider() (*widget.Slider, *widget.Slider, *widget.Label, *widget.Label, *wi
 	return min_freq_Slider, max_freq_Slider, min_freq_Label, max_freq_Label, entry_min, entry_max
 }
 
-func onButtonClickApply(min_freq_Slider, max_freq_Slider *widget.Slider) {
+func onButtonClickApply(selected []bool, min_freq_Slider, max_freq_Slider *widget.Slider) {
 
 	// อ่านค่าจากวิดเจต slider โดยตรง
 	freq_min := uint64(min_freq_Slider.Value)
 	freq_max := uint64(max_freq_Slider.Value)
 
 	go func() { // รันใน goroutine ไม่ให้ UI ค้าง
+		var scriptLines []string
+		for idx, sel := range selected {
+			if !sel {
+				continue
+			}
+			scriptLines = append(scriptLines, fmt.Sprintf("echo %d | tee /sys/devices/system/cpu/cpu%d/cpufreq/scaling_max_freq", freq_max, idx))
+			scriptLines = append(scriptLines, fmt.Sprintf("echo %d | tee /sys/devices/system/cpu/cpu%d/cpufreq/scaling_min_freq", freq_min, idx))
+		}
 
-		script := fmt.Sprintf(
-			`echo %d | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_max_freq
-echo %d | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_min_freq`,
-			freq_max,
-			freq_min,
-		)
+		if len(scriptLines) == 0 {
+			fmt.Println("ไม่พบคอร์ที่เลือกให้ปรับค่า")
+			return
+		}
+
+		script := strings.Join(scriptLines, "\n")
 
 		cmd := exec.Command("pkexec", "bash", "-c", script)
 		err := cmd.Run()
 		if err != nil {
-			// แสดง error dialog
-			fmt.Println("ล้มเหลว")
+			fmt.Println("ล้มเหลว:", err)
+			return
 		}
-		// แสดง success dialog
 		fmt.Println("สำเร็จ", "[ min ]", freq_min, "kHz", "[ max ]", freq_max, "kHz")
 	}()
+
 }
 
 func checkCoreCpu() {
@@ -354,10 +371,10 @@ func CpuControl() fyne.CanvasObject {
 	info, _, _ := getCPUhardware(0)
 	slider_min, slider_max, label_min, label_max, entry_min, entry_max := slider()
 
-	b := checkboxNumcpu()
+	chekCpu, selected := checkboxNumcpu()
 
 	apply := widget.NewButton("Apply", func() {
-		onButtonClickApply(slider_min, slider_max)
+		onButtonClickApply(selected, slider_min, slider_max)
 	})
 
 	bt_min_n := widget.NewButton("-", func() {
@@ -379,7 +396,7 @@ func CpuControl() fyne.CanvasObject {
 	x := container.NewBorder(
 		container.NewVBox(
 			info,
-			b,
+			chekCpu,
 			widget.NewSeparator(),
 			container.NewHBox(label_min,
 				container.NewGridWrap(fyne.NewSize(100, 35), entry_min),
