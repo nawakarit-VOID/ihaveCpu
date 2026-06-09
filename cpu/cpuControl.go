@@ -175,14 +175,15 @@ func checkboxNumcpu() fyne.CanvasObject {
 	coreCount := CpuCoreCount()
 
 	//corestr := widget.NewLabel("")
-	//corestr.SetText(strconv.FormatInt(coreCount, 10))
+	//corestr := strconv.Itoa(coreCount)
 	//corestr := string(coreCount)
+	var corestr string
 
 	box := container.NewHBox()
 	//s := "ss"
 	for i := 0; i < coreCount; i++ {
-
-		x := widget.NewCheck("X", nil)
+		corestr = strconv.Itoa(i)
+		x := widget.NewCheck(corestr, nil)
 
 		//coreInfo, _, _ := checkBox()
 
