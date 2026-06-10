@@ -160,35 +160,49 @@ func sysCPUFreqUpdate() fyne.CanvasObject {
 }
 
 // ============================================================================
-// checkbox
+// เลือกทั้งหมด
 // ============================================================================
-func checkBoxCpu() fyne.CanvasObject {
-	x := widget.NewLabel("00")
+func CheckAllBoxCpu(checkboxes []*widget.Check, selected []bool, updateLabel func()) {
+	for idx, check := range checkboxes {
+		check.SetChecked(true)
+		selected[idx] = true
+	}
+	updateLabel()
+	fmt.Println("เลือกทั้งหมด")
+}
 
-	return x
+// ============================================================================
+// ไม่เลือกทั้งหมด
+// ============================================================================
+func nonCheckBoxCpu(checkboxes []*widget.Check, selected []bool, updateLabel func()) {
+	for idx, check := range checkboxes {
+		check.SetChecked(false)
+		selected[idx] = false
+	}
+	updateLabel()
+	fmt.Println("ล้างทั้งหมด")
 }
 
 // ============================================================================
 // เพิ่ม checkbox ตามจำนวนคอร์
 // ============================================================================
-func checkboxNumcpu() (fyne.CanvasObject, []bool) {
+func checkboxNumcpu() (fyne.CanvasObject, []bool, []*widget.Check, func()) {
 	coreCount := CpuCoreCount()
 	if coreCount == 0 {
-		return widget.NewLabel("ไม่พบข้อมูลจำนวนคอร์ CPU"), nil
+		return widget.NewLabel("ไม่พบข้อมูลจำนวนคอร์ CPU"), nil, nil, nil
 	}
 
 	selected := make([]bool, coreCount)
+	checkboxes := make([]*widget.Check, coreCount)
 	for i := 0; i < coreCount; i++ {
 		selected[i] = true
 	}
 
 	selectedGet, _ := getSelectedCoresText(selected)
-	fmt.Println("core เริ่ม", selectedGet)
-
+	//fmt.Println("core เริ่ม", selectedGet)
 	selectedLabel := widget.NewLabel(selectedGet)
 
 	box := container.NewGridWithColumns(8)
-
 	for i := 0; i < coreCount; i++ {
 		idx := i
 		coreName := strconv.Itoa(idx)
@@ -200,16 +214,23 @@ func checkboxNumcpu() (fyne.CanvasObject, []bool) {
 				fmt.Println("core", idx, "ปิด")
 			}
 			selectedGet, _ := getSelectedCoresText(selected)
-			fmt.Println("core ใน for", selectedGet)
+			//fmt.Println("core ใน for", selectedGet)
 
 			selectedLabel.SetText(selectedGet)
 		})
 
 		x.SetChecked(true)
+		checkboxes[idx] = x
 		box.Add(x)
 	}
 
-	return container.NewVBox(selectedLabel, box), selected
+	// สร้าง function เพื่ออัปเดต label
+	updateLabel := func() {
+		selectedGet, _ := getSelectedCoresText(selected)
+		selectedLabel.SetText(selectedGet)
+	}
+
+	return container.NewVBox(selectedLabel, box), selected, checkboxes, updateLabel
 }
 
 func getSelectedCoresText(selected []bool) (string, []int) {
@@ -221,11 +242,28 @@ func getSelectedCoresText(selected []bool) (string, []int) {
 			coresIndices = append(coresIndices, idx)
 		}
 	}
+
 	if len(cores) == 0 {
-		return "คอร์ที่เลือก: ไม่มี", nil
+		return "คอร์ที่เลือก : ไม่มี", nil
 	}
-	return "คอร์ที่เลือก : " + strings.Join(cores, ", "), coresIndices
-}
+
+	var lines []string
+
+	for i := 0; i < len(cores); i += 2 { //40
+		end := i + 2 //40
+		if end > len(cores) {
+			end = len(cores)
+		}
+
+		lines = append(lines,
+			strings.Join(cores[i:end], ", "),
+		)
+	}
+
+	//return "คอร์ที่เลือก : " + strings.Join(lines, "\n"), coresIndices
+	//return "คอร์ที่เลือก : " + lines[0] + "\n                     " + strings.Join(lines[1:], "\n                 "), coresIndices
+	return "คอร์ที่เลือก : " + lines[0] + "\n                     " + strings.Join(lines[1:], "\n                     "), coresIndices
+} //21
 
 func onButtonMinN(min_freq_Slider *widget.Slider) { //ลดค่า min
 	freq_min := min_freq_Slider.Value - 1
@@ -342,6 +380,7 @@ func onButtonClickApply(selected []bool, min_freq_Slider, max_freq_Slider *widge
 		}
 
 		if len(scriptLines) == 0 {
+			//ฟังชั้น popup++
 			fmt.Println("ไม่พบคอร์ที่เลือกให้ปรับค่า")
 			return
 		}
@@ -371,7 +410,15 @@ func CpuControl() fyne.CanvasObject {
 	info, _, _ := getCPUhardware(0)
 	slider_min, slider_max, label_min, label_max, entry_min, entry_max := slider()
 
-	chekCpu, selected := checkboxNumcpu()
+	chekCpu, selected, checkboxes, updateLabel := checkboxNumcpu()
+
+	allCheck := widget.NewButton("เลือกทั้งหมด", func() {
+		CheckAllBoxCpu(checkboxes, selected, updateLabel)
+	})
+
+	nonCheck := widget.NewButton("Reset", func() {
+		nonCheckBoxCpu(checkboxes, selected, updateLabel)
+	})
 
 	apply := widget.NewButton("Apply", func() {
 		onButtonClickApply(selected, slider_min, slider_max)
@@ -397,6 +444,7 @@ func CpuControl() fyne.CanvasObject {
 		container.NewVBox(
 			info,
 			chekCpu,
+			container.NewGridWithColumns(2, allCheck, nonCheck),
 			widget.NewSeparator(),
 			container.NewHBox(label_min,
 				container.NewGridWrap(fyne.NewSize(100, 35), entry_min),
