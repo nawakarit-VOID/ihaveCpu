@@ -249,8 +249,8 @@ func getSelectedCoresText(selected []bool) (string, []int) {
 
 	var lines []string
 
-	for i := 0; i < len(cores); i += 2 { //40
-		end := i + 2 //40
+	for i := 0; i < len(cores); i += 40 { //40
+		end := i + 40 //40
 		if end > len(cores) {
 			end = len(cores)
 		}
@@ -259,11 +259,22 @@ func getSelectedCoresText(selected []bool) (string, []int) {
 			strings.Join(cores[i:end], ", "),
 		)
 	}
-
 	//return "คอร์ที่เลือก : " + strings.Join(lines, "\n"), coresIndices
-	//return "คอร์ที่เลือก : " + lines[0] + "\n                     " + strings.Join(lines[1:], "\n                 "), coresIndices
 	return "คอร์ที่เลือก : " + lines[0] + "\n                     " + strings.Join(lines[1:], "\n                     "), coresIndices
 } //21
+
+// ============================================================================
+// เรียกไฟล์ govenors
+// ============================================================================
+
+func GetGovernors() ([]string, error) {
+	data, err := os.ReadFile("/sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors")
+	if err != nil {
+		return nil, err
+	}
+
+	return strings.Fields(string(data)), nil
+}
 
 func onButtonMinN(min_freq_Slider *widget.Slider) { //ลดค่า min
 	freq_min := min_freq_Slider.Value - 1
