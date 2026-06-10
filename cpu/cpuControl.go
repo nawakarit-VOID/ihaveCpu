@@ -266,7 +266,6 @@ func getSelectedCoresText(selected []bool) (string, []int) {
 // ============================================================================
 // เรียกไฟล์ govenors
 // ============================================================================
-
 func GetGovernors() ([]string, error) {
 	data, err := os.ReadFile("/sys/devices/system/cpu/cpu0/cpufreq/scaling_available_governors")
 	if err != nil {
@@ -274,6 +273,26 @@ func GetGovernors() ([]string, error) {
 	}
 
 	return strings.Fields(string(data)), nil
+}
+
+// สร้าง check Govern...
+func GovernorscheckBox() fyne.CanvasObject {
+
+	governors, _ := GetGovernors()
+
+	var checks []*widget.Check
+
+	for _, gov := range governors {
+		check := widget.NewCheck(gov, func(bool) {})
+		checks = append(checks, check)
+	}
+
+	content := container.NewVBox()
+
+	for _, c := range checks {
+		content.Add(c)
+	}
+	return content
 }
 
 func onButtonMinN(min_freq_Slider *widget.Slider) { //ลดค่า min
@@ -388,6 +407,7 @@ func onButtonClickApply(selected []bool, min_freq_Slider, max_freq_Slider *widge
 			}
 			scriptLines = append(scriptLines, fmt.Sprintf("echo %d | tee /sys/devices/system/cpu/cpu%d/cpufreq/scaling_max_freq", freq_max, idx))
 			scriptLines = append(scriptLines, fmt.Sprintf("echo %d | tee /sys/devices/system/cpu/cpu%d/cpufreq/scaling_min_freq", freq_min, idx))
+			//scriptLines = append(scriptLines, fmt.Sprintf("echo %s | tee /sys/devices/system/cpu/cpu%d/cpufreq/scaling_governor", ค่า string ที่อยู่ใน available, idx))
 		}
 
 		if len(scriptLines) == 0 {
@@ -435,6 +455,9 @@ func CpuControl() fyne.CanvasObject {
 		onButtonClickApply(selected, slider_min, slider_max)
 	})
 
+	//check govern...
+	governors := GovernorscheckBox()
+
 	bt_min_n := widget.NewButton("-", func() {
 		onButtonMinN(slider_min)
 	})
@@ -456,6 +479,7 @@ func CpuControl() fyne.CanvasObject {
 			info,
 			chekCpu,
 			container.NewGridWithColumns(2, allCheck, nonCheck),
+			governors,
 			widget.NewSeparator(),
 			container.NewHBox(label_min,
 				container.NewGridWrap(fyne.NewSize(100, 35), entry_min),
