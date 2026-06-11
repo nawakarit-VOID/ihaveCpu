@@ -276,23 +276,31 @@ func GetGovernors() ([]string, error) {
 }
 
 // สร้าง check Govern...
-func GovernorscheckBox() fyne.CanvasObject {
+func GovernorscheckBox() (fyne.CanvasObject, string) {
 
 	governors, _ := GetGovernors()
+	var governors_selected string
 
-	var checks []*widget.Check
+	/*
+	   var checks []*widget.Check
 
-	for _, gov := range governors {
-		check := widget.NewCheck(gov, func(bool) {})
-		checks = append(checks, check)
-	}
+	   	for _, gov := range governors {
+	   		check := widget.NewCheck(gov, func(bool) {})
+	   		checks = append(checks, check)
+	   	}
 
-	content := container.NewVBox()
+	   content := container.NewVBox()
 
-	for _, c := range checks {
-		content.Add(c)
-	}
-	return content
+	   	for _, c := range checks {
+	   		content.Add(c)
+	   	}
+	*/
+	radio := widget.NewRadioGroup(governors, func(selected string) {
+		fmt.Println("เลือก:", selected)
+		governors_selected = selected
+	})
+
+	return radio, governors_selected
 }
 
 func onButtonMinN(min_freq_Slider *widget.Slider) { //ลดค่า min
@@ -451,12 +459,14 @@ func CpuControl() fyne.CanvasObject {
 		nonCheckBoxCpu(checkboxes, selected, updateLabel)
 	})
 
+	//check govern...
+	governors, governors_selected := GovernorscheckBox()
+
 	apply := widget.NewButton("Apply", func() {
 		onButtonClickApply(selected, slider_min, slider_max)
-	})
 
-	//check govern...
-	governors := GovernorscheckBox()
+		//เอา governors_selected เข้า apply
+	})
 
 	bt_min_n := widget.NewButton("-", func() {
 		onButtonMinN(slider_min)
