@@ -58,6 +58,6 @@ func CreateWindow() {
 
 	//w.SetContent(container.NewBorder(nil, nil, nil, nil, cpu))
 	w.SetContent(tabs)
-	w.Resize(fyne.NewSize(700, 800))
+	w.Resize(fyne.NewSize(710, 800))
 	w.ShowAndRun()
 }

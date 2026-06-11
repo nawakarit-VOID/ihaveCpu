@@ -276,31 +276,13 @@ func GetGovernors() ([]string, error) {
 }
 
 // สร้าง check Govern...
-func GovernorscheckBox() (fyne.CanvasObject, string) {
+func GovernorscheckBox() (fyne.CanvasObject, *widget.RadioGroup) {
 
 	governors, _ := GetGovernors()
-	var governors_selected string
+	governorsST := widget.NewRadioGroup(governors, nil)
+	governorsST.Horizontal = true
 
-	/*
-	   var checks []*widget.Check
-
-	   	for _, gov := range governors {
-	   		check := widget.NewCheck(gov, func(bool) {})
-	   		checks = append(checks, check)
-	   	}
-
-	   content := container.NewVBox()
-
-	   	for _, c := range checks {
-	   		content.Add(c)
-	   	}
-	*/
-	radio := widget.NewRadioGroup(governors, func(selected string) {
-		fmt.Println("เลือก:", selected)
-		governors_selected = selected
-	})
-
-	return radio, governors_selected
+	return governorsST, governorsST
 }
 
 func onButtonMinN(min_freq_Slider *widget.Slider) { //ลดค่า min
@@ -401,11 +383,12 @@ func slider() (*widget.Slider, *widget.Slider, *widget.Label, *widget.Label, *wi
 	return min_freq_Slider, max_freq_Slider, min_freq_Label, max_freq_Label, entry_min, entry_max
 }
 
-func onButtonClickApply(selected []bool, min_freq_Slider, max_freq_Slider *widget.Slider) {
+func onButtonClickApply(selected []bool, min_freq_Slider, max_freq_Slider *widget.Slider, governorsST *widget.RadioGroup) {
 
 	// อ่านค่าจากวิดเจต slider โดยตรง
 	freq_min := uint64(min_freq_Slider.Value)
 	freq_max := uint64(max_freq_Slider.Value)
+	governorsSt := governorsST.Selected
 
 	go func() { // รันใน goroutine ไม่ให้ UI ค้าง
 		var scriptLines []string
@@ -415,7 +398,7 @@ func onButtonClickApply(selected []bool, min_freq_Slider, max_freq_Slider *widge
 			}
 			scriptLines = append(scriptLines, fmt.Sprintf("echo %d | tee /sys/devices/system/cpu/cpu%d/cpufreq/scaling_max_freq", freq_max, idx))
 			scriptLines = append(scriptLines, fmt.Sprintf("echo %d | tee /sys/devices/system/cpu/cpu%d/cpufreq/scaling_min_freq", freq_min, idx))
-			//scriptLines = append(scriptLines, fmt.Sprintf("echo %s | tee /sys/devices/system/cpu/cpu%d/cpufreq/scaling_governor", ค่า string ที่อยู่ใน available, idx))
+			scriptLines = append(scriptLines, fmt.Sprintf("echo %s | tee /sys/devices/system/cpu/cpu%d/cpufreq/scaling_governor", governorsSt, idx))
 		}
 
 		if len(scriptLines) == 0 {
@@ -460,12 +443,10 @@ func CpuControl() fyne.CanvasObject {
 	})
 
 	//check govern...
-	governors, governors_selected := GovernorscheckBox()
+	governors, governorsSt := GovernorscheckBox()
 
 	apply := widget.NewButton("Apply", func() {
-		onButtonClickApply(selected, slider_min, slider_max)
-
-		//เอา governors_selected เข้า apply
+		onButtonClickApply(selected, slider_min, slider_max, governorsSt)
 	})
 
 	bt_min_n := widget.NewButton("-", func() {
@@ -489,6 +470,7 @@ func CpuControl() fyne.CanvasObject {
 			info,
 			chekCpu,
 			container.NewGridWithColumns(2, allCheck, nonCheck),
+			widget.NewLabel("โหมดการทำงาน"),
 			governors,
 			widget.NewSeparator(),
 			container.NewHBox(label_min,
