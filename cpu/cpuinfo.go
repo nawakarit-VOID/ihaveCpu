@@ -431,7 +431,7 @@ func grid() fyne.CanvasObject {
 // ============================================================================
 // CpuTabs
 // ============================================================================
-func CpuTabs() fyne.CanvasObject {
+func CpuTabs(w fyne.Window) fyne.CanvasObject {
 
 	dataCPUInfo := CPUdata()
 
@@ -522,7 +522,7 @@ func CpuTabs() fyne.CanvasObject {
 		widget.NewSeparator(),
 	)
 
-	cpuControlPage := CpuControl()
+	cpuControlPage := CpuControl(w)
 
 	return container.NewAppTabs(
 		container.NewTabItem("Overview", container.NewScroll(cpuOverviewPage)),

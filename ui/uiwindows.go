@@ -46,7 +46,7 @@ func CreateWindow() {
 	w := a.NewWindow("iHaveCPU")
 	w.SetIcon(icon)
 
-	cpuTabs := cpuinfo.CpuTabs()
+	cpuTabs := cpuinfo.CpuTabs(w)
 
 	tabs := container.NewAppTabs(
 		container.NewTabItem("CPU", container.NewScroll(cpuTabs)),

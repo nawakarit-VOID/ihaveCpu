@@ -13,6 +13,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -430,7 +431,7 @@ func checkCoreCpu() {
 }
 
 // ส่งออก
-func CpuControl() fyne.CanvasObject {
+func CpuControl(w fyne.Window) fyne.CanvasObject {
 
 	perCore := sysCPUFreqUpdate()
 	info, _, _ := getCPUhardware(0)
@@ -469,12 +470,19 @@ func CpuControl() fyne.CanvasObject {
 		onButtonMaxP(slider_max)
 	})
 
+	abbtn := widget.NewButton("โหมดการทำงาน", func() {
+		dialog.ShowInformation("about_test", "test test", w)
+	})
+
+	//dialog.ShowInformation("warn", "Please add the folder first.", w)
+
 	x := container.NewBorder(
 		container.NewVBox(
 			info,
 			chekCpu,
 			container.NewGridWithColumns(2, allCheck, nonCheck),
 			//popup widget.NewLabel("โหมดการทำงาน\n#conservative- เพิ่มความเร็วแบบค่อยเป็นค่อยไป #####"),
+			abbtn,
 			governors,
 			widget.NewSeparator(),
 			container.NewHBox(label_min,
