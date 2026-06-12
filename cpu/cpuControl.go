@@ -282,6 +282,10 @@ func GovernorscheckBox() (fyne.CanvasObject, *widget.RadioGroup) {
 	governorsST := widget.NewRadioGroup(governors, nil)
 	governorsST.Horizontal = true
 
+	if len(governors) > 0 {
+		governorsST.SetSelected(governors[0])
+	}
+
 	return governorsST, governorsST
 }
 
@@ -470,7 +474,7 @@ func CpuControl() fyne.CanvasObject {
 			info,
 			chekCpu,
 			container.NewGridWithColumns(2, allCheck, nonCheck),
-			widget.NewLabel("โหมดการทำงาน"),
+			//popup widget.NewLabel("โหมดการทำงาน\n#conservative- เพิ่มความเร็วแบบค่อยเป็นค่อยไป #####"),
 			governors,
 			widget.NewSeparator(),
 			container.NewHBox(label_min,
