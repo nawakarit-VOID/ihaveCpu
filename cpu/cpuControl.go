@@ -470,20 +470,33 @@ func CpuControl(w fyne.Window) fyne.CanvasObject {
 		onButtonMaxP(slider_max)
 	})
 
-	abbtn := widget.NewButton("โหมดการทำงาน", func() {
-		dialog.ShowInformation("about_test", "test test", w)
-	})
+	governorsAb := `conservative- เพิ่มความเร็วแบบค่อยเป็นค่อยไป
+ondemand    - เร่งเร็วเมื่อมีโหลด
+ี*userspace - รักษาความเร็วคงที่ (ตามที่กำหนด)
+powersave   - ประหยัดพลังงาน
+performance - ประสิทธิภาพสูงสุด
+schedutil   - ปรับอัตโนมัติตามโหลด
 
-	//dialog.ShowInformation("warn", "Please add the folder first.", w)
+--------
+*userspace - ใน CPU Intel และ AMD รุ่นใหม่ อาจไม่ได้ผล 
+เพราะการจัดการความถี่ถูกย้ายไปให้ตัวไดรเวอร์และเฟิร์มแวร์เป็นผู้ควบคุม`
+
+	abbtn := widget.NewButton("!", func() {
+		dialog.ShowInformation("โหมดการทำงาน", governorsAb, w)
+	})
 
 	x := container.NewBorder(
 		container.NewVBox(
 			info,
 			chekCpu,
-			container.NewGridWithColumns(2, allCheck, nonCheck),
-			//popup widget.NewLabel("โหมดการทำงาน\n#conservative- เพิ่มความเร็วแบบค่อยเป็นค่อยไป #####"),
-			abbtn,
+
+			container.NewCenter(container.NewHBox(
+				container.NewGridWrap(fyne.NewSize(150, 35), allCheck),
+				container.NewGridWrap(fyne.NewSize(150, 35), nonCheck),
+				container.NewGridWrap(fyne.NewSize(35, 35), abbtn))),
+
 			governors,
+
 			widget.NewSeparator(),
 			container.NewHBox(label_min,
 				container.NewGridWrap(fyne.NewSize(100, 35), entry_min),
@@ -491,15 +504,16 @@ func CpuControl(w fyne.Window) fyne.CanvasObject {
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_min_p)),
 			slider_min,
 
-			widget.NewSeparator(),
 			container.NewHBox(label_max,
 				container.NewGridWrap(fyne.NewSize(100, 35), entry_max),
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_max_n),
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_max_p)),
 			slider_max,
 			widget.NewSeparator(),
-			apply,
-			widget.NewSeparator(),
+
+			container.NewCenter(container.NewHBox(
+				container.NewGridWrap(fyne.NewSize(200, 35), apply))),
+
 			perCore,
 			widget.NewSeparator(),
 		),
