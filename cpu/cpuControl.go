@@ -14,8 +14,63 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/driver/desktop"
 	"fyne.io/fyne/v2/widget"
 )
+
+// ปุ่มกด
+type RepeatButton struct {
+	widget.Button
+	ticker *time.Ticker
+	stop   chan struct{}
+	action func()
+}
+
+func NewRepeatButton(text string, action func()) *RepeatButton {
+	b := &RepeatButton{
+		action: action,
+	}
+	b.ExtendBaseWidget(b)
+	b.SetText(text)
+	return b
+}
+
+func (b *RepeatButton) MouseDown(*desktop.MouseEvent) {
+	if b.ticker != nil {
+		return
+	}
+
+	// ทำครั้งแรกทันที
+	b.action()
+
+	b.stop = make(chan struct{})
+	b.ticker = time.NewTicker(100 * time.Millisecond)
+
+	go func() {
+		for {
+			select {
+			case <-b.ticker.C:
+				fyne.Do(func() {
+					b.action()
+				})
+			case <-b.stop:
+				return
+			}
+		}
+	}()
+}
+
+func (b *RepeatButton) MouseUp(*desktop.MouseEvent) {
+	if b.ticker == nil {
+		return
+	}
+
+	b.ticker.Stop()
+	close(b.stop)
+
+	b.ticker = nil
+	b.stop = nil
+}
 
 // -------------------------------------------------------------------------------------------
 
@@ -425,11 +480,6 @@ func onButtonClickApply(selected []bool, min_freq_Slider, max_freq_Slider *widge
 
 }
 
-func checkCoreCpu() {
-	//coreCount := CpuCoreCount()
-	//widget.NewCheck()
-}
-
 // ส่งออก
 func CpuControl(w fyne.Window) fyne.CanvasObject {
 
@@ -454,19 +504,19 @@ func CpuControl(w fyne.Window) fyne.CanvasObject {
 		onButtonClickApply(selected, slider_min, slider_max, governorsSt)
 	})
 
-	bt_min_n := widget.NewButton("-", func() {
+	bt_min_n := NewRepeatButton("-", func() {
 		onButtonMinN(slider_min)
 	})
 
-	bt_min_p := widget.NewButton("+", func() {
+	bt_min_p := NewRepeatButton("+", func() {
 		onButtonMinP(slider_min)
 	})
 
-	bt_max_n := widget.NewButton("-", func() {
+	bt_max_n := NewRepeatButton("-", func() {
 		onButtonMaxN(slider_max)
 	})
 
-	bt_max_p := widget.NewButton("+", func() {
+	bt_max_p := NewRepeatButton("+", func() {
 		onButtonMaxP(slider_max)
 	})
 
