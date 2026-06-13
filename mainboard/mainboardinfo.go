@@ -23,102 +23,93 @@ func read(path string) string {
 
 func mainboard_info() map[string]interface{} {
 
-	//vendor := read("/sys/class/dmi/id/board_vendor")
-	//name := read("/sys/class/dmi/id/board_name")
-	//version := read("/sys/class/dmi/id/board_version")
+	//system
+	sys_vendor := read("/sys/class/dmi/id/sys_vendor")
+	product_name := read("/sys/class/dmi/id/product_name")
+	product_family := read("/sys/class/dmi/id/product_family")
+	product_version := read("/sys/class/dmi/id/product_version")
+	//product_serial := read("/sys/class/dmi/id/product_serial")
+	//product_uuid := read("/sys/class/dmi/id/product_uuid")
+	product_sku := read("/sys/class/dmi/id/product_sku")
 
-	bios_date := read("/sys/class/dmi/id/bios_date")
-	bios_release := read("/sys/class/dmi/id/bios_release")
+	//mainboard
+	board_vendor := read("/sys/class/dmi/id/board_vendor")
+	board_name := read("/sys/class/dmi/id/board_name")
+	board_version := read("/sys/class/dmi/id/board_version")
+	//board_serial := read("/sys/class/dmi/id/board_serial")
+	board_asset_tag := read("/sys/class/dmi/id/board_asset_tag")
+
+	//BIOS/UEFI
 	bios_vendor := read("/sys/class/dmi/id/bios_vendor")
 	bios_version := read("/sys/class/dmi/id/bios_version")
+	bios_date := read("/sys/class/dmi/id/bios_date")
+	bios_release := read("/sys/class/dmi/id/bios_release")
 
-	board_asset_tag := read("/sys/class/dmi/id/board_asset_tag")
-	board_name := read("/sys/class/dmi/id/board_name")
-	board_serial := read("/sys/class/dmi/id/board_serial")
-	board_vendor := read("/sys/class/dmi/id/board_vendor")
-	board_version := read("/sys/class/dmi/id/board_version")
-
-	chassis_asset_tag := read("/sys/class/dmi/id/chassis_asset_tag")
-	chassis_serial := read("/sys/class/dmi/id/chassis_serial")
-	chassis_type := read("/sys/class/dmi/id/chassis_type")
+	//Chassis
 	chassis_vendor := read("/sys/class/dmi/id/chassis_vendor")
+	chassis_type := read("/sys/class/dmi/id/chassis_type")
+	//chassis_serial := read("/sys/class/dmi/id/chassis_serial")
 	chassis_version := read("/sys/class/dmi/id/chassis_version")
+	chassis_asset_tag := read("/sys/class/dmi/id/chassis_asset_tag")
 
 	modalias := read("/sys/class/dmi/id/modalias")
 
-	product_family := read("/sys/class/dmi/id/product_family")
-	product_name := read("/sys/class/dmi/id/product_name")
-	product_serial := read("/sys/class/dmi/id/product_serial")
-	product_sku := read("/sys/class/dmi/id/product_sku")
-	product_uuid := read("/sys/class/dmi/id/product_uuid")
-	product_version := read("/sys/class/dmi/id/product_version")
+	//-----------------------------------------------------------------------//
 
-	sys_vendor := read("/sys/class/dmi/id/sys_vendor")
-	//uevent := read("/sys/class/dmi/id/uevent")
+	//System
+	fmt.Println(sys_vendor)      //ผู้ผลิตเครื่องทั้งเครื่อง (OEM)
+	fmt.Println(product_name)    //รุ่นของเครื่อง
+	fmt.Println(product_family)  //ตระกูลของเครื่อง
+	fmt.Println(product_version) //เวอร์ชันหรือ Revision ของรุ่นเครื่อง
+	//fmt.Println(product_serial)//Serial Number ของเครื่องทั้งเครื่อง
+	//fmt.Println(product_uuid)//UUID ของเครื่อง
+	fmt.Println(product_sku) //SKU/Part Number ของเครื่อง
 
-	/*	baseboard, err := ghw.Baseboard()
-		if err != nil {
-			panic(err)
-		}
-	*/
-	//var vendor string
-	//gp := widget.NewLabel(fmt.Println(baseboard.Vendor))
-	//vendor, vendorjson := fmt.Println(baseboard.Vendor) //vendorjson
+	//Mainboard
+	fmt.Println(board_vendor)  //ผู้ผลิตเมนบอร์ด
+	fmt.Println(board_name)    //รุ่นเมนบอร์ด
+	fmt.Println(board_version) //Revision/Version ของเมนบอร์ด
+	//fmt.Println(board_serial)//Serial Number ของเมนบอร์ด
+	fmt.Println(board_asset_tag) //รหัสทรัพย์สิน (Asset Tag) ของเมนบอร์ด ใช้ในองค์กร
 
-	//fmt.Println(baseboard.Vendor)
-	//fmt.Println(baseboard.Product)
-	//fmt.Println(baseboard.Version)
-	//fmt.Println(baseboard.SerialNumber)
+	//BIOS/UEFI
+	fmt.Println(bios_vendor)  //ผู้ผลิต BIOS
+	fmt.Println(bios_version) //เวอร์ชัน BIOS
+	fmt.Println(bios_date)    //วันที่ออก BIOS
+	fmt.Println(bios_release) //เวอร์ชัน Release ของ BIOS ตาม SMBIOS
 
-	//fmt.Println(baseboard.AssetTag)
-	//fmt.Println(baseboard.Vendor)
-	//fmt.Println(baseboard)
-	//fmt.Println(vendor)
-	//fmt.Println(name)
-	//fmt.Println(version)
+	//Chassis
+	fmt.Println(chassis_vendor) //ผู้ผลิตตัวเครื่อง/เคส
+	fmt.Println(chassis_type)   //ประเภทของเครื่อง
+	//fmt.Println(chassis_serial)//Serial Number ของตัวเครื่อง/เคส
+	fmt.Println(chassis_version)   //รุ่นหรือ Revision ของตัวเครื่อง
+	fmt.Println(chassis_asset_tag) //Asset Tag ของตัวเครื่อง
 
-	fmt.Println(bios_date)
-	fmt.Println(bios_release)
-	fmt.Println(bios_vendor)
-	fmt.Println(bios_version)
-
-	fmt.Println(board_asset_tag)
-	fmt.Println(board_name)
-	fmt.Println(board_serial)
-	fmt.Println(board_vendor)
-	fmt.Println(board_version)
-
-	fmt.Println(chassis_asset_tag)
-	fmt.Println(chassis_serial)
-	fmt.Println(chassis_type)
-	fmt.Println(chassis_vendor)
-	fmt.Println(chassis_version)
-	fmt.Println(modalias)
-
-	fmt.Println(product_family)
-	fmt.Println(product_name)
-	fmt.Println(product_serial)
-	fmt.Println(product_sku)
-	fmt.Println(product_uuid)
-	fmt.Println(product_version)
-	fmt.Println(sys_vendor)
-	//fmt.Println(uevent)
-
-	/*
-		data, err := json.MarshalIndent(baseboard, "", "  ")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		fmt.Println(string(data))
-	*/
+	fmt.Println(modalias) //Hardware ID สำหรับ kernel ใช้จับคู่ driver
 
 	return map[string]interface{}{
-
-		//"Vendor":     vendor,
-		//"Vendorjson": vendorjson,
-		//"G":          g,
-		//	"GP":         gp,
+		"Sys_vendor":      sys_vendor,      //ผู้ผลิตเครื่องทั้งเครื่อง (OEM)
+		"Product_name":    product_name,    //รุ่นของเครื่อง
+		"Product_family":  product_family,  //ตระกูลของเครื่อง
+		"Product_version": product_version, //เวอร์ชันหรือ Revision ของรุ่นเครื่อง
+		//"Product_serial":    product_serial,    //Serial Number ของเครื่องทั้งเครื่อง
+		//"Product_uuid":      product_uuid,      //UUID ของเครื่อง
+		"Product_sku":   product_sku,   //SKU/Part Number ของเครื่อง
+		"Board_vendor":  board_vendor,  //ผู้ผลิตเมนบอร์ด
+		"Board_name":    board_name,    //รุ่นเมนบอร์ด
+		"Board_version": board_version, //Revision/Version ของเมนบอร์ด
+		//"Board_serial":      board_serial,      //Serial Number ของเมนบอร์ด
+		"Board_asset_tag": board_asset_tag, //รหัสทรัพย์สิน (Asset Tag) ของเมนบอร์ด ใช้ในองค์กร
+		"Bios_vendor":     bios_vendor,     //ผู้ผลิต BIOS
+		"Bios_version":    bios_version,    //เวอร์ชัน BIOS
+		"Bios_date":       bios_date,       //วันที่ออก BIOS
+		"Bios_release":    bios_release,    //เวอร์ชัน Release ของ BIOS ตาม SMBIOS
+		"Chassis_vendor":  chassis_vendor,  //ผู้ผลิตตัวเครื่อง/เคส
+		"Chassis_type":    chassis_type,    //ประเภทของเครื่อง
+		//"Chassis_serial":    chassis_serial,    //Serial Number ของตัวเครื่อง/เคส
+		"Chassis_version":   chassis_version,   //รุ่นหรือ Revision ของตัวเครื่อง
+		"Chassis_asset_tag": chassis_asset_tag, //Asset Tag ของตัวเครื่อง
+		"Modalias":          modalias,          //Hardware ID สำหรับ kernel ใช้จับคู่ driver
 	}
 
 }
