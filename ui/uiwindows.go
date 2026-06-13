@@ -6,6 +6,7 @@ package Package_ui
 import (
 	"embed"
 	cpuinfo "ihavecpu/cpu"
+	mainboardinfo "ihavecpu/mainboard"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -47,10 +48,11 @@ func CreateWindow() {
 	w.SetIcon(icon)
 
 	cpuTabs := cpuinfo.CpuTabs(w)
+	mainboardTabs := mainboardinfo.MainboardTabs()
 
 	tabs := container.NewAppTabs(
 		container.NewTabItem("CPU", container.NewScroll(cpuTabs)),
-		//container.NewTabItem("cpu", container.NewScroll(cpu)),
+		container.NewTabItem("MainBoard", container.NewScroll(mainboardTabs)),
 		//container.NewTabItem("Features", nil),
 		//container.NewTabItem("Security", container.NewScroll(nil)),
 		//container.NewTabItem("Virtualization", container.NewScroll(nil)),

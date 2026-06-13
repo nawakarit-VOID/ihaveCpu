@@ -391,7 +391,7 @@ func slider() (*widget.Slider, *widget.Slider, *widget.Label, *widget.Label, *wi
 
 	//label slider min และ max
 	min_freq_Label := widget.NewLabel(fmt.Sprintf("[ จำกัด - ความถี่ต่ำสุด ] %d kHz [ %.2f Ghz ]", val_ch_min, float64(val_ch_min)/1e6))
-	max_freq_Label := widget.NewLabel(fmt.Sprintf("[ จำกัด - ความถี่สูงสุด ]%d kHz [ %.2f Ghz ]", val_ch_max, float64(val_ch_max)/1e6))
+	max_freq_Label := widget.NewLabel(fmt.Sprintf("[ จำกัด - ความถี่สูงสุด ] %d kHz [ %.2f Ghz ]", val_ch_max, float64(val_ch_max)/1e6))
 
 	//ค่า slider ต่ำสุด-มากสุด ของ min และ max
 	min_freq_Slider := widget.NewSlider(float64(val_min), float64(val_max)) //*min
@@ -547,7 +547,7 @@ schedutil   - ปรับอัตโนมัติตามโหลด
 
 			governors,
 
-			widget.NewSeparator(),
+			//widget.NewSeparator(),
 			container.NewHBox(label_min,
 				container.NewGridWrap(fyne.NewSize(100, 35), entry_min),
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_min_n),
@@ -559,7 +559,6 @@ schedutil   - ปรับอัตโนมัติตามโหลด
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_max_n),
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_max_p)),
 			slider_max,
-			widget.NewSeparator(),
 
 			container.NewCenter(container.NewHBox(
 				container.NewGridWrap(fyne.NewSize(200, 35), apply))),

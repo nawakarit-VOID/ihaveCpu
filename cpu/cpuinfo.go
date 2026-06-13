@@ -437,20 +437,16 @@ func CpuTabs(w fyne.Window) fyne.CanvasObject {
 
 	cpuOverviewPage := container.NewVBox(
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["ModelName"])),
-		widget.NewSeparator(),
-		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["VendorID"])),
-		widget.NewSeparator(),
+		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["FreqMax"])),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Core"])),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Thread"])),
 		widget.NewSeparator(),
-		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["FreqMax"])),
-		widget.NewSeparator(),
+		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["VendorID"])),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Family"])),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Modelid"])),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Stepping"])),
 		widget.NewSeparator(),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Cachet"])),
-		widget.NewSeparator(),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Microcode"])),
 		widget.NewSeparator(),
 	)
