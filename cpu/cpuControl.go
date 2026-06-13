@@ -224,7 +224,7 @@ func CheckAllBoxCpu(checkboxes []*widget.Check, selected []bool, updateLabel fun
 		selected[idx] = true
 	}
 	updateLabel()
-	fmt.Println("เลือกทั้งหมด")
+	//fmt.Println("เลือกทั้งหมด")
 }
 
 // ============================================================================
@@ -236,7 +236,7 @@ func nonCheckBoxCpu(checkboxes []*widget.Check, selected []bool, updateLabel fun
 		selected[idx] = false
 	}
 	updateLabel()
-	fmt.Println("ล้างทั้งหมด")
+	//fmt.Println("ล้างทั้งหมด")
 }
 
 // ============================================================================
@@ -265,9 +265,9 @@ func checkboxNumcpu() (fyne.CanvasObject, []bool, []*widget.Check, func()) {
 		x := widget.NewCheck("core "+coreName, func(checked bool) {
 			selected[idx] = checked
 			if checked {
-				fmt.Println("core", idx, "เปิด")
+				//fmt.Println("core", idx, "เปิด")
 			} else {
-				fmt.Println("core", idx, "ปิด")
+				//fmt.Println("core", idx, "ปิด")
 			}
 			selectedGet, _ := getSelectedCoresText(selected)
 			//fmt.Println("core ใน for", selectedGet)

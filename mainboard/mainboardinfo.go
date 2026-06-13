@@ -55,57 +55,63 @@ func mainboard_info() map[string]interface{} {
 	modalias := read("/sys/class/dmi/id/modalias")
 
 	//-----------------------------------------------------------------------//
+	/*
+		//System
+		fmt.Println(sys_vendor)      //ผู้ผลิตเครื่องทั้งเครื่อง (OEM)
+		fmt.Println(product_name)    //รุ่นของเครื่อง
+		fmt.Println(product_family)  //ตระกูลของเครื่อง
+		fmt.Println(product_version) //เวอร์ชันหรือ Revision ของรุ่นเครื่อง
+		//fmt.Println(product_serial)//Serial Number ของเครื่องทั้งเครื่อง
+		//fmt.Println(product_uuid)//UUID ของเครื่อง
+		fmt.Println(product_sku) //SKU/Part Number ของเครื่อง
 
-	//System
-	fmt.Println(sys_vendor)      //ผู้ผลิตเครื่องทั้งเครื่อง (OEM)
-	fmt.Println(product_name)    //รุ่นของเครื่อง
-	fmt.Println(product_family)  //ตระกูลของเครื่อง
-	fmt.Println(product_version) //เวอร์ชันหรือ Revision ของรุ่นเครื่อง
-	//fmt.Println(product_serial)//Serial Number ของเครื่องทั้งเครื่อง
-	//fmt.Println(product_uuid)//UUID ของเครื่อง
-	fmt.Println(product_sku) //SKU/Part Number ของเครื่อง
+		//Mainboard
+		fmt.Println(board_vendor)  //ผู้ผลิตเมนบอร์ด
+		fmt.Println(board_name)    //รุ่นเมนบอร์ด
+		fmt.Println(board_version) //Revision/Version ของเมนบอร์ด
+		//fmt.Println(board_serial)//Serial Number ของเมนบอร์ด
+		fmt.Println(board_asset_tag) //รหัสทรัพย์สิน (Asset Tag) ของเมนบอร์ด ใช้ในองค์กร
 
-	//Mainboard
-	fmt.Println(board_vendor)  //ผู้ผลิตเมนบอร์ด
-	fmt.Println(board_name)    //รุ่นเมนบอร์ด
-	fmt.Println(board_version) //Revision/Version ของเมนบอร์ด
-	//fmt.Println(board_serial)//Serial Number ของเมนบอร์ด
-	fmt.Println(board_asset_tag) //รหัสทรัพย์สิน (Asset Tag) ของเมนบอร์ด ใช้ในองค์กร
+		//BIOS/UEFI
+		fmt.Println(bios_vendor)  //ผู้ผลิต BIOS
+		fmt.Println(bios_version) //เวอร์ชัน BIOS
+		fmt.Println(bios_date)    //วันที่ออก BIOS
+		fmt.Println(bios_release) //เวอร์ชัน Release ของ BIOS ตาม SMBIOS
 
-	//BIOS/UEFI
-	fmt.Println(bios_vendor)  //ผู้ผลิต BIOS
-	fmt.Println(bios_version) //เวอร์ชัน BIOS
-	fmt.Println(bios_date)    //วันที่ออก BIOS
-	fmt.Println(bios_release) //เวอร์ชัน Release ของ BIOS ตาม SMBIOS
+		//Chassis
+		fmt.Println(chassis_vendor) //ผู้ผลิตตัวเครื่อง/เคส
+		fmt.Println(chassis_type)   //ประเภทของเครื่อง
+		//fmt.Println(chassis_serial)//Serial Number ของตัวเครื่อง/เคส
+		fmt.Println(chassis_version)   //รุ่นหรือ Revision ของตัวเครื่อง
+		fmt.Println(chassis_asset_tag) //Asset Tag ของตัวเครื่อง
 
-	//Chassis
-	fmt.Println(chassis_vendor) //ผู้ผลิตตัวเครื่อง/เคส
-	fmt.Println(chassis_type)   //ประเภทของเครื่อง
-	//fmt.Println(chassis_serial)//Serial Number ของตัวเครื่อง/เคส
-	fmt.Println(chassis_version)   //รุ่นหรือ Revision ของตัวเครื่อง
-	fmt.Println(chassis_asset_tag) //Asset Tag ของตัวเครื่อง
-
-	fmt.Println(modalias) //Hardware ID สำหรับ kernel ใช้จับคู่ driver
+		fmt.Println(modalias) //Hardware ID สำหรับ kernel ใช้จับคู่ driver
+	*/
+	//-----------------------------------------------------------------------//
 
 	return map[string]interface{}{
+		//System
 		"Sys_vendor":      sys_vendor,      //ผู้ผลิตเครื่องทั้งเครื่อง (OEM)
 		"Product_name":    product_name,    //รุ่นของเครื่อง
 		"Product_family":  product_family,  //ตระกูลของเครื่อง
 		"Product_version": product_version, //เวอร์ชันหรือ Revision ของรุ่นเครื่อง
 		//"Product_serial":    product_serial,    //Serial Number ของเครื่องทั้งเครื่อง
 		//"Product_uuid":      product_uuid,      //UUID ของเครื่อง
-		"Product_sku":   product_sku,   //SKU/Part Number ของเครื่อง
+		"Product_sku": product_sku, //SKU/Part Number ของเครื่อง
+		//mainboard
 		"Board_vendor":  board_vendor,  //ผู้ผลิตเมนบอร์ด
 		"Board_name":    board_name,    //รุ่นเมนบอร์ด
 		"Board_version": board_version, //Revision/Version ของเมนบอร์ด
 		//"Board_serial":      board_serial,      //Serial Number ของเมนบอร์ด
 		"Board_asset_tag": board_asset_tag, //รหัสทรัพย์สิน (Asset Tag) ของเมนบอร์ด ใช้ในองค์กร
-		"Bios_vendor":     bios_vendor,     //ผู้ผลิต BIOS
-		"Bios_version":    bios_version,    //เวอร์ชัน BIOS
-		"Bios_date":       bios_date,       //วันที่ออก BIOS
-		"Bios_release":    bios_release,    //เวอร์ชัน Release ของ BIOS ตาม SMBIOS
-		"Chassis_vendor":  chassis_vendor,  //ผู้ผลิตตัวเครื่อง/เคส
-		"Chassis_type":    chassis_type,    //ประเภทของเครื่อง
+		//BIOS/UEFI
+		"Bios_vendor":  bios_vendor,  //ผู้ผลิต BIOS
+		"Bios_version": bios_version, //เวอร์ชัน BIOS
+		"Bios_date":    bios_date,    //วันที่ออก BIOS
+		"Bios_release": bios_release, //เวอร์ชัน Release ของ BIOS ตาม SMBIOS
+		//Chassis
+		"Chassis_vendor": chassis_vendor, //ผู้ผลิตตัวเครื่อง/เคส
+		"Chassis_type":   chassis_type,   //ประเภทของเครื่อง
 		//"Chassis_serial":    chassis_serial,    //Serial Number ของตัวเครื่อง/เคส
 		"Chassis_version":   chassis_version,   //รุ่นหรือ Revision ของตัวเครื่อง
 		"Chassis_asset_tag": chassis_asset_tag, //Asset Tag ของตัวเครื่อง
@@ -117,14 +123,48 @@ func mainboard_info() map[string]interface{} {
 func MainboardTabs() fyne.CanvasObject {
 	x := mainboard_info()
 
-	mainboard := container.NewVBox(
-		widget.NewLabel(fmt.Sprintf("%s", x["Vendor"])),
-		widget.NewLabel(fmt.Sprintf("%s", x["Vendorjson"])),
-		widget.NewLabel(fmt.Sprintf("%s", x["G"])),
-		widget.NewSeparator(),
+	System := container.NewVBox(
+		//System
+		widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s", x["Sys_vendor"])),       //ผู้ผลิตเครื่องทั้งเครื่อง (OEM)
+		widget.NewLabel(fmt.Sprintf("รุ่น : %s", x["Product_name"])),        //รุ่นของเครื่อง
+		widget.NewLabel(fmt.Sprintf("ตระกูล : %s", x["Product_family"])),    //ตระกูลของเครื่อง
+		widget.NewLabel(fmt.Sprintf("เวอร์ชัน : %s", x["Product_version"])), //เวอร์ชันหรือ Revision ของรุ่นเครื่อง
+		//widget.NewLabel(fmt.Sprintf("Serial Number : %s", x[//"Product_serial"])),    //Serial Number ของเครื่องทั้งเครื่อง
+		//widget.NewLabel(fmt.Sprintf("UUID : %s", x[//"Product_uuid"])),      //UUID ของเครื่อง
+		widget.NewLabel(fmt.Sprintf("รหัส : %s", x["Product_sku"])), //SKU/Part Number ของเครื่อง
+	)
+	Mainboard := container.NewVBox(
+		//mainboard
+		widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s", x["Board_vendor"])),   //ผู้ผลิตเมนบอร์ด
+		widget.NewLabel(fmt.Sprintf("รุ่น : %s", x["Board_name"])),        //รุ่นเมนบอร์ด
+		widget.NewLabel(fmt.Sprintf("เวอร์ชัน : %s", x["Board_version"])), //Revision/Version ของเมนบอร์ด
+		//widget.NewLabel(fmt.Sprintf("Serial Number : %s", x["Board_serial"])),     //Serial Number ของเมนบอร์ด
+		widget.NewLabel(fmt.Sprintf("รหัส : %s", x["Board_asset_tag"])), //รหัสทรัพย์สิน (Asset Tag) ของเมนบอร์ด ใช้ในองค์กร
+	)
+	BIOS_UEFI := container.NewVBox(
+		//BIOS/UEFI
+		widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s", x["Bios_vendor"])),   //ผู้ผลิต BIOS
+		widget.NewLabel(fmt.Sprintf("เวอร์ชัน : %s", x["Bios_version"])), //เวอร์ชัน BIOS
+		widget.NewLabel(fmt.Sprintf("วันที่ออก : %s", x["Bios_date"])),   //วันที่ออก BIOS
+		widget.NewLabel(fmt.Sprintf("เวอร์ชัน : %s", x["Bios_release"])), //เวอร์ชัน Release ของ BIOS ตาม SMBIOS
+	)
+	Chassis := container.NewVBox(
+		//Chassis
+		widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s", x["Chassis_vendor"])), //ผู้ผลิตตัวเครื่อง/เคส
+		widget.NewLabel(fmt.Sprintf("ประเภท : %s", x["Chassis_type"])),    //ประเภทของเครื่อง
+		//widget.NewLabel(fmt.Sprintf("รหัส : %s", x["Chassis_serial"])),    //Serial Number ของตัวเครื่อง/เคส
+		widget.NewLabel(fmt.Sprintf("รุ่น : %s", x["Chassis_version"])),  //รุ่นหรือ Revision ของตัวเครื่อง
+		widget.NewLabel(fmt.Sprintf("Tag : %s", x["Chassis_asset_tag"])), //Asset Tag ของตัวเครื่อง
+		//widget.NewLabel(fmt.Sprintf("Hardware ID : %s", x["Modalias"])),          //Hardware ID สำหรับ kernel ใช้จับคู่ driver
+		//widget.NewSeparator(),
 	)
 
 	return container.NewAppTabs(
-		container.NewTabItem("Overview", container.NewScroll(mainboard)),
+		container.NewTabItem("System", container.NewScroll(System)),
+		container.NewTabItem("Mainboard", container.NewScroll(Mainboard)),
+		container.NewTabItem("BIOS / UEFI", container.NewScroll(BIOS_UEFI)),
+		container.NewTabItem("Chassis", container.NewScroll(Chassis)),
 	)
 }
+
+/**/
