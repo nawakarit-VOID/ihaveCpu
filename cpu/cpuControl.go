@@ -375,7 +375,29 @@ func onButtonMaxP(max_freq_Slider *widget.Slider) { //เพิ่มค่า m
 	}
 } //---ปุ่มกด เพื่ม ลด
 
+func percentMin(min_freq_Slider, max_freq_Slider *widget.Slider) float64 {
+	freq_min := (max_freq_Slider.Max - min_freq_Slider.Min) / 100
+	return freq_min
+}
+func percentMax(max_freq_Slider *widget.Slider) float64 {
+	freq_max := max_freq_Slider.Max / 100
+	return freq_max
+}
+
+// min
 // ปุ่มกด 10%---
+func percent10(min_freq_Slider *widget.Slider) {
+
+	freq_min := percentMin(min_freq_Slider, min_freq_Slider)
+	freq_min = freq_min * 10
+	freq_min = freq_min + min_freq_Slider.Min
+	fmt.Println(freq_min)
+
+	if freq_min <= min_freq_Slider.Max {
+		min_freq_Slider.SetValue(freq_min)
+	}
+}
+
 // ---ปุ่มกด 10%
 
 // ปุ่มกด 20%---
@@ -406,7 +428,7 @@ func onButtonMaxP(max_freq_Slider *widget.Slider) { //เพิ่มค่า m
 // ---ปุ่มกด 100%
 
 //************************************//
-
+//max
 // ปุ่มกด 10%---
 // ---ปุ่มกด 10%
 
@@ -575,6 +597,10 @@ func CpuControl(w fyne.Window) fyne.CanvasObject {
 		onButtonMinP(slider_min)
 	})
 
+	bt_10 := NewRepeatButton("+", func() {
+		percent10(slider_min)
+	})
+
 	bt_max_n := NewRepeatButton("-", func() {
 		onButtonMaxN(slider_max)
 	})
@@ -615,6 +641,7 @@ schedutil   - ปรับอัตโนมัติตามโหลด
 				container.NewGridWrap(fyne.NewSize(100, 35), entry_min),
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_min_n),
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_min_p)),
+			bt_10,
 			slider_min,
 
 			container.NewHBox(label_max,
