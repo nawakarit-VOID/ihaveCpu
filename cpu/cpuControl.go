@@ -375,17 +375,10 @@ func onButtonMaxP(max_freq_Slider *widget.Slider) { //เพิ่มค่า m
 	}
 } //---ปุ่มกด เพื่ม ลด
 
-func freq_percent(min_freq_Slider *widget.Slider) float64 {
-	freq_percent := (min_freq_Slider.Max - min_freq_Slider.Min) / 100
+func freq_percent(percent_freq_Slider *widget.Slider) float64 {
+	freq_percent := (percent_freq_Slider.Max - percent_freq_Slider.Min) / 100
 	return freq_percent
 }
-
-/*
-func percentMax(min_freq_Slider, max_freq_Slider *widget.Slider) float64 {
-	freq_max := (max_freq_Slider.Max - min_freq_Slider.Min) / 100
-
-	return freq_max
-}*/
 
 // min
 // ปุ่มกด 10%---
@@ -739,6 +732,37 @@ func CpuControl(w fyne.Window) fyne.CanvasObject {
 		onButtonMaxP(slider_max)
 	})
 
+	bt_10max := NewRepeatButton("10%", func() {
+		percent10(slider_max)
+	})
+	bt_20max := NewRepeatButton("20%", func() {
+		percent20(slider_max)
+	})
+	bt_30max := NewRepeatButton("30%", func() {
+		percent30(slider_max)
+	})
+	bt_40max := NewRepeatButton("40%", func() {
+		percent40(slider_max)
+	})
+	bt_50max := NewRepeatButton("50%", func() {
+		percent50(slider_max)
+	})
+	bt_60max := NewRepeatButton("60%", func() {
+		percent60(slider_max)
+	})
+	bt_70max := NewRepeatButton("70%", func() {
+		percent70(slider_max)
+	})
+	bt_80max := NewRepeatButton("80%", func() {
+		percent80(slider_max)
+	})
+	bt_90max := NewRepeatButton("90%", func() {
+		percent90(slider_max)
+	})
+	bt_100max := NewRepeatButton("100%", func() {
+		percent100(slider_max)
+	})
+
 	governorsAb := `conservative- เพิ่มความเร็วแบบค่อยเป็นค่อยไป
 ondemand    - เร่งเร็วเมื่อมีโหลด
 ี*userspace - รักษาความเร็วคงที่ (ตามที่กำหนด)
@@ -778,6 +802,7 @@ schedutil   - ปรับอัตโนมัติตามโหลด
 				container.NewGridWrap(fyne.NewSize(100, 35), entry_max),
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_max_n),
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_max_p)),
+			container.NewGridWithColumns(10, bt_10max, bt_20max, bt_30max, bt_40max, bt_50max, bt_60max, bt_70max, bt_80max, bt_90max, bt_100max),
 			slider_max,
 
 			container.NewCenter(container.NewHBox(
