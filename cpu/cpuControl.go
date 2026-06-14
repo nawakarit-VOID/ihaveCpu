@@ -375,62 +375,163 @@ func onButtonMaxP(max_freq_Slider *widget.Slider) { //เพิ่มค่า m
 	}
 } //---ปุ่มกด เพื่ม ลด
 
-func percentMin(min_freq_Slider, max_freq_Slider *widget.Slider) float64 {
-	freq_min := (max_freq_Slider.Max - min_freq_Slider.Min) / 100
-	return freq_min
+func freq_percent(min_freq_Slider *widget.Slider) float64 {
+	freq_percent := (min_freq_Slider.Max - min_freq_Slider.Min) / 100
+	return freq_percent
 }
-func percentMax(max_freq_Slider *widget.Slider) float64 {
-	freq_max := max_freq_Slider.Max / 100
+
+/*
+func percentMax(min_freq_Slider, max_freq_Slider *widget.Slider) float64 {
+	freq_max := (max_freq_Slider.Max - min_freq_Slider.Min) / 100
+
 	return freq_max
-}
+}*/
 
 // min
 // ปุ่มกด 10%---
 func percent10(min_freq_Slider *widget.Slider) {
 
-	freq_min := percentMin(min_freq_Slider, min_freq_Slider)
+	freq_min := freq_percent(min_freq_Slider)
 	freq_min = freq_min * 10
 	freq_min = freq_min + min_freq_Slider.Min
-	fmt.Println(freq_min)
+	//fmt.Println(freq_min)
 
 	if freq_min <= min_freq_Slider.Max {
 		min_freq_Slider.SetValue(freq_min)
 	}
-}
-
-// ---ปุ่มกด 10%
+} // ---ปุ่มกด 10%
 
 // ปุ่มกด 20%---
-// ---ปุ่มกด 20%
+func percent20(min_freq_Slider *widget.Slider) {
+
+	freq_min := freq_percent(min_freq_Slider)
+	freq_min = freq_min * 20
+	freq_min = freq_min + min_freq_Slider.Min
+	//fmt.Println(freq_min)
+
+	if freq_min <= min_freq_Slider.Max {
+		min_freq_Slider.SetValue(freq_min)
+	}
+} // ---ปุ่มกด 20%
 
 // ปุ่มกด 30%---
-// ---ปุ่มกด 30%
+func percent30(min_freq_Slider *widget.Slider) {
+
+	freq_min := freq_percent(min_freq_Slider)
+	freq_min = freq_min * 30
+	freq_min = freq_min + min_freq_Slider.Min
+	//fmt.Println(freq_min)
+
+	if freq_min <= min_freq_Slider.Max {
+		min_freq_Slider.SetValue(freq_min)
+	}
+} // ---ปุ่มกด 30%
 
 // ปุ่มกด 40%---
-// ---ปุ่มกด 40%
+func percent40(min_freq_Slider *widget.Slider) {
+
+	freq_min := freq_percent(min_freq_Slider)
+	freq_min = freq_min * 40
+	freq_min = freq_min + min_freq_Slider.Min
+	//fmt.Println(freq_min)
+
+	if freq_min <= min_freq_Slider.Max {
+		min_freq_Slider.SetValue(freq_min)
+	}
+} // ---ปุ่มกด 40%
 
 // ปุ่มกด 50%---
-// ---ปุ่มกด 50%
+func percent50(min_freq_Slider *widget.Slider) {
+
+	freq_min := freq_percent(min_freq_Slider)
+	freq_min = freq_min * 50
+	freq_min = freq_min + min_freq_Slider.Min
+	//fmt.Println(freq_min)
+
+	if freq_min <= min_freq_Slider.Max {
+		min_freq_Slider.SetValue(freq_min)
+	}
+} // ---ปุ่มกด 50%
 
 // ปุ่มกด 60%---
-// ---ปุ่มกด 60%
+func percent60(min_freq_Slider *widget.Slider) {
+
+	freq_min := freq_percent(min_freq_Slider)
+	freq_min = freq_min * 60
+	freq_min = freq_min + min_freq_Slider.Min
+	//fmt.Println(freq_min)
+
+	if freq_min <= min_freq_Slider.Max {
+		min_freq_Slider.SetValue(freq_min)
+	}
+} // ---ปุ่มกด 60%
 
 // ปุ่มกด 70%---
-// ---ปุ่มกด 70%
+func percent70(min_freq_Slider *widget.Slider) {
+
+	freq_min := freq_percent(min_freq_Slider)
+	freq_min = freq_min * 70
+	freq_min = freq_min + min_freq_Slider.Min
+	//fmt.Println(freq_min)
+
+	if freq_min <= min_freq_Slider.Max {
+		min_freq_Slider.SetValue(freq_min)
+	}
+} // ---ปุ่มกด 70%
 
 // ปุ่มกด 80%---
-// ---ปุ่มกด 80%
+func percent80(min_freq_Slider *widget.Slider) {
+
+	freq_min := freq_percent(min_freq_Slider)
+	freq_min = freq_min * 80
+	freq_min = freq_min + min_freq_Slider.Min
+	//fmt.Println(freq_min)
+
+	if freq_min <= min_freq_Slider.Max {
+		min_freq_Slider.SetValue(freq_min)
+	}
+} // ---ปุ่มกด 80%
 
 // ปุ่มกด 90%---
-// ---ปุ่มกด 90%
+func percent90(min_freq_Slider *widget.Slider) {
+
+	freq_min := freq_percent(min_freq_Slider)
+	freq_min = freq_min * 90
+	freq_min = freq_min + min_freq_Slider.Min
+	//fmt.Println(freq_min)
+
+	if freq_min <= min_freq_Slider.Max {
+		min_freq_Slider.SetValue(freq_min)
+	}
+} // ---ปุ่มกด 90%
 
 // ปุ่มกด 100%---
-// ---ปุ่มกด 100%
+func percent100(min_freq_Slider *widget.Slider) {
 
-//************************************//
-//max
+	freq_min := freq_percent(min_freq_Slider)
+	freq_min = freq_min * 100
+	freq_min = freq_min + min_freq_Slider.Min
+	//fmt.Println(freq_min)
+
+	if freq_min <= min_freq_Slider.Max {
+		min_freq_Slider.SetValue(freq_min)
+	}
+} // ---ปุ่มกด 100%
+
+// ************************************//
+// max
 // ปุ่มกด 10%---
-// ---ปุ่มกด 10%
+/*func percent10max(max_freq_Slider *widget.Slider) {
+
+	freq_min := freq_percent(min_freq_Slider)
+	freq_min = freq_min * 10
+	freq_min = freq_min + min_freq_Slider.Min
+	//fmt.Println(freq_min)
+
+	if freq_min <= min_freq_Slider.Max {
+		min_freq_Slider.SetValue(freq_min)
+	}
+} */ // ---ปุ่มกด 10%
 
 // ปุ่มกด 20%---
 // ---ปุ่มกด 20%
@@ -589,6 +690,7 @@ func CpuControl(w fyne.Window) fyne.CanvasObject {
 		onButtonClickApply(selected, slider_min, slider_max, governorsSt)
 	})
 
+	//min
 	bt_min_n := NewRepeatButton("-", func() {
 		onButtonMinN(slider_min)
 	})
@@ -597,10 +699,38 @@ func CpuControl(w fyne.Window) fyne.CanvasObject {
 		onButtonMinP(slider_min)
 	})
 
-	bt_10 := NewRepeatButton("+", func() {
+	bt_10 := NewRepeatButton("10%", func() {
 		percent10(slider_min)
 	})
+	bt_20 := NewRepeatButton("20%", func() {
+		percent20(slider_min)
+	})
+	bt_30 := NewRepeatButton("30%", func() {
+		percent30(slider_min)
+	})
+	bt_40 := NewRepeatButton("40%", func() {
+		percent40(slider_min)
+	})
+	bt_50 := NewRepeatButton("50%", func() {
+		percent50(slider_min)
+	})
+	bt_60 := NewRepeatButton("60%", func() {
+		percent60(slider_min)
+	})
+	bt_70 := NewRepeatButton("70%", func() {
+		percent70(slider_min)
+	})
+	bt_80 := NewRepeatButton("80%", func() {
+		percent80(slider_min)
+	})
+	bt_90 := NewRepeatButton("90%", func() {
+		percent90(slider_min)
+	})
+	bt_100 := NewRepeatButton("100%", func() {
+		percent100(slider_min)
+	})
 
+	//max
 	bt_max_n := NewRepeatButton("-", func() {
 		onButtonMaxN(slider_max)
 	})
@@ -641,7 +771,7 @@ schedutil   - ปรับอัตโนมัติตามโหลด
 				container.NewGridWrap(fyne.NewSize(100, 35), entry_min),
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_min_n),
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_min_p)),
-			bt_10,
+			container.NewGridWithColumns(10, bt_10, bt_20, bt_30, bt_40, bt_50, bt_60, bt_70, bt_80, bt_90, bt_100),
 			slider_min,
 
 			container.NewHBox(label_max,
