@@ -18,60 +18,6 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-// ปุ่มกด
-type RepeatButton struct {
-	widget.Button
-	ticker *time.Ticker
-	stop   chan struct{}
-	action func()
-}
-
-func NewRepeatButton(text string, action func()) *RepeatButton {
-	b := &RepeatButton{
-		action: action,
-	}
-	b.ExtendBaseWidget(b)
-	b.SetText(text)
-	return b
-}
-
-func (b *RepeatButton) MouseDown(*desktop.MouseEvent) {
-	if b.ticker != nil {
-		return
-	}
-
-	// ทำครั้งแรกทันที
-	b.action()
-
-	b.stop = make(chan struct{})
-	b.ticker = time.NewTicker(100 * time.Millisecond)
-
-	go func() {
-		for {
-			select {
-			case <-b.ticker.C:
-				fyne.Do(func() {
-					b.action()
-				})
-			case <-b.stop:
-				return
-			}
-		}
-	}()
-}
-
-func (b *RepeatButton) MouseUp(*desktop.MouseEvent) {
-	if b.ticker == nil {
-		return
-	}
-
-	b.ticker.Stop()
-	close(b.stop)
-
-	b.ticker = nil
-	b.stop = nil
-}
-
 // -------------------------------------------------------------------------------------------
 
 func getCPUhardware(cpuIndex int) (fyne.CanvasObject, uint64, uint64) {
@@ -203,7 +149,8 @@ func getCPUFreqUpdate(cpuIndex int) (fyne.CanvasObject, uint64, uint64) {
 // ============================================================================
 func sysCPUFreqUpdate() fyne.CanvasObject {
 	coreCount := CpuCoreCount()
-	box := container.NewVBox()
+	//box := container.NewVBox()
+	box := container.NewGridWithColumns(2)
 
 	for i := 0; i < coreCount; i++ {
 		coreInfo, _, _ := getCPUFreqUpdate(i)
@@ -258,7 +205,7 @@ func checkboxNumcpu() (fyne.CanvasObject, []bool, []*widget.Check, func()) {
 	//fmt.Println("core เริ่ม", selectedGet)
 	selectedLabel := widget.NewLabel(selectedGet)
 
-	box := container.NewGridWithColumns(8)
+	box := container.NewGridWithColumns(8) //8
 	for i := 0; i < coreCount; i++ {
 		idx := i
 		coreName := strconv.Itoa(idx)
@@ -345,6 +292,61 @@ func GovernorscheckBox() (fyne.CanvasObject, *widget.RadioGroup) {
 	return governorsST, governorsST
 }
 
+// ฟังชั้นปุ่มกด เพื่ม ลด ต่อเนื่อง---
+type RepeatButton struct {
+	widget.Button
+	ticker *time.Ticker
+	stop   chan struct{}
+	action func()
+}
+
+func NewRepeatButton(text string, action func()) *RepeatButton {
+	b := &RepeatButton{
+		action: action,
+	}
+	b.ExtendBaseWidget(b)
+	b.SetText(text)
+	return b
+}
+
+func (b *RepeatButton) MouseDown(*desktop.MouseEvent) {
+	if b.ticker != nil {
+		return
+	}
+
+	// ทำครั้งแรกทันที
+	b.action()
+
+	b.stop = make(chan struct{})
+	b.ticker = time.NewTicker(100 * time.Millisecond)
+
+	go func() {
+		for {
+			select {
+			case <-b.ticker.C:
+				fyne.Do(func() {
+					b.action()
+				})
+			case <-b.stop:
+				return
+			}
+		}
+	}()
+}
+
+func (b *RepeatButton) MouseUp(*desktop.MouseEvent) {
+	if b.ticker == nil {
+		return
+	}
+
+	b.ticker.Stop()
+	close(b.stop)
+
+	b.ticker = nil
+	b.stop = nil
+} // ---ฟังชั้นปุ่มกด เพื่ม ลด ต่อเนื่อง
+
+// ปุ่มกด เพื่ม ลด---
 func onButtonMinN(min_freq_Slider *widget.Slider) { //ลดค่า min
 	freq_min := min_freq_Slider.Value - 1
 	if freq_min >= min_freq_Slider.Min {
@@ -371,8 +373,69 @@ func onButtonMaxP(max_freq_Slider *widget.Slider) { //เพิ่มค่า m
 	if freq_max <= max_freq_Slider.Max {
 		max_freq_Slider.SetValue(freq_max)
 	}
-}
+} //---ปุ่มกด เพื่ม ลด
 
+// ปุ่มกด 10%---
+// ---ปุ่มกด 10%
+
+// ปุ่มกด 20%---
+// ---ปุ่มกด 20%
+
+// ปุ่มกด 30%---
+// ---ปุ่มกด 30%
+
+// ปุ่มกด 40%---
+// ---ปุ่มกด 40%
+
+// ปุ่มกด 50%---
+// ---ปุ่มกด 50%
+
+// ปุ่มกด 60%---
+// ---ปุ่มกด 60%
+
+// ปุ่มกด 70%---
+// ---ปุ่มกด 70%
+
+// ปุ่มกด 80%---
+// ---ปุ่มกด 80%
+
+// ปุ่มกด 90%---
+// ---ปุ่มกด 90%
+
+// ปุ่มกด 100%---
+// ---ปุ่มกด 100%
+
+//************************************//
+
+// ปุ่มกด 10%---
+// ---ปุ่มกด 10%
+
+// ปุ่มกด 20%---
+// ---ปุ่มกด 20%
+
+// ปุ่มกด 30%---
+// ---ปุ่มกด 30%
+
+// ปุ่มกด 40%---
+// ---ปุ่มกด 40%
+
+// ปุ่มกด 50%---
+// ---ปุ่มกด 50%
+
+// ปุ่มกด 60%---
+// ---ปุ่มกด 60%
+
+// ปุ่มกด 70%---
+// ---ปุ่มกด 70%
+
+// ปุ่มกด 80%---
+// ---ปุ่มกด 80%
+
+// ปุ่มกด 90%---
+// ---ปุ่มกด 90%
+
+// ปุ่มกด 100%---
+// ---ปุ่มกด 100%
 func slider() (*widget.Slider, *widget.Slider, *widget.Label, *widget.Label, *widget.Entry, *widget.Entry) {
 
 	_, val_min, val_max := getCPUhardware(0)
