@@ -381,8 +381,8 @@ func freq_percent(percent_freq_Slider *widget.Slider) float64 {
 }
 
 // test new percent
-func btNewPercent(freq_Slider *widget.Slider, percent float64) {
-
+func newPercent(freq_Slider *widget.Slider, percent float64) {
+******************
 }
 
 // ปุ่มกด 10%---
