@@ -62,7 +62,7 @@ func (m MyTheme) Color(name fyne.ThemeColorName, v fyne.ThemeVariant) color.Colo
 			return color.NRGBA{46, 46, 51, 255}
 
 		case theme.ColorNameShadow: // → เงา
-			return color.NRGBA{41, 246, 181, 10}
+			return color.NRGBA{255, 246, 181, 100}
 
 			//⚠️ สถานะพิเศษ
 		case theme.ColorNameError: // → error (แดง)
@@ -124,7 +124,7 @@ func (m MyTheme) Color(name fyne.ThemeColorName, v fyne.ThemeVariant) color.Colo
 			return color.NRGBA{230, 230, 230, 255}
 
 		case theme.ColorNameShadow: // → เงา
-			return color.NRGBA{41, 246, 181, 10}
+			return color.NRGBA{255, 246, 181, 100}
 
 			//⚠️ สถานะพิเศษ
 		case theme.ColorNameError: // → error (แดง)

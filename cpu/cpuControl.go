@@ -5,6 +5,7 @@ package Ppackage_cpuinfo
 
 import (
 	"fmt"
+	"image/color"
 	"os"
 	"os/exec"
 	"strconv"
@@ -12,10 +13,10 @@ import (
 	"time"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/driver/desktop"
-	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -207,6 +208,7 @@ func checkboxNumcpu() (fyne.CanvasObject, []bool, []*widget.Check, func()) {
 	selectedLabel := widget.NewLabel(selectedGet)
 
 	box := container.NewGridWithColumns(10) //8
+
 	for i := 0; i < coreCount; i++ {
 		idx := i
 		coreName := strconv.Itoa(idx)
@@ -234,7 +236,7 @@ func checkboxNumcpu() (fyne.CanvasObject, []bool, []*widget.Check, func()) {
 		selectedLabel.SetText(selectedGet)
 	}
 
-	return container.NewVBox(selectedLabel, box), selected, checkboxes, updateLabel
+	return container.NewVBox(selectedLabel, widget.NewSeparator(), box), selected, checkboxes, updateLabel
 }
 
 func getSelectedCoresText(selected []bool) (string, []int) {
@@ -248,7 +250,7 @@ func getSelectedCoresText(selected []bool) (string, []int) {
 	}
 
 	if len(cores) == 0 {
-		return "ไม่มี", nil
+		return "ยังไม่ได้เลือก", nil
 	}
 
 	var lines []string
@@ -676,54 +678,93 @@ schedutil - ปรับอัตโนมัติตามโหลด
 *userspace - ใน CPU Intel และ AMD รุ่นใหม่ อาจไม่ได้ผล 
 เพราะการจัดการความถี่ถูกย้ายไปให้ตัวไดรเวอร์และเฟิร์มแวร์เป็นผู้ควบคุม`
 
-	abbtn := widget.NewButton("!", func() {
+	//ระยะห่าง
+	space := canvas.NewRectangle(color.Transparent)
+	space.SetMinSize(fyne.NewSize(0, 15))
+
+	Info := container.NewVBox(info,
+		space,
+	)
+
+	selectedCoreCpu := container.NewVBox(
+		container.NewCenter(chekCpu),
+		//layout.NewSpacer(),
+		space,
+		container.NewCenter(
+			container.NewHBox(
+				//container.NewGridWrap(fyne.NewSize(150, 35), allCheck),
+				//container.NewGridWrap(fyne.NewSize(150, 35), nonCheck),
+				container.NewGridWithColumns(2,
+					container.NewGridWrap(fyne.NewSize(150, 35), allCheck),
+					container.NewGridWrap(fyne.NewSize(150, 35), nonCheck),
+				),
+			)),
+		space,
+	)
+
+	aboutBtn := widget.NewButton("ความหมาย", func() {
 		dialog.ShowInformation("โหมดการทำงาน", governorsAb, w)
 	})
 
-	selectedCoreCpu := container.NewVBox(chekCpu,
-		layout.NewSpacer(),
-		container.NewCenter(container.NewHBox(
-			container.NewGridWrap(fyne.NewSize(150, 35), allCheck),
-			container.NewGridWrap(fyne.NewSize(150, 35), nonCheck),
-			container.NewGridWrap(fyne.NewSize(35, 35), abbtn))))
+	work := container.NewVBox(
+		container.NewCenter(governors),
+		//container.NewGridWrap(fyne.NewSize(35, 35), abbtn),
+		space,
+		container.NewCenter(
+			container.NewHBox(
+				container.NewGridWithColumns(1,
+					container.NewGridWrap(fyne.NewSize(150, 35), aboutBtn)),
+			)),
+		space,
+	)
+
+	configMin := container.NewVBox(
+		container.NewCenter(label_min),
+
+		container.NewCenter(
+			container.NewHBox(
+				container.NewGridWrap(fyne.NewSize(100, 35), entry_min),
+				bt_min_n, bt_min_p, bt_101, bt_102, bt_103, bt_104, bt_105, bt_106, bt_107, bt_108, bt_109, bt_1010),
+		),
+		slider_min,
+	)
+
+	configMax := container.NewVBox(
+		container.NewCenter(label_max),
+
+		container.NewCenter(
+			container.NewHBox(
+				container.NewGridWrap(fyne.NewSize(100, 35), entry_max),
+				bt_max_n, bt_max_p, bt_101M, bt_102M, bt_103M, bt_104M, bt_105M, bt_106M, bt_107M, bt_108M, bt_109M, bt_1010M),
+		),
+		slider_max,
+	)
+
+	now := container.NewCenter(perCore)
+
+	//perCore
 
 	x := container.NewBorder(
 		container.NewVBox(
-			widget.NewCard("Default Kernel and Hardware", "", info),
+			widget.NewCard("Default Kernel and Hardware", "", Info),
 			//info,
+			//widget.NewSeparator(),
 			widget.NewCard("เลือกคอร์ CPU", "", selectedCoreCpu),
 			//chekCpu,
-
-			/*
-				container.NewCenter(container.NewHBox(
-					container.NewGridWrap(fyne.NewSize(150, 35), allCheck),
-					container.NewGridWrap(fyne.NewSize(150, 35), nonCheck),
-					container.NewGridWrap(fyne.NewSize(35, 35), abbtn))),
-			*/
-			widget.NewCard("โหมดการทำงาน", "", governors),
-
+			widget.NewCard("โหมดการทำงาน", "", work),
 			//governors,
+			widget.NewCard("ความถี่ต่ำสุด", "", configMin),
 
-			//widget.NewSeparator(),
-			container.NewHBox(label_min,
-				container.NewGridWrap(fyne.NewSize(100, 35), entry_min),
-				container.NewGridWrap(fyne.NewSize(35, 35), bt_min_n),
-				container.NewGridWrap(fyne.NewSize(35, 35), bt_min_p)),
-			container.NewGridWithColumns(10, bt_101, bt_102, bt_103, bt_104, bt_105, bt_106, bt_107, bt_108, bt_109, bt_1010),
-			slider_min,
+			widget.NewCard("ความถี่สูงสุด", "", configMax),
 
-			container.NewHBox(label_max,
-				container.NewGridWrap(fyne.NewSize(100, 35), entry_max),
-				container.NewGridWrap(fyne.NewSize(35, 35), bt_max_n),
-				container.NewGridWrap(fyne.NewSize(35, 35), bt_max_p)),
-			container.NewGridWithColumns(10, bt_101M, bt_102M, bt_103M, bt_104M, bt_105M, bt_106M, bt_107M, bt_108M, bt_109M, bt_1010M),
+			container.NewCenter(
+				container.NewVBox(
+					space,
+					container.NewGridWrap(fyne.NewSize(200, 35), apply),
+					space)),
 
-			slider_max,
+			widget.NewCard("สถานะปัจจุบัน", "", now),
 
-			container.NewCenter(container.NewHBox(
-				container.NewGridWrap(fyne.NewSize(200, 35), apply))),
-
-			perCore,
 			widget.NewSeparator(),
 		),
 		nil,
