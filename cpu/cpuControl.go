@@ -15,6 +15,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/driver/desktop"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -36,8 +37,8 @@ func getCPUhardware(cpuIndex int) (fyne.CanvasObject, uint64, uint64) {
 	var val_cpuinfo_min_freq uint64
 	var val_cpuinfo_max_freq uint64
 
-	x1.WriteString("Default Kernel and Hardware")
-	x1.WriteString("\n|")
+	//x1.WriteString("Default Kernel and Hardware")
+	//x1.WriteString("\n|")
 
 	for _, item := range files {
 		data, err := os.ReadFile(base + item.file)
@@ -205,11 +206,11 @@ func checkboxNumcpu() (fyne.CanvasObject, []bool, []*widget.Check, func()) {
 	//fmt.Println("core เริ่ม", selectedGet)
 	selectedLabel := widget.NewLabel(selectedGet)
 
-	box := container.NewGridWithColumns(8) //8
+	box := container.NewGridWithColumns(10) //8
 	for i := 0; i < coreCount; i++ {
 		idx := i
 		coreName := strconv.Itoa(idx)
-		x := widget.NewCheck("core "+coreName, func(checked bool) {
+		x := widget.NewCheck("[ "+coreName+" ]", func(checked bool) {
 			selected[idx] = checked
 			if checked {
 				//fmt.Println("core", idx, "เปิด")
@@ -247,13 +248,13 @@ func getSelectedCoresText(selected []bool) (string, []int) {
 	}
 
 	if len(cores) == 0 {
-		return "คอร์ที่เลือก : ไม่มี", nil
+		return "ไม่มี", nil
 	}
 
 	var lines []string
 
-	for i := 0; i < len(cores); i += 40 { //40
-		end := i + 40 //40
+	for i := 0; i < len(cores); i += 48 { //48
+		end := i + 48 //48
 		if end > len(cores) {
 			end = len(cores)
 		}
@@ -263,7 +264,9 @@ func getSelectedCoresText(selected []bool) (string, []int) {
 		)
 	}
 	//return "คอร์ที่เลือก : " + strings.Join(lines, "\n"), coresIndices
-	return "คอร์ที่เลือก : " + lines[0] + "\n                     " + strings.Join(lines[1:], "\n                     "), coresIndices
+	//return "คอร์ที่เลือก : " + lines[0] + "\n                     " + strings.Join(lines[1:], "\n                     "), coresIndices
+	return "" + lines[0] + "\n" + strings.Join(lines[1:], "\n"), coresIndices
+
 } //21
 
 // ============================================================================
@@ -385,10 +388,10 @@ func x101(percent float64, freq_Slider *widget.Slider) {
 	freqNow := freq_percent(freq_Slider)
 	freqNow = freqNow * percent
 	freqNow = freqNow + freq_Slider.Min
+
 	//เช็ค น้อยกว่า ให้ทำงาน
 	if freqNow <= freq_Slider.Max {
 		freq_Slider.SetValue(freqNow)
-
 	}
 }
 
@@ -429,136 +432,6 @@ func newPercent(freq_Slider *widget.Slider, percent float64) {
 
 	}
 }
-
-// ปุ่มกด 10%---
-func percent10(freq_Slider *widget.Slider) {
-
-	freqNow := freq_percent(freq_Slider)
-	freqNow = freqNow * 10
-	freqNow = freqNow + freq_Slider.Min
-	//fmt.Println(freq_min)
-
-	if freqNow <= freq_Slider.Max {
-		freq_Slider.SetValue(freqNow)
-	}
-} // ---ปุ่มกด 10%
-
-// ปุ่มกด 20%---
-func percent20(freq_Slider *widget.Slider) {
-
-	freqNow := freq_percent(freq_Slider)
-	freqNow = freqNow * 20
-	freqNow = freqNow + freq_Slider.Min
-	//fmt.Println(freq_min)
-
-	if freqNow <= freq_Slider.Max {
-		freq_Slider.SetValue(freqNow)
-	}
-} // ---ปุ่มกด 20%
-
-// ปุ่มกด 30%---
-func percent30(freq_Slider *widget.Slider) {
-
-	freqNow := freq_percent(freq_Slider)
-	freqNow = freqNow * 30
-	freqNow = freqNow + freq_Slider.Min
-	//fmt.Println(freq_min)
-
-	if freqNow <= freq_Slider.Max {
-		freq_Slider.SetValue(freqNow)
-	}
-} // ---ปุ่มกด 30%
-
-// ปุ่มกด 40%---
-func percent40(freq_Slider *widget.Slider) {
-
-	freqNow := freq_percent(freq_Slider)
-	freqNow = freqNow * 40
-	freqNow = freqNow + freq_Slider.Min
-	//fmt.Println(freq_min)
-
-	if freqNow <= freq_Slider.Max {
-		freq_Slider.SetValue(freqNow)
-	}
-} // ---ปุ่มกด 40%
-
-// ปุ่มกด 50%---
-func percent50(freq_Slider *widget.Slider) {
-
-	freqNow := freq_percent(freq_Slider)
-	freqNow = freqNow * 50
-	freqNow = freqNow + freq_Slider.Min
-	//fmt.Println(freq_min)
-
-	if freqNow <= freq_Slider.Max {
-		freq_Slider.SetValue(freqNow)
-	}
-} // ---ปุ่มกด 50%
-
-// ปุ่มกด 60%---
-func percent60(freq_Slider *widget.Slider) {
-
-	freqNow := freq_percent(freq_Slider)
-	freqNow = freqNow * 60
-	freqNow = freqNow + freq_Slider.Min
-	//fmt.Println(freq_min)
-
-	if freqNow <= freq_Slider.Max {
-		freq_Slider.SetValue(freqNow)
-	}
-} // ---ปุ่มกด 60%
-
-// ปุ่มกด 70%---
-func percent70(freq_Slider *widget.Slider) {
-
-	freqNow := freq_percent(freq_Slider)
-	freqNow = freqNow * 70
-	freqNow = freqNow + freq_Slider.Min
-	//fmt.Println(freq_min)
-
-	if freqNow <= freq_Slider.Max {
-		freq_Slider.SetValue(freqNow)
-	}
-} // ---ปุ่มกด 70%
-
-// ปุ่มกด 80%---
-func percent80(freq_Slider *widget.Slider) {
-
-	freqNow := freq_percent(freq_Slider)
-	freqNow = freqNow * 80
-	freqNow = freqNow + freq_Slider.Min
-	//fmt.Println(freq_min)
-
-	if freqNow <= freq_Slider.Max {
-		freq_Slider.SetValue(freqNow)
-	}
-} // ---ปุ่มกด 80%
-
-// ปุ่มกด 90%---
-func percent90(freq_Slider *widget.Slider) {
-
-	freqNow := freq_percent(freq_Slider)
-	freqNow = freqNow * 90
-	freqNow = freqNow + freq_Slider.Min
-	//fmt.Println(freq_min)
-
-	if freqNow <= freq_Slider.Max {
-		freq_Slider.SetValue(freqNow)
-	}
-} // ---ปุ่มกด 90%
-
-// ปุ่มกด 100%---
-func percent100(freq_Slider *widget.Slider) {
-
-	freqNow := freq_percent(freq_Slider)
-	freqNow = freqNow * 100
-	freqNow = freqNow + freq_Slider.Min
-	//fmt.Println(freq_min)
-
-	if freqNow <= freq_Slider.Max {
-		freq_Slider.SetValue(freqNow)
-	}
-} // ---ปุ่มกด 100%
 
 // ************************************//
 
@@ -742,37 +615,6 @@ func CpuControl(w fyne.Window) fyne.CanvasObject {
 		newPercent(slider_min, 100)
 	})
 
-	bt_10 := NewRepeatButton("10%", func() {
-		percent10(slider_min)
-	})
-	bt_20 := NewRepeatButton("20%", func() {
-		percent20(slider_min)
-	})
-	bt_30 := NewRepeatButton("30%", func() {
-		percent30(slider_min)
-	})
-	bt_40 := NewRepeatButton("40%", func() {
-		percent40(slider_min)
-	})
-	bt_50 := NewRepeatButton("50%", func() {
-		percent50(slider_min)
-	})
-	bt_60 := NewRepeatButton("60%", func() {
-		percent60(slider_min)
-	})
-	bt_70 := NewRepeatButton("70%", func() {
-		percent70(slider_min)
-	})
-	bt_80 := NewRepeatButton("80%", func() {
-		percent80(slider_min)
-	})
-	bt_90 := NewRepeatButton("90%", func() {
-		percent90(slider_min)
-	})
-	bt_100 := NewRepeatButton("100%", func() {
-		percent100(slider_min)
-	})
-
 	//max
 	bt_max_n := NewRepeatButton("-", func() {
 		onButtonMaxN(slider_max)
@@ -823,43 +665,12 @@ func CpuControl(w fyne.Window) fyne.CanvasObject {
 		newPercent(slider_max, 100)
 	})
 
-	bt_10max := NewRepeatButton("10%", func() {
-		percent10(slider_max)
-	})
-	bt_20max := NewRepeatButton("20%", func() {
-		percent20(slider_max)
-	})
-	bt_30max := NewRepeatButton("30%", func() {
-		percent30(slider_max)
-	})
-	bt_40max := NewRepeatButton("40%", func() {
-		percent40(slider_max)
-	})
-	bt_50max := NewRepeatButton("50%", func() {
-		percent50(slider_max)
-	})
-	bt_60max := NewRepeatButton("60%", func() {
-		percent60(slider_max)
-	})
-	bt_70max := NewRepeatButton("70%", func() {
-		percent70(slider_max)
-	})
-	bt_80max := NewRepeatButton("80%", func() {
-		percent80(slider_max)
-	})
-	bt_90max := NewRepeatButton("90%", func() {
-		percent90(slider_max)
-	})
-	bt_100max := NewRepeatButton("100%", func() {
-		percent100(slider_max)
-	})
-
-	governorsAb := `conservative- เพิ่มความเร็วแบบค่อยเป็นค่อยไป
-ondemand    - เร่งเร็วเมื่อมีโหลด
+	governorsAb := `conservative - เพิ่มความเร็วแบบค่อยเป็นค่อยไป
+ondemand - เร่งเร็วเมื่อมีโหลด
 ี*userspace - รักษาความเร็วคงที่ (ตามที่กำหนด)
-powersave   - ประหยัดพลังงาน
+powersave - ประหยัดพลังงาน
 performance - ประสิทธิภาพสูงสุด
-schedutil   - ปรับอัตโนมัติตามโหลด
+schedutil - ปรับอัตโนมัติตามโหลด
 
 --------
 *userspace - ใน CPU Intel และ AMD รุ่นใหม่ อาจไม่ได้ผล 
@@ -869,25 +680,35 @@ schedutil   - ปรับอัตโนมัติตามโหลด
 		dialog.ShowInformation("โหมดการทำงาน", governorsAb, w)
 	})
 
+	selectedCoreCpu := container.NewVBox(chekCpu,
+		layout.NewSpacer(),
+		container.NewCenter(container.NewHBox(
+			container.NewGridWrap(fyne.NewSize(150, 35), allCheck),
+			container.NewGridWrap(fyne.NewSize(150, 35), nonCheck),
+			container.NewGridWrap(fyne.NewSize(35, 35), abbtn))))
+
 	x := container.NewBorder(
 		container.NewVBox(
-			info,
-			chekCpu,
+			widget.NewCard("Default Kernel and Hardware", "", info),
+			//info,
+			widget.NewCard("เลือกคอร์ CPU", "", selectedCoreCpu),
+			//chekCpu,
 
-			container.NewCenter(container.NewHBox(
-				container.NewGridWrap(fyne.NewSize(150, 35), allCheck),
-				container.NewGridWrap(fyne.NewSize(150, 35), nonCheck),
-				container.NewGridWrap(fyne.NewSize(35, 35), abbtn))),
+			/*
+				container.NewCenter(container.NewHBox(
+					container.NewGridWrap(fyne.NewSize(150, 35), allCheck),
+					container.NewGridWrap(fyne.NewSize(150, 35), nonCheck),
+					container.NewGridWrap(fyne.NewSize(35, 35), abbtn))),
+			*/
+			widget.NewCard("โหมดการทำงาน", "", governors),
 
-			governors,
+			//governors,
 
 			//widget.NewSeparator(),
 			container.NewHBox(label_min,
 				container.NewGridWrap(fyne.NewSize(100, 35), entry_min),
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_min_n),
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_min_p)),
-
-			container.NewGridWithColumns(10, bt_10, bt_20, bt_30, bt_40, bt_50, bt_60, bt_70, bt_80, bt_90, bt_100),
 			container.NewGridWithColumns(10, bt_101, bt_102, bt_103, bt_104, bt_105, bt_106, bt_107, bt_108, bt_109, bt_1010),
 			slider_min,
 
@@ -895,7 +716,6 @@ schedutil   - ปรับอัตโนมัติตามโหลด
 				container.NewGridWrap(fyne.NewSize(100, 35), entry_max),
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_max_n),
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_max_p)),
-			container.NewGridWithColumns(10, bt_10max, bt_20max, bt_30max, bt_40max, bt_50max, bt_60max, bt_70max, bt_80max, bt_90max, bt_100max),
 			container.NewGridWithColumns(10, bt_101M, bt_102M, bt_103M, bt_104M, bt_105M, bt_106M, bt_107M, bt_108M, bt_109M, bt_1010M),
 
 			slider_max,
