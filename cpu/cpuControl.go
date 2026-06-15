@@ -375,14 +375,59 @@ func onButtonMaxP(max_freq_Slider *widget.Slider) { //เพิ่มค่า m
 	}
 } //---ปุ่มกด เพื่ม ลด
 
+// หาส่วนต่าง + แปลงเป็น 1%
 func freq_percent(percent_freq_Slider *widget.Slider) float64 {
 	freq_percent := (percent_freq_Slider.Max - percent_freq_Slider.Min) / 100
 	return freq_percent
 }
 
+func x101(percent float64, freq_Slider *widget.Slider) {
+	freqNow := freq_percent(freq_Slider)
+	freqNow = freqNow * percent
+	freqNow = freqNow + freq_Slider.Min
+	//เช็ค น้อยกว่า ให้ทำงาน
+	if freqNow <= freq_Slider.Max {
+		freq_Slider.SetValue(freqNow)
+
+	}
+}
+
 // test new percent
 func newPercent(freq_Slider *widget.Slider, percent float64) {
-******************
+
+	switch percent {
+	case 10:
+		x101(percent, freq_Slider)
+		fmt.Println("10%")
+	case 20:
+		x101(percent, freq_Slider)
+		fmt.Println("20%")
+	case 30:
+		x101(percent, freq_Slider)
+		fmt.Println("30%")
+	case 40:
+		x101(percent, freq_Slider)
+		fmt.Println("40%")
+	case 50:
+		x101(percent, freq_Slider)
+		fmt.Println("50%")
+	case 60:
+		x101(percent, freq_Slider)
+		fmt.Println("60%")
+	case 70:
+		x101(percent, freq_Slider)
+		fmt.Println("70%")
+	case 80:
+		x101(percent, freq_Slider)
+		fmt.Println("80%")
+	case 90:
+		x101(percent, freq_Slider)
+		fmt.Println("90%")
+	case 100:
+		x101(percent, freq_Slider)
+		fmt.Println("100%")
+
+	}
 }
 
 // ปุ่มกด 10%---
@@ -652,14 +697,49 @@ func CpuControl(w fyne.Window) fyne.CanvasObject {
 	bt_min_n := NewRepeatButton("-", func() {
 		onButtonMinN(slider_min)
 	})
-
 	bt_min_p := NewRepeatButton("+", func() {
 		onButtonMinP(slider_min)
 	})
 
 	//test 10% new
 	bt_101 := NewRepeatButton("10%", func() {
-		percent10(slider_min)
+		newPercent(slider_min, 10)
+	})
+	//test 20% new
+	bt_102 := NewRepeatButton("20%", func() {
+		newPercent(slider_min, 20)
+	})
+	//test 30% new
+	bt_103 := NewRepeatButton("30%", func() {
+		newPercent(slider_min, 30)
+	})
+	//test 40% new
+	bt_104 := NewRepeatButton("40%", func() {
+		newPercent(slider_min, 40)
+	})
+	//test 50% new
+	bt_105 := NewRepeatButton("50%", func() {
+		newPercent(slider_min, 50)
+	})
+	//test 60% new
+	bt_106 := NewRepeatButton("60%", func() {
+		newPercent(slider_min, 60)
+	})
+	//test 70% new
+	bt_107 := NewRepeatButton("70%", func() {
+		newPercent(slider_min, 70)
+	})
+	//test 80% new
+	bt_108 := NewRepeatButton("80%", func() {
+		newPercent(slider_min, 80)
+	})
+	//test 90% new
+	bt_109 := NewRepeatButton("90%", func() {
+		newPercent(slider_min, 90)
+	})
+	//test 100% new
+	bt_1010 := NewRepeatButton("100%", func() {
+		newPercent(slider_min, 100)
 	})
 
 	bt_10 := NewRepeatButton("10%", func() {
@@ -700,6 +780,47 @@ func CpuControl(w fyne.Window) fyne.CanvasObject {
 
 	bt_max_p := NewRepeatButton("+", func() {
 		onButtonMaxP(slider_max)
+	})
+
+	//test 10% new
+	bt_101M := NewRepeatButton("10%", func() {
+		newPercent(slider_max, 10)
+	})
+	//test 20% new
+	bt_102M := NewRepeatButton("20%", func() {
+		newPercent(slider_max, 20)
+	})
+	//test 30% new
+	bt_103M := NewRepeatButton("30%", func() {
+		newPercent(slider_max, 30)
+	})
+	//test 40% new
+	bt_104M := NewRepeatButton("40%", func() {
+		newPercent(slider_max, 40)
+	})
+	//test 50% new
+	bt_105M := NewRepeatButton("50%", func() {
+		newPercent(slider_max, 50)
+	})
+	//test 60% new
+	bt_106M := NewRepeatButton("60%", func() {
+		newPercent(slider_max, 60)
+	})
+	//test 70% new
+	bt_107M := NewRepeatButton("70%", func() {
+		newPercent(slider_max, 70)
+	})
+	//test 80% new
+	bt_108M := NewRepeatButton("80%", func() {
+		newPercent(slider_max, 80)
+	})
+	//test 90% new
+	bt_109M := NewRepeatButton("90%", func() {
+		newPercent(slider_max, 90)
+	})
+	//test 100% new
+	bt_1010M := NewRepeatButton("100%", func() {
+		newPercent(slider_max, 100)
 	})
 
 	bt_10max := NewRepeatButton("10%", func() {
@@ -765,8 +886,9 @@ schedutil   - ปรับอัตโนมัติตามโหลด
 				container.NewGridWrap(fyne.NewSize(100, 35), entry_min),
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_min_n),
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_min_p)),
-			bt_101,
+
 			container.NewGridWithColumns(10, bt_10, bt_20, bt_30, bt_40, bt_50, bt_60, bt_70, bt_80, bt_90, bt_100),
+			container.NewGridWithColumns(10, bt_101, bt_102, bt_103, bt_104, bt_105, bt_106, bt_107, bt_108, bt_109, bt_1010),
 			slider_min,
 
 			container.NewHBox(label_max,
@@ -774,6 +896,8 @@ schedutil   - ปรับอัตโนมัติตามโหลด
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_max_n),
 				container.NewGridWrap(fyne.NewSize(35, 35), bt_max_p)),
 			container.NewGridWithColumns(10, bt_10max, bt_20max, bt_30max, bt_40max, bt_50max, bt_60max, bt_70max, bt_80max, bt_90max, bt_100max),
+			container.NewGridWithColumns(10, bt_101M, bt_102M, bt_103M, bt_104M, bt_105M, bt_106M, bt_107M, bt_108M, bt_109M, bt_1010M),
+
 			slider_max,
 
 			container.NewCenter(container.NewHBox(
