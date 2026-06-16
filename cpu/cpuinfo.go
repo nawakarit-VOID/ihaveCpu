@@ -492,19 +492,21 @@ func CpuTabs(w fyne.Window) fyne.CanvasObject {
 	//layout
 	Grid := container.NewBorder(nil, nil, nil, nil, grid)
 
-	cpuUsagePage := container.NewVBox(container.NewBorder(
-		Grid,
-		nil,
-		nil,
-		nil,
-		container.NewCenter(
-			container.NewVBox(
-				usagepercentTotalLabel,
-				widget.NewSeparator(),
-				usagePerCoreSTRINGLabel,
-				widget.NewSeparator(),
-			)),
-	))
+	cpuUsagePage := container.NewVBox(
+		container.NewBorder(
+			widget.NewCard("กราฟ", "", Grid),
+			//Grid,
+			nil,
+			nil,
+			nil,
+			container.NewCenter(
+				container.NewVBox(
+					usagepercentTotalLabel,
+					widget.NewSeparator(),
+					usagePerCoreSTRINGLabel,
+					widget.NewSeparator(),
+				)),
+		))
 
 	//cpuTimesusagePage
 	cpuTimesusagePage := container.NewVBox(

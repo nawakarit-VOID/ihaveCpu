@@ -746,26 +746,21 @@ schedutil - ปรับอัตโนมัติตามโหลด
 
 	x := container.NewBorder(
 		container.NewVBox(
-			widget.NewCard("Default Kernel and Hardware", "", Info),
-			//info,
+			widget.NewCard("Default Kernel and Hardware", "", Info), //info,
 			//widget.NewSeparator(),
-			widget.NewCard("เลือกคอร์ CPU", "", selectedCoreCpu),
-			//chekCpu,
-			widget.NewCard("โหมดการทำงาน", "", work),
-			//governors,
+			widget.NewCard("เลือกคอร์ CPU", "", selectedCoreCpu), //chekCpu,
+			widget.NewCard("โหมดการทำงาน", "", work),             //governors,
 			widget.NewCard("ความถี่ต่ำสุด", "", configMin),
-
 			widget.NewCard("ความถี่สูงสุด", "", configMax),
 
 			container.NewCenter(
 				container.NewVBox(
 					space,
 					container.NewGridWrap(fyne.NewSize(200, 35), apply),
-					space)),
-
+					space),
+			),
 			widget.NewCard("สถานะปัจจุบัน", "", now),
-
-			widget.NewSeparator(),
+			//widget.NewSeparator(),
 		),
 		nil,
 		nil,
