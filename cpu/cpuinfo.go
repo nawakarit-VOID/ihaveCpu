@@ -541,8 +541,7 @@ func CpuTabs(w fyne.Window) fyne.CanvasObject {
 		//widget.NewSeparator(),
 		//widget.NewLabel("[ ความหมาย ]\n[ User : CPU กำลังรันโปรแกรมทั่วไปของผู้ใช้ (โหมด user space) ]\n[ System : CPU กำลังทำงานในโหมดเคอร์เนล (เช่น ระบบเรียกไฟล์, จัดการหน่วยความจำ) ]\n[ Idle : CPU ไม่ได้ทำอะไร ไม่มีงานรอทำ ]\n[ Nice : เหมือน user mode แต่เป็นกระบวนการที่ถูกลด priority (nice value > 0) ]\n[ Iowait : ว่าง แต่มีกระบวนการรอ I/O (disk/SSD) อยู่ ถ้าค่าสูงแสดงว่า ssd ช้า ]\n[ Irq : กำลังทำงานตาม hardware interrupt (เช่น เมาส์, การ์ดเน็ตเวิร์ก) ]\n[ Softirq : งานต่อเนื่องจาก interrupt (มักเป็นงานเครือข่ายหรือ task scheduling) ]\n[ Steal : บน VM: CPU ถูก hypervisor แย่งไปให้ VM อื่น ]\n[ Guest : กำลังรัน VM อื่น (CPU ทำงานในโหมด guest OS) ]\n[ GuestNice : VM ใช้แบบ nice priority *ทำงาน แต่โดนลด priority บน host ]\n      **VM = Virtual Machine"),
 		widget.NewCard("ความหมาย", "", abt),
-
-		widget.NewSeparator(),
+		//widget.NewSeparator(),
 	)
 
 	cpuControlPage := CpuControl(w)

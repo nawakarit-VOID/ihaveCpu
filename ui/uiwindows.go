@@ -7,6 +7,7 @@ import (
 	"embed"
 	cpuinfo "ihavecpu/cpu"
 	mainboardinfo "ihavecpu/mainboard"
+	raminfo "ihavecpu/ram"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -49,11 +50,12 @@ func CreateWindow() {
 
 	cpuTabs := cpuinfo.CpuTabs(w)
 	mainboardTabs := mainboardinfo.MainboardTabs()
+	ram := raminfo.RamTabs()
 
 	tabs := container.NewAppTabs(
 		container.NewTabItem("CPU", container.NewScroll(cpuTabs)),
 		container.NewTabItem("MainBoard", container.NewScroll(mainboardTabs)),
-		//container.NewTabItem("Features", nil),
+		container.NewTabItem("Ram", ram),
 		//container.NewTabItem("Security", container.NewScroll(nil)),
 		//container.NewTabItem("Virtualization", container.NewScroll(nil)),
 	)

@@ -191,5 +191,3 @@ func MainboardTabs() fyne.CanvasObject {
 		container.NewTabItem("Chassis", container.NewScroll(Chassis)),
 	)
 }
-
-/**/
