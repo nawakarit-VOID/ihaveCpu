@@ -27,8 +27,13 @@ func RamTabs() fyne.CanvasObject {
 	memory := Memory()
 
 	memName := fmt.Sprintf("%s", &memory.Area)
-	memSize := fmt.Sprintf("%d", &memory.DefaultHugePageSize) //เปลี่ยนแปลงตลอด
-	memModule := fmt.Sprintf("%T", &memory.Modules)
+	memDefaulSize := fmt.Sprintf("%d", &memory.DefaultHugePageSize) //เปลี่ยนแปลงตลอด
+	memModule := fmt.Sprintf("%T", &memory.Modules)                 //[]
+	memHugeSize := fmt.Sprintf("%T", &memory.HugePageAmountsBySize) //map uint64
+	memSupportSize := fmt.Sprintf("%T", &memory.SupportedPageSizes) //[] uint64
+	memTotalHugeBytes := fmt.Sprintf("%d", &memory.TotalHugePageBytes)
+	memTotalPhysicalBytes := fmt.Sprintf("%d", &memory.TotalPhysicalBytes)
+	memTotalUsableBytes := fmt.Sprintf("%d", &memory.TotalUsableBytes)
 
 	//	var xx string
 	for _, area := range memory.Modules {
@@ -41,8 +46,13 @@ func RamTabs() fyne.CanvasObject {
 	subRam := container.NewVBox(
 		//System
 		widget.NewLabel(memName),
-		widget.NewLabel(memSize),
+		widget.NewLabel(memDefaulSize),
 		widget.NewLabel(memModule),
+		widget.NewLabel(memHugeSize),
+		widget.NewLabel(memSupportSize),
+		widget.NewLabel(memTotalHugeBytes),
+		widget.NewLabel(memTotalPhysicalBytes),
+		widget.NewLabel(memTotalUsableBytes),
 	)
 	ram := container.NewVBox(
 		//System
