@@ -109,12 +109,12 @@ func CPUdata() map[string]interface{} {
 	// ============================================================================
 	// Detail
 	// ============================================================================
-	hyperthreading := fmt.Sprintf("Hyperthreading: [ %v ]", logical > physical)
+	hyperthreading := fmt.Sprintf("Hyperthreading: [ %v ]\n", logical > physical)
 
 	var cpuThreadCoreSocketresult string //จำนวน thread
-	cpuThreadCoreSocketresult += ("[  Thread  ] : [ Core ] : [ Socket ]\n")
+	//cpuThreadCoreSocketresult += ("[  Thread  ] : [ Core ] : [ Socket ]\n")
 	for i, cpu := range info {
-		cpuThreadCoreSocketresult += fmt.Sprintf("\nThread [%d] : Core [%s] : Socket [%s]",
+		cpuThreadCoreSocketresult += fmt.Sprintf("Thread [%d] : Core [%s] : Socket [%s]\n",
 			i, cpu.CoreID, cpu.PhysicalID) //PhysicalID*socket จำนวน cpu ในบอรฺ์ด
 	}
 
@@ -127,11 +127,11 @@ func CPUdata() map[string]interface{} {
 	c3, xc3 := processValue(cpuInfo.Cache.L3)
 
 	var cache string //cpuid
-	cache += "[ Cache ]\n"
-	cache += fmt.Sprintf("\nL1d : %d %s", c1d, xc1d)
-	cache += fmt.Sprintf("\nL1i : %d %s", c1i, xc1i)
-	cache += fmt.Sprintf("\nL2 : %d %s", c2, xc2)
-	cache += fmt.Sprintf("\nL3 : %d %s", c3, xc3)
+	//cache += "[ Cache ]\n"
+	cache += fmt.Sprintf("L1d : %d %s\n", c1d, xc1d)
+	cache += fmt.Sprintf("L1i : %d %s\n", c1i, xc1i)
+	cache += fmt.Sprintf("L2 : %d %s\n", c2, xc2)
+	cache += fmt.Sprintf("L3 : %d %s\n", c3, xc3)
 
 	//"BrandName":          cpuInfo.BrandName, //ชื่อ cpu
 	//"l1d_cache": cpuInfo.Cache.L1D,
@@ -212,18 +212,18 @@ func (m *CPUMonitor) Start() {
 			percentPerCore := CpuPercentPercore()
 			//จัดเรียง usage
 
-			usagepercentTotal := fmt.Sprintf("[ Usage Avg ]\n%.2f %%", percentTotal[0]) //percentTotal[0]			// แสดง usage ต่อ core
+			usagepercentTotal := fmt.Sprintf("%.2f %%\n", percentTotal[0]) //percentTotal[0]			// แสดง usage ต่อ core
 			var usagepercentPerCore string
-			usagepercentPerCore += "[ Usage PerCore ]\n"
+			//usagepercentPerCore += "[ Usage PerCore ]\n"
 			for i, pc := range percentPerCore {
-				usagepercentPerCore += fmt.Sprintf("\nCore [ %d ] : %.2f %%", i, pc)
+				usagepercentPerCore += fmt.Sprintf("Core [ %d ] : %.2f %%\n", i, pc)
 			}
 
 			var timesTotalAvg string
 			var timesSec string
-			timesSec += "[ ข้อมูลดิบ ]"
+			//timesSec += "[ ข้อมูลดิบ ]"
 			var timesHms string
-			timesHms += "[ แปลงเป็นเวลาสากล ]"
+			//timesHms += "[ แปลงเป็นเวลาสากล ]"
 			var totalUser float64
 			var totalSystem float64
 			var totalIdle float64
@@ -253,7 +253,7 @@ func (m *CPUMonitor) Start() {
 				nCPU := d.CPU
 				//วินาที *ดิบ
 				timesSec += fmt.Sprintf(
-					"\n[ %s ] | User: %.2f s | System: %.2f s | Idle: %.2f s | Nice: %.2f s | Iowait: %.2f s | Irq %.2f s | Softirq %.2f s | Steal %.2f s | Guest %.2f s | GuestNice %.2f s",
+					"[ %s ] | User: %.2f s | System: %.2f s | Idle: %.2f s | Nice: %.2f s | Iowait: %.2f s | Irq %.2f s | Softirq %.2f s | Steal %.2f s | Guest %.2f s | GuestNice %.2f s\n",
 					nCPU, d.User, d.System, d.Idle, d.Nice, d.Iowait, d.Irq, d.Softirq, d.Steal, d.Guest, d.GuestNice)
 
 				//แปลงเป็นเวลาสากล
@@ -270,7 +270,7 @@ func (m *CPUMonitor) Start() {
 
 				//จัดเรียงเวลาสากล
 				timesHms += fmt.Sprintf(
-					"\n[ %s ] | User [ %d : %d : %d ] | System [ %d : %d : %d ] | Idle [ %d : %d : %d ] | Nice [ %d : %d : %d ] | Iowait [ %d : %d : %d ] | Irq [ %d : %d : %d ] | Softirq [ %d : %d : %d ] | Steal [ %d : %d : %d ] | Guest [ %d : %d : %d ] | GuestNice [ %d : %d : %d ]",
+					"[ %s ] | User [ %d : %d : %d ] | System [ %d : %d : %d ] | Idle [ %d : %d : %d ] | Nice [ %d : %d : %d ] | Iowait [ %d : %d : %d ] | Irq [ %d : %d : %d ] | Softirq [ %d : %d : %d ] | Steal [ %d : %d : %d ] | Guest [ %d : %d : %d ] | GuestNice [ %d : %d : %d ]\n",
 					nCPU, thUser, tmUser, tsUser, thSystem, tmSystem, tsSystem, thIdle, tmIdle, tsIdle, thNice, tmNice, tsNice, thIowait, tmIowait, tsIowait, thIrq, tmIrq, tsIrq, thSoftirq, tmSoftirq, tsSoftirq, thSteal, tmSteal, tsSteal, thGuest, tmGuest, tsGuest, thGuestNice, tmGuestNice, tsGuestNice)
 
 				//AVG//เวลาโดยเฉลี่ย
@@ -287,7 +287,7 @@ func (m *CPUMonitor) Start() {
 				hGuestNice, mGuestNice, sGuestNice := Avg(totalGuestNice)
 				//จัดเรียงเวลาโดยเฉลี่ย
 				timesTotalAvg = fmt.Sprintf(
-					"[ เฉลี่ย ]\n[ AVG ] | User [ %d : %d : %d ] | System [ %d : %d : %d ] | Idle [ %d : %d : %d ] | Nice [ %d : %d : %d ] | Iowait [ %d : %d : %d ] | Irq [ %d : %d : %d ] | Softirq [ %d : %d : %d ] | Steal [ %d : %d : %d ] | Guest [ %d : %d : %d ] | GuestNice [ %d : %d : %d ]",
+					"| User [ %d : %d : %d ] | System [ %d : %d : %d ] | Idle [ %d : %d : %d ] | Nice [ %d : %d : %d ] | Iowait [ %d : %d : %d ] | Irq [ %d : %d : %d ] | Softirq [ %d : %d : %d ] | Steal [ %d : %d : %d ] | Guest [ %d : %d : %d ] | GuestNice [ %d : %d : %d ]\n",
 					hUser, mUser, sUser, hSystem, mSystem, sSysteme, hIdle, mIdle, sIdle, hNice, mNice, sNice, hIowait, mIowait, sIowait, hIrq, mIrq, sIrq, hSoftirq, mSoftirq, sSoftirq, hSteal, mSteal, sSteal, hGuest, mGuest, sGuest, hGuestNice, mGuestNice, sGuestNice)
 			}
 
@@ -435,35 +435,44 @@ func CpuTabs(w fyne.Window) fyne.CanvasObject {
 
 	dataCPUInfo := CPUdata()
 
-	cpuOverviewPage := container.NewVBox(
+	CPU := container.NewVBox(
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["ModelName"])),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["FreqMax"])),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Core"])),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Thread"])),
-		widget.NewSeparator(),
+	)
+	Vendor := container.NewVBox(
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["VendorID"])),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Family"])),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Modelid"])),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Stepping"])),
-		widget.NewSeparator(),
+	)
+
+	Cache := container.NewVBox(
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Cachet"])),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Microcode"])),
-		widget.NewSeparator(),
+	)
+
+	cpuOverviewPage := container.NewVBox(
+		widget.NewCard("CPU", "", CPU),
+		widget.NewCard("Vendor", "", Vendor),
+		widget.NewCard("Cache", "", Cache),
+		//widget.NewSeparator(),
 	)
 
 	cpuDetailPage := container.NewVBox(
-		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Hyperthreading"])),
-		widget.NewSeparator(),
-		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["CpuThreadCoreSocketresult"])),
-		widget.NewSeparator(),
-		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Cache"])), //cpuid
-		widget.NewSeparator(),
+		widget.NewCard("Hyper Threading", "", widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Hyperthreading"]))),
+		//widget.NewSeparator(),
+		widget.NewCard("Thread", "#ยังมีข้อผิดพลาด", widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["CpuThreadCoreSocketresult"]))),
+		//widget.NewSeparator(),
+		widget.NewCard("Cache", "", widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Cache"]))), //cpuid
+		//widget.NewSeparator(),
 	)
 
 	cpuFlagsFeaturePage := container.NewVBox(
-		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["FlagsFeature"])),
-		widget.NewSeparator(),
+		widget.NewCard("Flags Feature", "", widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["FlagsFeature"]))),
 	)
+
 	//cpuUsagePage//
 	usagepercentTotalLabel := widget.NewLabel("usagepercentTotalLabel...")
 	usagepercentTotalLabel.Alignment = fyne.TextAlignCenter
@@ -499,24 +508,40 @@ func CpuTabs(w fyne.Window) fyne.CanvasObject {
 			nil,
 			nil,
 			nil,
-			container.NewCenter(
-				container.NewVBox(
-					usagepercentTotalLabel,
-					widget.NewSeparator(),
-					usagePerCoreSTRINGLabel,
-					widget.NewSeparator(),
-				)),
-		))
+		),
+		container.NewVBox(
+			widget.NewCard("AVG", "", usagepercentTotalLabel),
+			//usagepercentTotalLabel,
+			widget.NewCard("PerCore", "", usagePerCoreSTRINGLabel),
+			//usagePerCoreSTRINGLabel,
+		),
+	)
+
+	abt := widget.NewLabel(
+		`[ User : CPU กำลังรันโปรแกรมทั่วไปของผู้ใช้ (โหมด user space) ]
+[ System : CPU กำลังทำงานในโหมดเคอร์เนล (เช่น ระบบเรียกไฟล์, จัดการหน่วยความจำ) ]
+[ Idle : CPU ไม่ได้ทำอะไร ไม่มีงานรอทำ ]
+[ Nice : เหมือน user mode แต่เป็นกระบวนการที่ถูกลด priority (nice value > 0) ]
+[ Iowait : ว่าง แต่มีกระบวนการรอ I/O (disk/SSD) อยู่ ถ้าค่าสูงแสดงว่า ssd ช้า ]
+[ Irq : กำลังทำงานตาม hardware interrupt (เช่น เมาส์, การ์ดเน็ตเวิร์ก) ]
+[ Softirq : งานต่อเนื่องจาก interrupt (มักเป็นงานเครือข่ายหรือ task scheduling) ]
+[ Steal : บน VM: CPU ถูก hypervisor แย่งไปให้ VM อื่น ]
+[ Guest : กำลังรัน VM อื่น (CPU ทำงานในโหมด guest OS) ]
+[ GuestNice : VM ใช้แบบ nice priority *ทำงาน แต่โดนลด priority บน host ]
+ 		**VM = Virtual Machine
+`)
 
 	//cpuTimesusagePage
 	cpuTimesusagePage := container.NewVBox(
-		timesTotalAvg,
-		widget.NewSeparator(),
-		timesSec,
-		widget.NewSeparator(),
-		timesHms,
-		widget.NewSeparator(),
-		widget.NewLabel("[ ความหมาย ]\n[ User : CPU กำลังรันโปรแกรมทั่วไปของผู้ใช้ (โหมด user space) ]\n[ System : CPU กำลังทำงานในโหมดเคอร์เนล (เช่น ระบบเรียกไฟล์, จัดการหน่วยความจำ) ]\n[ Idle : CPU ไม่ได้ทำอะไร ไม่มีงานรอทำ ]\n[ Nice : เหมือน user mode แต่เป็นกระบวนการที่ถูกลด priority (nice value > 0) ]\n[ Iowait : ว่าง แต่มีกระบวนการรอ I/O (disk/SSD) อยู่ ถ้าค่าสูงแสดงว่า ssd ช้า ]\n[ Irq : กำลังทำงานตาม hardware interrupt (เช่น เมาส์, การ์ดเน็ตเวิร์ก) ]\n[ Softirq : งานต่อเนื่องจาก interrupt (มักเป็นงานเครือข่ายหรือ task scheduling) ]\n[ Steal : บน VM: CPU ถูก hypervisor แย่งไปให้ VM อื่น ]\n[ Guest : กำลังรัน VM อื่น (CPU ทำงานในโหมด guest OS) ]\n[ GuestNice : VM ใช้แบบ nice priority *ทำงาน แต่โดนลด priority บน host ]\n      **VM = Virtual Machine"),
+		widget.NewCard("เฉลี่ย", "", timesTotalAvg),
+		//widget.NewSeparator(),
+		widget.NewCard("ข้อมูลดิบ", "", timesSec),
+		//widget.NewSeparator(),
+		widget.NewCard("แปลงเป็นเวลาสากล", "", timesHms),
+		//widget.NewSeparator(),
+		//widget.NewLabel("[ ความหมาย ]\n[ User : CPU กำลังรันโปรแกรมทั่วไปของผู้ใช้ (โหมด user space) ]\n[ System : CPU กำลังทำงานในโหมดเคอร์เนล (เช่น ระบบเรียกไฟล์, จัดการหน่วยความจำ) ]\n[ Idle : CPU ไม่ได้ทำอะไร ไม่มีงานรอทำ ]\n[ Nice : เหมือน user mode แต่เป็นกระบวนการที่ถูกลด priority (nice value > 0) ]\n[ Iowait : ว่าง แต่มีกระบวนการรอ I/O (disk/SSD) อยู่ ถ้าค่าสูงแสดงว่า ssd ช้า ]\n[ Irq : กำลังทำงานตาม hardware interrupt (เช่น เมาส์, การ์ดเน็ตเวิร์ก) ]\n[ Softirq : งานต่อเนื่องจาก interrupt (มักเป็นงานเครือข่ายหรือ task scheduling) ]\n[ Steal : บน VM: CPU ถูก hypervisor แย่งไปให้ VM อื่น ]\n[ Guest : กำลังรัน VM อื่น (CPU ทำงานในโหมด guest OS) ]\n[ GuestNice : VM ใช้แบบ nice priority *ทำงาน แต่โดนลด priority บน host ]\n      **VM = Virtual Machine"),
+		widget.NewCard("ความหมาย", "", abt),
+
 		widget.NewSeparator(),
 	)
 
