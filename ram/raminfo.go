@@ -4,6 +4,7 @@
 package Ppackage_raminfo
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"fyne.io/fyne/v2"
@@ -42,6 +43,28 @@ func RamTabs() fyne.CanvasObject {
 	info += fmt.Sprintf("TotalPhysicalBytes: %d\n", memInfo.TotalPhysicalBytes)
 	info += fmt.Sprintf("TotalUsableBytes: %d\n", memInfo.TotalUsableBytes)
 	info += fmt.Sprintf("DefaultHugePageSize: %d\n", memInfo.DefaultHugePageSize)
+
+	for i, m := range memInfo.Modules {
+		info += fmt.Sprintf("\nModule %d\n", i+1)
+		info += fmt.Sprintf("  Vendor : %s\n", m.Vendor)
+		//info += fmt.Sprintf("  Product: %s\n", m.Product)
+		info += fmt.Sprintf("  Size   : %d\n", m.SizeBytes)
+		info += fmt.Sprintf("  Serial : %s\n", m.SerialNumber)
+		info += fmt.Sprintf("  Serial : %s\n", m.Label)
+		info += fmt.Sprintf("  Serial : %s\n", m.Location)
+
+	}
+
+	for size, amount := range memInfo.HugePageAmountsBySize {
+		info += fmt.Sprintf("HugePage %d : %d\n", size, amount)
+	}
+
+	for _, m := range memInfo.Modules {
+		fmt.Printf("%+v\n", m)
+	}
+
+	b, _ := json.MarshalIndent(memInfo.Modules, "", "  ")
+	fmt.Println(string(b))
 
 	memName := fmt.Sprintf("1 memName : %s", &memInfo.Area)
 	//c := memInfo.Area
