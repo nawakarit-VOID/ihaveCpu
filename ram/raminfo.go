@@ -4,42 +4,50 @@
 package Ppackage_raminfo
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 	"github.com/jaypipes/ghw"
-	"github.com/jaypipes/ghw/pkg/memory"
 )
 
-func Memory() *memory.Info {
+func Memory() *ghw.MemoryInfo {
 	//ข้อมูล RAM
-	memory, err := ghw.Memory()
+	memInfo, err := ghw.Memory()
 	if err != nil {
 		return nil
 	}
-	return memory
+
+	return memInfo
 }
 
 func RamTabs() fyne.CanvasObject {
 
-	memory := Memory()
+	memInfo := Memory()
 
-	memName := fmt.Sprintf("%s", &memory.Area)
-	memDefaulSize := fmt.Sprintf("%d", &memory.DefaultHugePageSize) //เปลี่ยนแปลงตลอด
-	memModule := fmt.Sprintf("%T", &memory.Modules)                 //[]
-	memHugeSize := fmt.Sprintf("%T", &memory.HugePageAmountsBySize) //map uint64
-	memSupportSize := fmt.Sprintf("%T", &memory.SupportedPageSizes) //[] uint64
-	memTotalHugeBytes := fmt.Sprintf("%d", &memory.TotalHugePageBytes)
-	memTotalPhysicalBytes := fmt.Sprintf("%d", &memory.TotalPhysicalBytes)
-	memTotalUsableBytes := fmt.Sprintf("%d", &memory.TotalUsableBytes)
+	memName := fmt.Sprintf("%s", &memInfo.Area)
+	memDefaulSize := fmt.Sprintf("%d", &memInfo.DefaultHugePageSize) //เปลี่ยนแปลงตลอด
+	memModule := fmt.Sprintf("%T", &memInfo.Modules)                 //[]
+	memHugeSize := fmt.Sprintf("%T", &memInfo.HugePageAmountsBySize) //map uint64
+	memSupportSize := fmt.Sprintf("%T", &memInfo.SupportedPageSizes) //[] uint64
+	memTotalHugeBytes := fmt.Sprintf("%d", &memInfo.TotalHugePageBytes)
+	memTotalPhysicalBytes := fmt.Sprintf("%d", &memInfo.TotalPhysicalBytes)
+	memTotalUsableBytes := fmt.Sprintf("%d", &memInfo.TotalUsableBytes)
 
 	//	var xx string
-	for _, area := range memory.Modules {
+	for _, area := range memInfo.Modules {
 		fmt.Printf("%+v\n", area)
 	}
 
+	b, _ := json.MarshalIndent(memInfo, "", "  ")
+	fmt.Println(string(b))
+
+	for _, m := range memInfo.Modules {
+		b, _ := json.MarshalIndent(m, "", "  ")
+		fmt.Println(string(b))
+	}
 	//fmt.Println(memory.Area)
 	//fmt.Println(memory.DefaultHugePageSize)
 
