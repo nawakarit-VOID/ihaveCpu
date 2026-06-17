@@ -4,7 +4,6 @@
 package Ppackage_raminfo
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"fyne.io/fyne/v2"
@@ -23,44 +22,82 @@ func Memory() *ghw.MemoryInfo {
 	return memInfo
 }
 
-func RamTabs() fyne.CanvasObject {
+/*
+func g() *ghw.GPUInfo {
+	gpuInfo, err := ghw.GPU()
+	if err != nil {
+		return nil
+	}
+	return gpuInfo
 
+}
+*/
+
+// dmidecode
+func RamTabs() fyne.CanvasObject {
+	var info string
 	memInfo := Memory()
 
-	memName := fmt.Sprintf("%s", &memInfo.Area)
-	memDefaulSize := fmt.Sprintf("%d", &memInfo.DefaultHugePageSize) //เปลี่ยนแปลงตลอด
-	memModule := fmt.Sprintf("%T", &memInfo.Modules)                 //[]
-	memHugeSize := fmt.Sprintf("%T", &memInfo.HugePageAmountsBySize) //map uint64
-	memSupportSize := fmt.Sprintf("%T", &memInfo.SupportedPageSizes) //[] uint64
-	memTotalHugeBytes := fmt.Sprintf("%d", &memInfo.TotalHugePageBytes)
-	memTotalPhysicalBytes := fmt.Sprintf("%d", &memInfo.TotalPhysicalBytes)
-	memTotalUsableBytes := fmt.Sprintf("%d", &memInfo.TotalUsableBytes)
+	info += fmt.Sprintf("Area: %v\n", memInfo.Area)
+	info += fmt.Sprintf("TotalPhysicalBytes: %d\n", memInfo.TotalPhysicalBytes)
+	info += fmt.Sprintf("TotalUsableBytes: %d\n", memInfo.TotalUsableBytes)
+	info += fmt.Sprintf("DefaultHugePageSize: %d\n", memInfo.DefaultHugePageSize)
 
+	memName := fmt.Sprintf("1 memName : %s", &memInfo.Area)
+	//c := memInfo.Area
+	memDefaulSize := fmt.Sprintf("2 memDefaulSize : %d", memInfo.DefaultHugePageSize) //เปลี่ยนแปลงตลอด
+
+	//memModule := fmt.Println(len(memInfo.Modules))                //[]
+	/*
+		var memModule string
+		for _, area := range memInfo.Modules {
+			m := fmt.Printf("%+v\n", area)
+			memModule += m
+		}
+	*/
+	memHugeSize := fmt.Sprintf("4 memHugeSize : %v\n", memInfo.HugePageAmountsBySize) //map uint64
+
+	memSupportSize := fmt.Sprintf("5 memSupportSize : %T", &memInfo.SupportedPageSizes) //[] uint64
+	memTotalHugeBytes := fmt.Sprintf("6 memTotalHugeBytes : %d", memInfo.TotalHugePageBytes)
+	memTotalPhysicalBytes := fmt.Sprintf("7 memTotalPhysicalBytes : %d", memInfo.TotalPhysicalBytes)
+	memTotalUsableBytes := fmt.Sprintf("8 memTotalUsableBytes : %d", memInfo.TotalUsableBytes)
+
+	//fmt.Println(c)
+	//memDefaulSize1 := c / 1024 //byte
+	//println("kbyte", memDefaulSize1)
 	//	var xx string
-	for _, area := range memInfo.Modules {
-		fmt.Printf("%+v\n", area)
-	}
-
-	b, _ := json.MarshalIndent(memInfo, "", "  ")
-	fmt.Println(string(b))
-
-	for _, m := range memInfo.Modules {
-		b, _ := json.MarshalIndent(m, "", "  ")
+	/*
+		for _, area := range memInfo.Modules {
+			fmt.Printf("%+v\n", area)
+		}
+	*/
+	/*
+		for _, m := range memInfo.Modules {
+			b, _ := json.MarshalIndent(m, "", "  ")
+			fmt.Println(string(b))
+		}
+	*/
+	/*
+		b, _ := json.MarshalIndent(memInfo, "", "  ")
 		fmt.Println(string(b))
-	}
+	*/
 	//fmt.Println(memory.Area)
 	//fmt.Println(memory.DefaultHugePageSize)
+	var x string
+	x += fmt.Sprintf("%#v\n", memInfo)
 
 	subRam := container.NewVBox(
 		//System
 		widget.NewLabel(memName),
 		widget.NewLabel(memDefaulSize),
-		widget.NewLabel(memModule),
+		//widget.NewLabel(fmt.Sprintln("%s", memModule)),
 		widget.NewLabel(memHugeSize),
 		widget.NewLabel(memSupportSize),
 		widget.NewLabel(memTotalHugeBytes),
 		widget.NewLabel(memTotalPhysicalBytes),
 		widget.NewLabel(memTotalUsableBytes),
+		widget.NewLabel(x),
+		widget.NewLabel(info),
 	)
 	ram := container.NewVBox(
 		//System
