@@ -40,8 +40,27 @@ func RamTabs() fyne.CanvasObject {
 	memInfo := Memory()
 
 	info += fmt.Sprintf("Area: %v\n", memInfo.Area)
-	info += fmt.Sprintf("TotalPhysicalBytes: %d\n", memInfo.TotalPhysicalBytes)
-	info += fmt.Sprintf("TotalUsableBytes: %d\n", memInfo.TotalUsableBytes)
+
+	x1 := float64(memInfo.TotalPhysicalBytes)
+	x2 := float64(x1) / 1024
+	x3 := float64(x2) / 1024
+	x4 := float64(x3) / 1024
+	//info += fmt.Sprintf("TotalPhysicalBytes: %d\n", memInfo.TotalPhysicalBytes)
+	info += fmt.Sprintf("TotalPhysicalBytes: %.2f byte\n", x1)
+	info += fmt.Sprintf("TotalPhysicalBytes: %.2f Kb\n", x2)
+	info += fmt.Sprintf("TotalPhysicalBytes: %.2f Mb\n", x3)
+	info += fmt.Sprintf("TotalPhysicalBytes: %.2f Gb\n", x4)
+
+	xx1 := float64(memInfo.TotalUsableBytes)
+	xx2 := float64(xx1) / 1024
+	xx3 := float64(xx2) / 1024
+	xx4 := float64(xx3) / 1024
+	//info += fmt.Sprintf("TotalUsableBytes: %d\n", memInfo.TotalUsableBytes)
+	info += fmt.Sprintf("TotalPhysicalBytes: %.2f byte\n", xx1)
+	info += fmt.Sprintf("TotalPhysicalBytes: %.2f Kb\n", xx2)
+	info += fmt.Sprintf("TotalPhysicalBytes: %.2f Mb\n", xx3)
+	info += fmt.Sprintf("TotalPhysicalBytes: %.2f Gb\n", xx4)
+
 	info += fmt.Sprintf("DefaultHugePageSize: %d\n", memInfo.DefaultHugePageSize)
 
 	for i, m := range memInfo.Modules {
@@ -169,7 +188,7 @@ func RamTabs() fyne.CanvasObject {
 		)
 	*/
 	return container.NewAppTabs(
-		container.NewTabItem("ram", container.NewScroll(ram)),
+		container.NewTabItem("Ram", container.NewScroll(ram)),
 		//container.NewTabItem("ram", container.NewScroll(Mainboard)),
 		//container.NewTabItem("ram", container.NewScroll(BIOS_UEFI)),
 		//container.NewTabItem("ram", container.NewScroll(Chassis)),
