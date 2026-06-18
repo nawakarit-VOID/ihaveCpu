@@ -4,7 +4,6 @@
 package Ppackage_raminfo
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"fyne.io/fyne/v2"
@@ -38,34 +37,34 @@ func newProcessValue(value float64) (float64, string) {
 	// ตัวอักษร flag ที่สัมผัส
 	var x string = "B" //8Bit = 1Byte
 	// ตรวจสอบเงื่อนไข //แบบ บนลงล่าง
-	if value > 1024 {
+	if value >= 1024 {
 		value = value / 1024
 		x = "KB"
-		if value > 1024 {
+		if value >= 1024 {
 			value = value / 1024
 			x = "MB"
-			if value > 1024 {
+			if value >= 1024 {
 				value = value / 1024
 				x = "GB"
-				if value > 1024 {
+				if value >= 1024 {
 					value = value / 1024
 					x = "TB"
-					if value > 1024 {
+					if value >= 1024 {
 						value = value / 1024
 						x = "PB"
-						if value > 1024 {
+						if value >= 1024 {
 							value = value / 1024
 							x = "EB"
-							if value > 1024 {
+							if value >= 1024 {
 								value = value / 1024
 								x = "ZB"
-								if value > 1024 {
+								if value >= 1024 {
 									value = value / 1024
 									x = "YB"
-									if value > 1024 {
+									if value >= 1024 {
 										value = value / 1024
 										x = "Bronto Byte"
-										if value > 1024 {
+										if value >= 1024 {
 											value = value / 1024
 											x = "Geop Byte"
 										}
@@ -86,7 +85,7 @@ func RamTabs() fyne.CanvasObject {
 	var info string
 	memInfo := Memory()
 
-	info += fmt.Sprintf("Area: %v\n", memInfo.Area)
+	//info += fmt.Sprintf("Area: %v\n", memInfo.Area) //**
 
 	//info += fmt.Sprintf("TotalPhysicalBytes: %d\n", memInfo.TotalPhysicalBytes)
 	TotalPhysicalBytes, TotalPhysicalBytesString := newProcessValue(float64(memInfo.TotalPhysicalBytes))
@@ -95,11 +94,11 @@ func RamTabs() fyne.CanvasObject {
 	TotalUsableBytes, TotalUsableBytesString := newProcessValue(float64(memInfo.TotalUsableBytes))
 	info += fmt.Sprintf("[ RAM ที่ระบบสามารถนำไปใช้งานได้จริง ] : %.2f %s\n", TotalUsableBytes, TotalUsableBytesString)
 
-	xz1 := float64(memInfo.DefaultHugePageSize)
-	xz2 := float64(xz1) / 1024
-	xz3 := float64(xz2) / 1024
 	//info += fmt.Sprintf("DefaultHugePageSize: %d\n", memInfo.DefaultHugePageSize)
-	info += fmt.Sprintf("DefaultHugePageSize: %.2f Mb\n", xz3)
+	DefaultHugePageSize, DefaultHugePageSizeString := newProcessValue(float64(memInfo.DefaultHugePageSize))
+	info += fmt.Sprintf("[ หากเปิดใช้ Huge Pages ขนาดเริ่มต้น คือ ] : %.2f %s\n", DefaultHugePageSize, DefaultHugePageSizeString)
+
+	//
 
 	for i, m := range memInfo.Modules {
 		info += fmt.Sprintf("\nModule %d\n", i+1)
@@ -111,90 +110,40 @@ func RamTabs() fyne.CanvasObject {
 		info += fmt.Sprintf("  Serial : %s\n", m.Location)
 	} //*ไม่ขึ้น
 
+	//
+	info += "การรองรับ Huge Pages (หน้าหน่วยความจำขนาดพิเศษ) อธิบายเสริม: ปกติแล้วระบบปฏิบัติการจะแบ่ง RAM ออกเป็นช่องเล็ก ๆ เรียกว่า [ Page ] ขนาดปกติคือ 4 KB แต่ถ้าโปรแกรมต้องใช้ RAM เยอะ ๆ (เช่น Database หรือแอปพลิเคชันใหญ่ ๆ) การใช้ช่องเล็ก ๆ จะทำให้หาข้อมูลช้า ระบบจึงมีฟีเจอร์ Huge Pages เพื่อรวมเป็นช่องขนาดใหญ่ขึ้น ทำให้ทำงานเร็วขึ้น\n"
+	info += "ระบบนี้รองรับการแบ่งหน้า RAM ขนาดใหญ่ 2 ขนาด คือ\n"
 	for size, amount := range memInfo.HugePageAmountsBySize {
-		var xx1 float64
-		var xx2 float64
-		var xx3 float64
-		var xx4 float64
-
-		xx1 = float64(size)
-		if xx1 > 1024 {
-			xx2 = float64(xx1) / 1024 //Kb
-		}
-		if xx2 > 1024 {
-			xx3 = float64(xx1) / 1024 //Mb
-		}
-		if xx3 > 1024 {
-			xx4 = float64(xx1) / 1024 //Gb
-		}
-
-		//xx3 = float64(xx2) / 1024 //Mb
-		//xx4 = float64(xx3) / 1024 //Gb
-
-		info += fmt.Sprintf("HugePage %.2f Gb : %d\n", xx4, amount)
+		HugePageAmountsBySize, HugePageAmountsBySizeString := newProcessValue(float64(size))
+		info += fmt.Sprintf("HugePage %.2f %s : สถานะ %d\n", HugePageAmountsBySize, HugePageAmountsBySizeString, amount)
 	}
+
+	info += "ระบบนี้รองรับการแบ่งหน้า RAM\n"
+
+	for no, amount := range memInfo.SupportedPageSizes {
+		HugePageAmountsBySize, HugePageAmountsBySizeString := newProcessValue(float64(amount))
+		info += fmt.Sprintf("ลำดับ %d : ขนาด %.2f %s\n", no, HugePageAmountsBySize, HugePageAmountsBySizeString)
+	}
+
+	TotalHugePageBytes, TotalHugePageBytesString := newProcessValue(float64(memInfo.TotalHugePageBytes))
+	info += fmt.Sprintf("TotalHugePageBytes ขนาด %.2f %s\n", TotalHugePageBytes, TotalHugePageBytesString)
 
 	for _, m := range memInfo.Modules {
 		fmt.Printf("%+v\n", m)
 	} //*ไม่ขึ้น
 
-	c, _ := json.MarshalIndent(memInfo.Modules, "", "  ")
-	fmt.Println(string(c)) //*ไม่ขึ้น
-
-	memName := fmt.Sprintf("1 memName : %s", &memInfo.Area)
-	//c := memInfo.Area
-	memDefaulSize := fmt.Sprintf("2 memDefaulSize : %d", memInfo.DefaultHugePageSize) //เปลี่ยนแปลงตลอด
-
-	//memModule := fmt.Println(len(memInfo.Modules))                //[]
-	/*
-		var memModule string
-		for _, area := range memInfo.Modules {
-			m := fmt.Printf("%+v\n", area)
-			memModule += m
-		}
-	*/
-	memHugeSize := fmt.Sprintf("4 memHugeSize : %v\n", memInfo.HugePageAmountsBySize) //map uint64
-
-	memSupportSize := fmt.Sprintf("5 memSupportSize : %T", &memInfo.SupportedPageSizes) //[] uint64
-	memTotalHugeBytes := fmt.Sprintf("6 memTotalHugeBytes : %d", memInfo.TotalHugePageBytes)
-	memTotalPhysicalBytes := fmt.Sprintf("7 memTotalPhysicalBytes : %d", memInfo.TotalPhysicalBytes)
-	memTotalUsableBytes := fmt.Sprintf("8 memTotalUsableBytes : %d", memInfo.TotalUsableBytes)
-
-	//fmt.Println(c)
-	//memDefaulSize1 := c / 1024 //byte
-	//println("kbyte", memDefaulSize1)
-	//	var xx string
-	/*
-		for _, area := range memInfo.Modules {
-			fmt.Printf("%+v\n", area)
-		}
-	*/
-	/*
-		for _, m := range memInfo.Modules {
-			b, _ := json.MarshalIndent(m, "", "  ")
-			fmt.Println(string(b))
-		}
-	*/
-	/*
-		b, _ := json.MarshalIndent(memInfo, "", "  ")
-		fmt.Println(string(b))
-	*/
-	//fmt.Println(memory.Area)
-	//fmt.Println(memory.DefaultHugePageSize)
-	var x string
-	x += fmt.Sprintf("%#v\n", memInfo)
+	//
 
 	subRam := container.NewVBox(
 		//System
-		widget.NewLabel(memName),
-		widget.NewLabel(memDefaulSize),
+		//widget.NewLabel(memName),
+		//widget.NewLabel(memDefaulSize),
 		//widget.NewLabel(fmt.Sprintln("%s", memModule)),
-		widget.NewLabel(memHugeSize),
-		widget.NewLabel(memSupportSize),
-		widget.NewLabel(memTotalHugeBytes),
-		widget.NewLabel(memTotalPhysicalBytes),
-		widget.NewLabel(memTotalUsableBytes),
-		widget.NewLabel(x),
+		//widget.NewLabel(memHugeSize),
+		//widget.NewLabel(memSupportSize),
+		//widget.NewLabel(memTotalHugeBytes),
+		//widget.NewLabel(memTotalPhysicalBytes),
+		//widget.NewLabel(memTotalUsableBytes),
 		widget.NewLabel(info),
 	)
 	ram := container.NewVBox(
