@@ -33,28 +33,6 @@ func Memory() *ghw.MemoryInfo {
 
 }
 */
-func processValue(value float64) (float64, string) {
-	// ตัวอักษร flag ที่สัมผัส
-	var x string = ""
-	// ตรวจสอบเงื่อนไข //แบบ บนลงล่าง
-	switch {
-	case value >= 1099511627776:
-		value = value / 1099511627776
-		x = "TB"
-	case value >= 1073741824:
-		value = value / 1073741824
-		x = "GB"
-	case value >= 1048576:
-		value = value / 1048576
-		x = "MB"
-	case value >= 1000:
-		value = value / 1024
-		x = "KB"
-	default:
-		x = "B"
-	}
-	return value, x
-}
 
 func newProcessValue(value float64) (float64, string) {
 	// ตัวอักษร flag ที่สัมผัส
@@ -90,7 +68,6 @@ func newProcessValue(value float64) (float64, string) {
 										if value > 1024 {
 											value = value / 1024
 											x = "Geop Byte"
-
 										}
 									}
 								}
@@ -101,23 +78,6 @@ func newProcessValue(value float64) (float64, string) {
 			}
 		}
 	}
-
-	/*
-	   case value >= 1099511627776:
-	   		value = value / 1099511627776
-	   		x = "TB"
-	   	case value >= 1073741824:
-	   		value = value / 1073741824
-	   		x = "GB"
-	   	case value >= 1048576:
-	   		value = value / 1048576
-	   		x = "MB"
-	   	case value >= 1000:
-	   		value = value / 1024
-	   		x = "KB"
-	   	default:
-	   		x = "B"
-	   	}*/
 	return value, x
 }
 
@@ -128,38 +88,12 @@ func RamTabs() fyne.CanvasObject {
 
 	info += fmt.Sprintf("Area: %v\n", memInfo.Area)
 
-	q1, q2 := newProcessValue(float64(memInfo.TotalPhysicalBytes))
-
-	info += fmt.Sprintf("newProcessValue : %.2f  %s\n", q1, q2)
-
-	x1 := float64(memInfo.TotalPhysicalBytes)
-	x2 := float64(x1) / 1024
-	x3 := float64(x2) / 1024
-	x4 := float64(x3) / 1024
-
-	a, a1 := processValue(x1)
-
 	//info += fmt.Sprintf("TotalPhysicalBytes: %d\n", memInfo.TotalPhysicalBytes)
-	info += fmt.Sprintf("TotalPhysicalBytes: %.2f byte\n", x1)
-	info += fmt.Sprintf("TotalPhysicalBytes: %.2f Kb\n", x2)
-	info += fmt.Sprintf("TotalPhysicalBytes: %.2f Mb\n", x3)
-	info += fmt.Sprintf("TotalPhysicalBytes: %.2f Gb\n", x4)
-
-	info += fmt.Sprintf("processValue: %.2f %s\n", a, a1)
-
-	xx1 := float64(memInfo.TotalUsableBytes) //b
-	xx2 := float64(xx1) / 1024               //Kb
-	xx3 := float64(xx2) / 1024               //Mb
-	xx4 := float64(xx3) / 1024               //Gb
-
-	b, b1 := processValue(x1)
-
+	TotalPhysicalBytes, TotalPhysicalBytesString := newProcessValue(float64(memInfo.TotalPhysicalBytes))
+	info += fmt.Sprintf("[ RAM ทั้งหมดที่มีในเครื่อง ] : %.2f %s\n", TotalPhysicalBytes, TotalPhysicalBytesString)
 	//info += fmt.Sprintf("TotalUsableBytes: %d\n", memInfo.TotalUsableBytes)
-	info += fmt.Sprintf("TotalPhysicalBytes: %.2f byte\n", xx1)
-	info += fmt.Sprintf("TotalPhysicalBytes: %.2f Kb\n", xx2)
-	info += fmt.Sprintf("TotalPhysicalBytes: %.2f Mb\n", xx3)
-	info += fmt.Sprintf("TotalPhysicalBytes: %.2f Gb\n", xx4) //มีจุดทศนิยม
-	info += fmt.Sprintf("processValue: %.2f %s\n", b, b1)     //ถูกปัดเศษขึ้น
+	TotalUsableBytes, TotalUsableBytesString := newProcessValue(float64(memInfo.TotalUsableBytes))
+	info += fmt.Sprintf("[ RAM ที่ระบบสามารถนำไปใช้งานได้จริง ] : %.2f %s\n", TotalUsableBytes, TotalUsableBytesString)
 
 	xz1 := float64(memInfo.DefaultHugePageSize)
 	xz2 := float64(xz1) / 1024
