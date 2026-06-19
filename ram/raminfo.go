@@ -5,6 +5,7 @@ package Ppackage_raminfo
 
 import (
 	"fmt"
+	"os/exec"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -32,6 +33,17 @@ func Memory() *ghw.MemoryInfo {
 
 }
 */
+
+func GetMemoryInfo() (string, error) {
+	cmd := exec.Command("sudo", "dmidecode", "-t", "memory")
+
+	out, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+
+	return string(out), nil
+}
 
 func newProcessValue(value float64) (float64, string) {
 	// ตัวอักษร flag ที่สัมผัส
@@ -83,60 +95,50 @@ func newProcessValue(value float64) (float64, string) {
 // dmidecode
 func RamTabs() fyne.CanvasObject {
 
-	var physical string
-	var usable string
-	var SupportedPage string
-	var DefaultHugePage string
-	var HugePageAmounts string
-	var TotalHugePage string
+	var total string
+	var Support string
+	var status string
 	var modules string
 
 	memInfo := Memory()
 
-	//info += fmt.Sprintf("Area: %v\n", memInfo.Area)
+	//info += fmt.Sprintf("Area: %v\n", &memInfo.Area) //ดูทั้งหมด
 
-	//info += fmt.Sprintf("TotalPhysicalBytes: %d\n", memInfo.TotalPhysicalBytes)
+	//Total
+	//TotalPhysicalBytes
 	TotalPhysicalBytes, TotalPhysicalBytesString := newProcessValue(float64(memInfo.TotalPhysicalBytes))
-	physical += fmt.Sprintf("Ram physical total : %.2f %s", TotalPhysicalBytes, TotalPhysicalBytesString)
-
-	//info += fmt.Sprintf("TotalUsableBytes: %d\n", memInfo.TotalUsableBytes)
+	total += fmt.Sprintf("Ram ทั้งหมด : %.2f %s\n", TotalPhysicalBytes, TotalPhysicalBytesString)
+	//TotalUsableBytes
 	TotalUsableBytes, TotalUsableBytesString := newProcessValue(float64(memInfo.TotalUsableBytes))
-	usable += fmt.Sprintf("Ram usable totsl : %.2f %s", TotalUsableBytes, TotalUsableBytesString)
+	total += fmt.Sprintf("Ram ที่นำมาใช้งานได้ : %.2f %s\n", TotalUsableBytes, TotalUsableBytesString)
 
+	//การรองรับ Hug Page
+	//SupportedPageSizes
 	for NoSupported, amount := range memInfo.SupportedPageSizes {
 		SupportedPageSizes, SupportedPageSizesString := newProcessValue(float64(amount))
-		SupportedPage += fmt.Sprintf("ลำดับ %d : ขนาด %.2f %s\n", NoSupported, SupportedPageSizes, SupportedPageSizesString)
+		Support += fmt.Sprintf("ลำดับ %d : ขนาด %.2f %s\n", NoSupported, SupportedPageSizes, SupportedPageSizesString)
 	}
-
-	//info += fmt.Sprintf("DefaultHugePageSize: %d\n", memInfo.DefaultHugePageSize)
+	//DefaultHugePageSize
 	DefaultHugePageSize, DefaultHugePageSizeString := newProcessValue(float64(memInfo.DefaultHugePageSize))
-	DefaultHugePage += fmt.Sprintf("Default Huge Page size : %.2f %s", DefaultHugePageSize, DefaultHugePageSizeString)
+	Support += fmt.Sprintf("\nค่าเริ่มต้นของ Hug Page คือ %.2f %s\n", DefaultHugePageSize, DefaultHugePageSizeString)
 
+	//สถานะ HugPage
+	//HugePageAmountsBySize
 	for size, amount := range memInfo.HugePageAmountsBySize {
 		HugePageAmountsBySize, HugePageAmountsBySizeString := newProcessValue(float64(size))
-		HugePageAmounts += fmt.Sprintf("HugePage %.2f %s : สถานะ %d\n", HugePageAmountsBySize, HugePageAmountsBySizeString, amount)
+		status += fmt.Sprintf("HugePage %.2f %s : สถานะ %d\n", HugePageAmountsBySize, HugePageAmountsBySizeString, amount)
 	}
-
-	//info += "ระบบนี้รองรับการแบ่งหน้า RAM\n"
-
+	//TotalHugePageBytes
 	TotalHugePageBytes, TotalHugePageBytesString := newProcessValue(float64(memInfo.TotalHugePageBytes))
-	TotalHugePage += fmt.Sprintf("TotalHugePageBytes ขนาด %.2f %s\n", TotalHugePageBytes, TotalHugePageBytesString)
+	status += fmt.Sprintf("\nใช้ Hug Page ไปแล้ว %.2f %s\n", TotalHugePageBytes, TotalHugePageBytesString)
 
-	/*
-		info += `Ram physical total = แรมทั้งหมด
-		Ram usable totsl = แรมที่ระบบสามารถใช้งานได้
-		HugePage = หน้าหน่วยความจำขนาดพิเศษ
-
-		Default Huge Page size = ระบบจะเลือกขนาดเริ่มต้น หากมีการเปิดใช้ Huge Pages
-
-		`
-	*/
 	/*
 		for _, m := range memInfo.Modules {
 			fmt.Printf("%+v\n", m)
 		} //*ไม่ขึ้น
 	*/
 	//หรือ
+	//ยังไม่แสดง
 	for i, m := range memInfo.Modules {
 		modules += fmt.Sprintf("\nModule %d\n", i+1)
 		modules += fmt.Sprintf("  Vendor : %s\n", m.Vendor)
@@ -156,32 +158,46 @@ func RamTabs() fyne.CanvasObject {
 	fmt.Println(x)
 	info += fmt.Sprintf("%s", x)
 	*/
+	//
+	text, err := GetMemoryInfo()
+	if err != nil {
+		text = err.Error()
+	}
 
+	entry := widget.NewMultiLineEntry()
+	entry.SetText(text)
+	//entry.Disable()
+
+	///////////////////////////////////////
 	physical_usable := container.NewVBox(
-		widget.NewLabel(physical),
-		widget.NewLabel(usable),
+		widget.NewLabel(total),
 	)
 
 	SupportedPage_DefaultHugePage := container.NewVBox(
-		widget.NewLabel(SupportedPage),
-		widget.NewLabel(DefaultHugePage),
+		/*	widget.NewLabel(
+						`*ปกติแล้วระบบปฏิบัติการจะแบ่ง RAM ออกเป็นช่องเล็ก ๆ เรียกว่า [ Page ]
+			ขนาดปกติคือ 4 KB แต่ถ้าโปรแกรมต้องใช้ RAM เยอะ ๆ
+			เช่น Database หรือแอปพลิเคชันใหญ่ ๆ) การใช้ช่องเล็ก ๆ
+			จะทำให้หาข้อมูลช้า ระบบจึงมีฟีเจอร์ Huge Pages
+			เพื่อรวมเป็นช่องขนาดใหญ่ขึ้น ทำให้ทำงานเร็วขึ้น`),
+		*/
+		widget.NewLabel(Support),
 	)
 
 	TotalHugePage_HugePageAmounts_ := container.NewVBox(
-		widget.NewLabel(TotalHugePage),
-		widget.NewLabel(HugePageAmounts),
+		widget.NewLabel(status),
 	)
 
 	Modules := container.NewVBox(
 		widget.NewLabel(modules),
-		//widget.NewLabel(""),
 	)
 	detail := container.NewVBox(
 		//
 		widget.NewCard("Ram total", "", physical_usable),
-		widget.NewCard("การรองรับ Huge Pages", "หน่วยความจำขนาดพิเศษ", SupportedPage_DefaultHugePage),
+		widget.NewCard("การรองรับ Huge Pages", "หน่วยความจำขนาดพิเศษ ", SupportedPage_DefaultHugePage),
 		widget.NewCard("สถานะ Huge Pages", "", TotalHugePage_HugePageAmounts_),
 		widget.NewCard("Modules", "", Modules),
+		entry,
 	)
 
 	/*
