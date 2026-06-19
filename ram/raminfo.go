@@ -6,6 +6,7 @@ package Ppackage_raminfo
 import (
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -34,6 +35,89 @@ func Memory() *ghw.MemoryInfo {
 }
 */
 
+type RAMModule struct {
+	Size         string
+	FormFactor   string
+	Locator      string
+	BankLocator  string
+	Type         string
+	Speed        string
+	ConfigSpeed  string
+	Manufacturer string
+	PartNumber   string
+	SerialNumber string
+}
+
+// เรียก dmidecode  แบบ 2
+func readDMI() (string, error) {
+	out, err := exec.Command("sudo", "dmidecode", "-t", "memory").Output()
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
+}
+
+// เอาผล readDMI มาแยก
+func ParseMemory(text string) []RAMModule {
+	var modules []RAMModule
+	var ram RAMModule
+
+	lines := strings.Split(text, "\n")
+
+	for _, line := range lines {
+
+		line = strings.TrimSpace(line)
+
+		switch {
+
+		case line == "Memory Device":
+			// เก็บตัวก่อนหน้า
+			if ram.Size != "" {
+				modules = append(modules, ram)
+			}
+			ram = RAMModule{}
+
+		case strings.HasPrefix(line, "Size:"):
+			ram.Size = strings.TrimSpace(strings.TrimPrefix(line, "Size:"))
+
+		case strings.HasPrefix(line, "Form Factor:"):
+			ram.FormFactor = strings.TrimSpace(strings.TrimPrefix(line, "Form Factor:"))
+
+		case strings.HasPrefix(line, "Locator:"):
+			ram.Locator = strings.TrimSpace(strings.TrimPrefix(line, "Locator:"))
+
+		case strings.HasPrefix(line, "Bank Locator:"):
+			ram.BankLocator = strings.TrimSpace(strings.TrimPrefix(line, "Bank Locator:"))
+
+		case strings.HasPrefix(line, "Type:"):
+			ram.Type = strings.TrimSpace(strings.TrimPrefix(line, "Type:"))
+
+		case strings.HasPrefix(line, "Speed:"):
+			ram.Speed = strings.TrimSpace(strings.TrimPrefix(line, "Speed:"))
+
+		case strings.HasPrefix(line, "Configured Memory Speed:"):
+			ram.ConfigSpeed = strings.TrimSpace(strings.TrimPrefix(line, "Configured Memory Speed:"))
+
+		case strings.HasPrefix(line, "Manufacturer:"):
+			ram.Manufacturer = strings.TrimSpace(strings.TrimPrefix(line, "Manufacturer:"))
+
+		case strings.HasPrefix(line, "Part Number:"):
+			ram.PartNumber = strings.TrimSpace(strings.TrimPrefix(line, "Part Number:"))
+
+		case strings.HasPrefix(line, "Serial Number:"):
+			ram.SerialNumber = strings.TrimSpace(strings.TrimPrefix(line, "Serial Number:"))
+		}
+	}
+
+	// ตัวสุดท้าย
+	if ram.Size != "" {
+		modules = append(modules, ram)
+	}
+
+	return modules
+}
+
+// เรียก dmidecode  แบบ 1
 func GetMemoryInfo() (string, error) {
 	cmd := exec.Command("sudo", "dmidecode", "-t", "memory")
 
@@ -95,10 +179,42 @@ func newProcessValue(value float64) (float64, string) {
 // dmidecode
 func RamTabs() fyne.CanvasObject {
 
+	// ============================================================================
+	// SECTION_NAME
+	// ============================================================================
+	//แบบ 1
+
+	teXt, err := GetMemoryInfo()
+	if err != nil {
+		teXt = err.Error()
+	}
+
+	entry := widget.NewLabel("")
+	entry.SetText(teXt)
+	//entry.Disable()
+
+	//แบบ 2
+	var ram_dmidecode string
+
+	text, err := readDMI()
+	if err != nil {
+		panic(err)
+	}
+
+	modules := ParseMemory(text)
+
+	for _, m := range modules {
+		ram_dmidecode += fmt.Sprintf("%+v\n", m)
+	}
+
+	// ============================================================================
+	// ghw.Memory
+	// ============================================================================
+
 	var total string
 	var Support string
 	var status string
-	var modules string
+	var modulesS string
 
 	memInfo := Memory()
 
@@ -140,13 +256,13 @@ func RamTabs() fyne.CanvasObject {
 	//หรือ
 	//ยังไม่แสดง
 	for i, m := range memInfo.Modules {
-		modules += fmt.Sprintf("\nModule %d\n", i+1)
-		modules += fmt.Sprintf("  Vendor : %s\n", m.Vendor)
+		modulesS += fmt.Sprintf("\nModule %d\n", i+1)
+		modulesS += fmt.Sprintf("  Vendor : %s\n", m.Vendor)
 		//modules += fmt.Sprintf("  Product: %s\n", m.Product)
-		modules += fmt.Sprintf("  Size   : %d\n", m.SizeBytes)
-		modules += fmt.Sprintf("  Serial : %s\n", m.SerialNumber)
-		modules += fmt.Sprintf("  Serial : %s\n", m.Label)
-		modules += fmt.Sprintf("  Serial : %s\n", m.Location)
+		modulesS += fmt.Sprintf("  Size   : %d\n", m.SizeBytes)
+		modulesS += fmt.Sprintf("  Serial : %s\n", m.SerialNumber)
+		modulesS += fmt.Sprintf("  Serial : %s\n", m.Label)
+		modulesS += fmt.Sprintf("  Serial : %s\n", m.Location)
 	} //*ไม่ขึ้น
 
 	/*หรือ ดูทั้งหมด
@@ -159,16 +275,15 @@ func RamTabs() fyne.CanvasObject {
 	info += fmt.Sprintf("%s", x)
 	*/
 	//
-	text, err := GetMemoryInfo()
-	if err != nil {
-		text = err.Error()
-	}
 
-	entry := widget.NewMultiLineEntry()
-	entry.SetText(text)
-	//entry.Disable()
+	//dmidecode
 
-	///////////////////////////////////////
+	overview := container.NewVBox(
+		widget.NewLabel(ram_dmidecode),
+		entry,
+	)
+
+	//ghw
 	physical_usable := container.NewVBox(
 		widget.NewLabel(total),
 	)
@@ -184,20 +299,19 @@ func RamTabs() fyne.CanvasObject {
 		widget.NewLabel(Support),
 	)
 
-	TotalHugePage_HugePageAmounts_ := container.NewVBox(
+	TotalHugePage_HugePageAmounts := container.NewVBox(
 		widget.NewLabel(status),
 	)
 
 	Modules := container.NewVBox(
-		widget.NewLabel(modules),
+		widget.NewLabel(modulesS),
 	)
 	detail := container.NewVBox(
 		//
 		widget.NewCard("Ram total", "", physical_usable),
 		widget.NewCard("การรองรับ Huge Pages", "หน่วยความจำขนาดพิเศษ ", SupportedPage_DefaultHugePage),
-		widget.NewCard("สถานะ Huge Pages", "", TotalHugePage_HugePageAmounts_),
+		widget.NewCard("สถานะ Huge Pages", "", TotalHugePage_HugePageAmounts),
 		widget.NewCard("Modules", "", Modules),
-		entry,
 	)
 
 	/*
@@ -242,6 +356,7 @@ func RamTabs() fyne.CanvasObject {
 		)
 	*/
 	return container.NewAppTabs(
+		container.NewTabItem("Overview", container.NewScroll(overview)),
 		container.NewTabItem("Detail", container.NewScroll(detail)),
 		//container.NewTabItem("ram", container.NewScroll(Mainboard)),
 		//container.NewTabItem("ram", container.NewScroll(BIOS_UEFI)),
