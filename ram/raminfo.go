@@ -6,7 +6,6 @@ package Ppackage_raminfo
 import (
 	"fmt"
 	"os/exec"
-	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -34,88 +33,6 @@ func Memory() *ghw.MemoryInfo {
 
 }
 */
-
-type RAMModule struct {
-	Size         string
-	FormFactor   string
-	Locator      string
-	BankLocator  string
-	Type         string
-	Speed        string
-	ConfigSpeed  string
-	Manufacturer string
-	PartNumber   string
-	SerialNumber string
-}
-
-// เรียก dmidecode  แบบ 2
-func readDMI() (string, error) {
-	out, err := exec.Command("sudo", "dmidecode", "-t", "memory").Output()
-	if err != nil {
-		return "", err
-	}
-	return string(out), nil
-}
-
-// เอาผล readDMI มาแยก
-func ParseMemory(text string) []RAMModule {
-	var modules []RAMModule
-	var ram RAMModule
-
-	lines := strings.Split(text, "\n")
-
-	for _, line := range lines {
-
-		line = strings.TrimSpace(line)
-
-		switch {
-
-		case line == "Memory Device":
-			// เก็บตัวก่อนหน้า
-			if ram.Size != "" {
-				modules = append(modules, ram)
-			}
-			ram = RAMModule{}
-
-		case strings.HasPrefix(line, "Size:"):
-			ram.Size = strings.TrimSpace(strings.TrimPrefix(line, "Size:"))
-
-		case strings.HasPrefix(line, "Form Factor:"):
-			ram.FormFactor = strings.TrimSpace(strings.TrimPrefix(line, "Form Factor:"))
-
-		case strings.HasPrefix(line, "Locator:"):
-			ram.Locator = strings.TrimSpace(strings.TrimPrefix(line, "Locator:"))
-
-		case strings.HasPrefix(line, "Bank Locator:"):
-			ram.BankLocator = strings.TrimSpace(strings.TrimPrefix(line, "Bank Locator:"))
-
-		case strings.HasPrefix(line, "Type:"):
-			ram.Type = strings.TrimSpace(strings.TrimPrefix(line, "Type:"))
-
-		case strings.HasPrefix(line, "Speed:"):
-			ram.Speed = strings.TrimSpace(strings.TrimPrefix(line, "Speed:"))
-
-		case strings.HasPrefix(line, "Configured Memory Speed:"):
-			ram.ConfigSpeed = strings.TrimSpace(strings.TrimPrefix(line, "Configured Memory Speed:"))
-
-		case strings.HasPrefix(line, "Manufacturer:"):
-			ram.Manufacturer = strings.TrimSpace(strings.TrimPrefix(line, "Manufacturer:"))
-
-		case strings.HasPrefix(line, "Part Number:"):
-			ram.PartNumber = strings.TrimSpace(strings.TrimPrefix(line, "Part Number:"))
-
-		case strings.HasPrefix(line, "Serial Number:"):
-			ram.SerialNumber = strings.TrimSpace(strings.TrimPrefix(line, "Serial Number:"))
-		}
-	}
-
-	// ตัวสุดท้าย
-	if ram.Size != "" {
-		modules = append(modules, ram)
-	}
-
-	return modules
-}
 
 // เรียก dmidecode  แบบ 1
 func GetMemoryInfo() (string, error) {
@@ -183,29 +100,14 @@ func RamTabs() fyne.CanvasObject {
 	// SECTION_NAME
 	// ============================================================================
 	//แบบ 1
-
+	//สิทธิ์ไม่พอ + ปุ่ม getting SMBIOS
 	teXt, err := GetMemoryInfo()
 	if err != nil {
 		teXt = err.Error()
 	}
-
 	entry := widget.NewLabel("")
 	entry.SetText(teXt)
 	//entry.Disable()
-
-	//แบบ 2
-	var ram_dmidecode string
-
-	text, err := readDMI()
-	if err != nil {
-		panic(err)
-	}
-
-	modules := ParseMemory(text)
-
-	for _, m := range modules {
-		ram_dmidecode += fmt.Sprintf("%+v\n", m)
-	}
 
 	// ============================================================================
 	// ghw.Memory
@@ -277,9 +179,7 @@ func RamTabs() fyne.CanvasObject {
 	//
 
 	//dmidecode
-
-	overview := container.NewVBox(
-		widget.NewLabel(ram_dmidecode),
+	sub_overview := container.NewVBox(
 		entry,
 	)
 
@@ -306,7 +206,13 @@ func RamTabs() fyne.CanvasObject {
 	Modules := container.NewVBox(
 		widget.NewLabel(modulesS),
 	)
-	detail := container.NewVBox(
+
+	//card
+	Overview := container.NewVBox(
+		widget.NewCard("Overview", "", sub_overview),
+	)
+
+	Detail := container.NewVBox(
 		//
 		widget.NewCard("Ram total", "", physical_usable),
 		widget.NewCard("การรองรับ Huge Pages", "หน่วยความจำขนาดพิเศษ ", SupportedPage_DefaultHugePage),
@@ -356,8 +262,8 @@ func RamTabs() fyne.CanvasObject {
 		)
 	*/
 	return container.NewAppTabs(
-		container.NewTabItem("Overview", container.NewScroll(overview)),
-		container.NewTabItem("Detail", container.NewScroll(detail)),
+		container.NewTabItem("Overview", container.NewScroll(Overview)),
+		container.NewTabItem("Detail", container.NewScroll(Detail)),
 		//container.NewTabItem("ram", container.NewScroll(Mainboard)),
 		//container.NewTabItem("ram", container.NewScroll(BIOS_UEFI)),
 		//container.NewTabItem("ram", container.NewScroll(Chassis)),
