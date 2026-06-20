@@ -104,12 +104,12 @@ func RamTabs() fyne.CanvasObject {
 	//สิทธิ์ไม่พอ + ปุ่ม getting SMBIOS
 	entry := widget.NewLabel("")
 
-	d := widget.NewButton("D", func() {
+	RequestingAccessToRAM := widget.NewButton("ขอสิทธิ์เข้าถึงแรม", func() {
 		teXt, err := GetMemoryInfo()
 		if err != nil {
 			teXt = err.Error()
 		}
-		entry.SetText(teXt)
+		entry.SetText(teXt) //ให้มันอัพเดท
 	})
 
 	//entry.Disable()
@@ -182,12 +182,6 @@ func RamTabs() fyne.CanvasObject {
 	info += fmt.Sprintf("%s", x)
 	*/
 	//
-
-	//dmidecode
-	sub_overview := container.NewVBox(
-		entry,
-	)
-
 	//ghw
 	physical_usable := container.NewVBox(
 		widget.NewLabel(total),
@@ -212,18 +206,22 @@ func RamTabs() fyne.CanvasObject {
 		widget.NewLabel(modulesS),
 	)
 
-	//card
-	Overview := container.NewVBox(
-		d,
-		widget.NewCard("Overview", "", sub_overview),
+	//dmidecode
+	sub_Detail := container.NewVBox(
+		RequestingAccessToRAM,
+		entry,
 	)
 
-	Detail := container.NewVBox(
-		//
+	//card
+	Overview := container.NewVBox(
 		widget.NewCard("Ram total", "", physical_usable),
 		widget.NewCard("การรองรับ Huge Pages", "หน่วยความจำขนาดพิเศษ ", SupportedPage_DefaultHugePage),
 		widget.NewCard("สถานะ Huge Pages", "", TotalHugePage_HugePageAmounts),
 		widget.NewCard("Modules", "", Modules),
+	)
+
+	Detail := container.NewVBox(
+		widget.NewCard("Detail", "", sub_Detail),
 	)
 
 	/*
