@@ -96,23 +96,20 @@ func newProcessValue(value float64) (float64, string) {
 
 // dmidecode
 func RamTabs() fyne.CanvasObject {
-
 	// ============================================================================
-	// SECTION_NAME
+	// ขอสิทธิ์เข้าถึงแรม
 	// ============================================================================
 	//แบบ 1
 	//สิทธิ์ไม่พอ + ปุ่ม getting SMBIOS
-	entry := widget.NewLabel("")
+	MemoryPkexec := widget.NewLabel("")
 
 	RequestingAccessToRAM := widget.NewButton("ขอสิทธิ์เข้าถึงแรม", func() {
 		teXt, err := GetMemoryInfo()
 		if err != nil {
 			teXt = err.Error()
 		}
-		entry.SetText(teXt) //ให้มันอัพเดท
+		MemoryPkexec.SetText(teXt) //ให้มันอัพเดท
 	})
-
-	//entry.Disable()
 
 	// ============================================================================
 	// ghw.Memory
@@ -207,9 +204,9 @@ func RamTabs() fyne.CanvasObject {
 	)
 
 	//dmidecode
-	sub_Detail := container.NewVBox(
+	sub_Detail_ram := container.NewVBox(
 		RequestingAccessToRAM,
-		entry,
+		MemoryPkexec,
 	)
 
 	//card
@@ -221,7 +218,7 @@ func RamTabs() fyne.CanvasObject {
 	)
 
 	Detail := container.NewVBox(
-		widget.NewCard("Detail", "", sub_Detail),
+		widget.NewCard("Detail", "", sub_Detail_ram),
 	)
 
 	/*

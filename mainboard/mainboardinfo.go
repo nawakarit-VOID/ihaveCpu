@@ -6,6 +6,7 @@ package Ppackage_mainboardinfo
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -19,6 +20,45 @@ func read(path string) string {
 		return ""
 	}
 	return strings.TrimSpace(string(b))
+}
+
+func GetMainboardInfo() (string, error) {
+	// เปลี่ยนจาก "sudo" เป็น "pkexec"
+	cmd := exec.Command("pkexec", "dmidecode", "-t", "2")
+
+	out, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+
+	return string(out), nil
+}
+
+func GetInfoPkexecAll() {
+
+	go func() { // รันใน goroutine ไม่ให้ UI ค้าง
+		var scriptLines []string
+
+		scriptLines = append(scriptLines, "memory")
+		scriptLines = append(scriptLines, "2")
+
+		if len(scriptLines) == 0 {
+			//ฟังชั้น popup++
+			fmt.Println("ไม่พบคอร์ที่เลือกให้ปรับค่า")
+			return
+		}
+
+		script := strings.Join(scriptLines, "\n")
+
+		cmd := exec.Command("pkexec", "dmidecode", "-t", script)
+		err := cmd.Run()
+		if err != nil {
+			fmt.Println("ล้มเหลว:", err)
+			return
+		}
+		//fmt.Println("")
+	}()
+
 }
 
 func mainboard_info() map[string]interface{} {
@@ -123,6 +163,25 @@ func mainboard_info() map[string]interface{} {
 func MainboardTabs() fyne.CanvasObject {
 	x := mainboard_info()
 
+	MainboardPkexec := widget.NewLabel("")
+
+	RequestingAccessToMainboard := widget.NewButton("ขอสิทธิ์เข้าถึงเมนบอร์ด", func() {
+		teXt, err := GetMainboardInfo()
+		if err != nil {
+			teXt = err.Error()
+		}
+		MainboardPkexec.SetText(teXt) //ให้มันอัพเดท
+	})
+
+	subdetail_mainboard := container.NewVBox(
+		RequestingAccessToMainboard,
+		MainboardPkexec,
+	)
+
+	detail_mainboard := container.NewVBox(
+		widget.NewCard("Detail", "", subdetail_mainboard),
+	)
+
 	subSystem := container.NewVBox(
 		//System
 		widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s", x["Sys_vendor"])),       //ผู้ผลิตเครื่องทั้งเครื่อง (OEM)
@@ -189,5 +248,6 @@ func MainboardTabs() fyne.CanvasObject {
 		container.NewTabItem("Mainboard", container.NewScroll(Mainboard)),
 		container.NewTabItem("BIOS / UEFI", container.NewScroll(BIOS_UEFI)),
 		container.NewTabItem("Chassis", container.NewScroll(Chassis)),
+		container.NewTabItem("Detail", container.NewScroll(detail_mainboard)),
 	)
 }
