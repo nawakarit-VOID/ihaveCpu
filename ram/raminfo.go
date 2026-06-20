@@ -36,7 +36,8 @@ func Memory() *ghw.MemoryInfo {
 
 // เรียก dmidecode  แบบ 1
 func GetMemoryInfo() (string, error) {
-	cmd := exec.Command("sudo", "dmidecode", "-t", "memory")
+	// เปลี่ยนจาก "sudo" เป็น "pkexec"
+	cmd := exec.Command("pkexec", "dmidecode", "-t", "memory")
 
 	out, err := cmd.Output()
 	if err != nil {
@@ -101,12 +102,16 @@ func RamTabs() fyne.CanvasObject {
 	// ============================================================================
 	//แบบ 1
 	//สิทธิ์ไม่พอ + ปุ่ม getting SMBIOS
-	teXt, err := GetMemoryInfo()
-	if err != nil {
-		teXt = err.Error()
-	}
 	entry := widget.NewLabel("")
-	entry.SetText(teXt)
+
+	d := widget.NewButton("D", func() {
+		teXt, err := GetMemoryInfo()
+		if err != nil {
+			teXt = err.Error()
+		}
+		entry.SetText(teXt)
+	})
+
 	//entry.Disable()
 
 	// ============================================================================
@@ -209,6 +214,7 @@ func RamTabs() fyne.CanvasObject {
 
 	//card
 	Overview := container.NewVBox(
+		d,
 		widget.NewCard("Overview", "", sub_overview),
 	)
 
