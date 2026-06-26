@@ -34,31 +34,16 @@ func GetMainboardInfo() (string, error) {
 	return string(out), nil
 }
 
-func GetInfoPkexecAll() {
+func GetInfoPkexecAll() (string, error) {
+	types := []string{"2", "memory"}
+	args := []string{"dmidecode"}
+	for _, t := range types {
+		args = append(args, "-t", t)
+	}
 
-	go func() { // รันใน goroutine ไม่ให้ UI ค้าง
-		var scriptLines []string
-
-		scriptLines = append(scriptLines, "memory")
-		scriptLines = append(scriptLines, "2")
-
-		if len(scriptLines) == 0 {
-			//ฟังชั้น popup++
-			fmt.Println("ไม่พบคอร์ที่เลือกให้ปรับค่า")
-			return
-		}
-
-		script := strings.Join(scriptLines, "\n")
-
-		cmd := exec.Command("pkexec", "dmidecode", "-t", script)
-		err := cmd.Run()
-		if err != nil {
-			fmt.Println("ล้มเหลว:", err)
-			return
-		}
-		//fmt.Println("")
-	}()
-
+	cmd := exec.Command("pkexec", args...)
+	out, err := cmd.CombinedOutput()
+	return string(out), err
 }
 
 func mainboard_info() map[string]interface{} {
@@ -163,19 +148,45 @@ func mainboard_info() map[string]interface{} {
 func MainboardTabs() fyne.CanvasObject {
 	x := mainboard_info()
 
-	MainboardPkexec := widget.NewLabel("")
+	MainboardPkexec := widget.NewMultiLineEntry()
+	MainboardPkexec.SetPlaceHolder("ผลลัพธ์การเข้าถึงเมนบอร์ด")
+	MainboardPkexec.SetMinRowsVisible(8)
+	//MainboardPkexec.SetReadOnly(true)
+
+	MainboardPkexecAll := widget.NewMultiLineEntry()
+	MainboardPkexecAll.SetPlaceHolder("ผลลัพธ์การขอสิทธิ์ทั้งหมด")
+	MainboardPkexecAll.SetMinRowsVisible(12)
+	//MainboardPkexecAll.SetReadOnly(true)
 
 	RequestingAccessToMainboard := widget.NewButton("ขอสิทธิ์เข้าถึงเมนบอร์ด", func() {
-		teXt, err := GetMainboardInfo()
-		if err != nil {
-			teXt = err.Error()
-		}
-		MainboardPkexec.SetText(teXt) //ให้มันอัพเดท
+		go func() {
+			teXt, err := GetMainboardInfo()
+			if err != nil {
+				teXt = err.Error()
+			}
+			MainboardPkexec.SetText(teXt) //ให้มันอัพเดท
+		}()
+	})
+
+	RequestingFullAccessToMainboard := widget.NewButton("ขอสิทธิ์ทั้งหมด", func() {
+		go func() {
+			teXt, err := GetInfoPkexecAll()
+			if err != nil {
+				if teXt == "" {
+					teXt = err.Error()
+				} else {
+					teXt = fmt.Sprintf("%s\n%s", teXt, err.Error())
+				}
+			}
+			MainboardPkexecAll.SetText(teXt)
+		}()
 	})
 
 	subdetail_mainboard := container.NewVBox(
 		RequestingAccessToMainboard,
-		MainboardPkexec,
+		container.NewScroll(MainboardPkexec),
+		RequestingFullAccessToMainboard,
+		container.NewScroll(MainboardPkexecAll),
 	)
 
 	detail_mainboard := container.NewVBox(
