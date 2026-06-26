@@ -8,6 +8,6 @@ import (
 )
 
 func main() {
-	uiwindows.CreateWindow()
 
+	uiwindows.CreateWindow()
 }
