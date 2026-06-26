@@ -148,45 +148,67 @@ func mainboard_info() map[string]interface{} {
 func MainboardTabs() fyne.CanvasObject {
 	x := mainboard_info()
 
-	MainboardPkexec := widget.NewMultiLineEntry()
-	MainboardPkexec.SetPlaceHolder("ผลลัพธ์การเข้าถึงเมนบอร์ด")
-	MainboardPkexec.SetMinRowsVisible(8)
+	//MainboardPkexec := widget.NewMultiLineEntry()
+	//MainboardPkexec.SetPlaceHolder("ผลลัพธ์การเข้าถึงเมนบอร์ด")
+	//MainboardPkexec.SetMinRowsVisible(8)
 	//MainboardPkexec.SetReadOnly(true)
 
-	MainboardPkexecAll := widget.NewMultiLineEntry()
-	MainboardPkexecAll.SetPlaceHolder("ผลลัพธ์การขอสิทธิ์ทั้งหมด")
-	MainboardPkexecAll.SetMinRowsVisible(12)
+	//MainboardPkexecAll := widget.NewMultiLineEntry()
+	//MainboardPkexecAll.SetPlaceHolder("ผลลัพธ์การขอสิทธิ์ทั้งหมด")
+	//MainboardPkexecAll.SetMinRowsVisible(12)
 	//MainboardPkexecAll.SetReadOnly(true)
 
+	MainboardPkexec := widget.NewLabel("")
+	MainboardPkexecAll := widget.NewLabel("")
+
 	RequestingAccessToMainboard := widget.NewButton("ขอสิทธิ์เข้าถึงเมนบอร์ด", func() {
-		go func() {
-			teXt, err := GetMainboardInfo()
-			if err != nil {
-				teXt = err.Error()
-			}
-			MainboardPkexec.SetText(teXt) //ให้มันอัพเดท
-		}()
+		teXt, err := GetMainboardInfo()
+		if err != nil {
+			teXt = err.Error()
+		}
+		MainboardPkexec.SetText(teXt) //ให้มันอัพเดท
 	})
-
-	RequestingFullAccessToMainboard := widget.NewButton("ขอสิทธิ์ทั้งหมด", func() {
-		go func() {
-			teXt, err := GetInfoPkexecAll()
-			if err != nil {
-				if teXt == "" {
+	/*
+		RequestingAccessToMainboard := widget.NewButton("ขอสิทธิ์เข้าถึงเมนบอร์ด", func() {
+			go func() {
+				teXt, err := GetMainboardInfo()
+				if err != nil {
 					teXt = err.Error()
-				} else {
-					teXt = fmt.Sprintf("%s\n%s", teXt, err.Error())
 				}
-			}
-			MainboardPkexecAll.SetText(teXt)
-		}()
+				MainboardPkexec.SetText(teXt) //ให้มันอัพเดท
+			}()
+		})
+	*/
+
+	RequestingFullAccessToMainboard := widget.NewButton("ขอสิทธิ์เข้าถึงทั้งหมด", func() {
+		teXt, err := GetInfoPkexecAll()
+		if err != nil {
+			teXt = err.Error()
+		}
+		MainboardPkexecAll.SetText(teXt) //ให้มันอัพเดท
+		MainboardPkexec.SetText(teXt)
 	})
 
+	/*
+		RequestingFullAccessToMainboard := widget.NewButton("ขอสิทธิ์ทั้งหมด", func() {
+			go func() {
+				teXt, err := GetInfoPkexecAll()
+				if err != nil {
+					if teXt == "" {
+						teXt = err.Error()
+					} else {
+						teXt = fmt.Sprintf("%s\n%s", teXt, err.Error())
+					}
+				}
+				MainboardPkexecAll.SetText(teXt)
+			}()
+		})
+	*/
 	subdetail_mainboard := container.NewVBox(
 		RequestingAccessToMainboard,
-		container.NewScroll(MainboardPkexec),
+		MainboardPkexec,
 		RequestingFullAccessToMainboard,
-		container.NewScroll(MainboardPkexecAll),
+		MainboardPkexecAll,
 	)
 
 	detail_mainboard := container.NewVBox(
