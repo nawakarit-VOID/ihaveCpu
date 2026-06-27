@@ -47,6 +47,14 @@ func GetMemoryInfo() (string, error) {
 	return string(out), nil
 }
 
+var ramLabel *widget.Label
+
+func RamLabelAllText(text string) {
+	if ramLabel != nil {
+		ramLabel.SetText(text)
+	}
+}
+
 func newProcessValue(value float64) (float64, string) {
 	// ตัวอักษร flag ที่สัมผัส
 	var x string = "B" //8Bit = 1Byte
@@ -205,6 +213,7 @@ func RamTabs() fyne.CanvasObject {
 
 	//dmidecode
 	sub_Detail_ram := container.NewVBox(
+		ramLabel,
 		RequestingAccessToRAM,
 		MemoryPkexec,
 	)

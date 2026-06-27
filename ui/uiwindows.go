@@ -52,6 +52,26 @@ func CreateWindow() {
 	mainboardTabs := mainboardinfo.MainboardTabs()
 	ram := raminfo.RamTabs()
 
+	teXt, err := raminfo.GetMemoryInfo()
+
+	if err != nil {
+		teXt = err.Error()
+	}
+	fyne.Do(func() {
+		raminfo.RamLabelAllText(teXt)
+	})
+
+	//MemoryPkexec.SetText(teXt) //ให้มันอัพเดท
+	/*
+		cmd := exec.Command("pkexec", "bash", "-t", script)
+		output, err := cmd.CombinedOutput()
+		text := string(output)
+		if err != nil {
+			text = fmt.Sprintf("%s\n%s", text, err.Error())
+			fmt.Printf("failed to run pkexec: %v\n%s\n", err, string(output))
+		}
+		mainboardinfo.SetMainboardPkexecAllText(text)
+	*/
 	tabs := container.NewAppTabs(
 		container.NewTabItem("CPU", container.NewScroll(cpuTabs)),
 		container.NewTabItem("MainBoard", container.NewScroll(mainboardTabs)),

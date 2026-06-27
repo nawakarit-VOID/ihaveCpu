@@ -35,6 +35,7 @@ func GetMainboardInfo() (string, error) {
 }
 
 // เพิ่มการขอสิทธ์ทีเดียว
+
 func mainboard_info() map[string]interface{} {
 
 	//system
