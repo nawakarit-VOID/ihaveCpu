@@ -34,6 +34,7 @@ func GetMainboardInfo() (string, error) {
 	return string(out), nil
 }
 
+// เพิ่มการขอสิทธ์ทีเดียว
 func mainboard_info() map[string]interface{} {
 
 	//system
