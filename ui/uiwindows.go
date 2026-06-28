@@ -76,7 +76,7 @@ func CreateWindow() {
 	mainboardTabs := mainboardinfo.MainboardTabs()
 	ram := raminfo.RamTabs()
 
-	memInfo, _, err := GetDataIn()
+	memInfo, boardInfo, err := GetDataIn()
 
 	if err != nil {
 		return
@@ -85,8 +85,8 @@ func CreateWindow() {
 	fyne.Do(func() {
 
 		//raminfo.TestDetailLabelcmd(testAll)
-		raminfo.TestDetailLabelcmd(memInfo)
-		//raminfo.BoardDetailLabelcmd(boardInfo)
+		raminfo.RamDetailLabelcmd(memInfo)
+		mainboardinfo.TestDetailLabelcmd(boardInfo)
 	})
 
 	/*

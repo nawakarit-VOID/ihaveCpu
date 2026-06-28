@@ -56,15 +56,6 @@ func RamDetailLabelcmd(text string) {
 	}
 }
 
-// test
-var testDetailLabel *widget.Label //ประกาศแบบ golbal
-
-func TestDetailLabelcmd(text string) {
-	if testDetailLabel != nil {
-		testDetailLabel.SetText(text)
-	}
-}
-
 func newProcessValue(value float64) (float64, string) {
 	// ตัวอักษร flag ที่สัมผัส
 	var x string = "B" //8Bit = 1Byte
@@ -119,7 +110,6 @@ func RamTabs() fyne.CanvasObject {
 	// ============================================================================
 
 	ramDetailLabel = widget.NewLabel("")
-	testDetailLabel = widget.NewLabel("")
 
 	// ============================================================================
 	// ghw.Memory
@@ -234,9 +224,6 @@ func RamTabs() fyne.CanvasObject {
 		widget.NewCard("Detail", "", sub_Detail_ram),
 	)
 
-	test := container.NewVBox(
-		widget.NewCard("test", "", testDetailLabel),
-	)
 	/*
 		subSystem := container.NewVBox(
 			//System
@@ -281,7 +268,7 @@ func RamTabs() fyne.CanvasObject {
 	return container.NewAppTabs(
 		container.NewTabItem("Overview", container.NewScroll(Overview)),
 		container.NewTabItem("Detail", container.NewScroll(Detail)),
-		container.NewTabItem("test", container.NewScroll(test)),
+		//container.NewTabItem("test", container.NewScroll(test)),
 		//container.NewTabItem("ram", container.NewScroll(BIOS_UEFI)),
 		//container.NewTabItem("ram", container.NewScroll(Chassis)),
 	)

@@ -135,10 +135,20 @@ func mainboard_info() map[string]interface{} {
 
 }
 
+// test
+var testDetailLabel *widget.Label //ประกาศแบบ golbal
+
+func TestDetailLabelcmd(text string) {
+	if testDetailLabel != nil {
+		testDetailLabel.SetText(text)
+	}
+}
+
 func MainboardTabs() fyne.CanvasObject {
 	x := mainboard_info()
 
 	MainboardPkexec := widget.NewLabel("")
+	testDetailLabel = widget.NewLabel("")
 
 	RequestingAccessToMainboard := widget.NewButton("ขอสิทธิ์เข้าถึงเมนบอร์ด", func() {
 		teXt, err := GetMainboardInfo()
@@ -155,6 +165,10 @@ func MainboardTabs() fyne.CanvasObject {
 
 	detail_mainboard := container.NewVBox(
 		widget.NewCard("Detail", "", subdetail_mainboard),
+	)
+
+	test := container.NewVBox(
+		widget.NewCard("test", "", testDetailLabel),
 	)
 
 	subSystem := container.NewVBox(
@@ -224,5 +238,6 @@ func MainboardTabs() fyne.CanvasObject {
 		container.NewTabItem("BIOS / UEFI", container.NewScroll(BIOS_UEFI)),
 		container.NewTabItem("Chassis", container.NewScroll(Chassis)),
 		container.NewTabItem("Detail", container.NewScroll(detail_mainboard)),
+		container.NewTabItem("Detail", container.NewScroll(test)),
 	)
 }
