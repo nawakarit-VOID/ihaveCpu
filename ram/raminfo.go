@@ -35,6 +35,7 @@ func Memory() *ghw.MemoryInfo {
 */
 
 // เรียก dmidecode  แบบ 1
+
 func GetMemoryInfo() (string, error) {
 	// เปลี่ยนจาก "sudo" เป็น "pkexec"
 	cmd := exec.Command("pkexec", "dmidecode", "-t", "memory")
@@ -47,11 +48,20 @@ func GetMemoryInfo() (string, error) {
 	return string(out), nil
 }
 
-var ramLabel *widget.Label
+var ramDetailLabel *widget.Label //ประกาศแบบ golbal
 
-func RamLabelAllText(text string) {
-	if ramLabel != nil {
-		ramLabel.SetText(text)
+func RamDetailLabelcmd(text string) {
+	if ramDetailLabel != nil {
+		ramDetailLabel.SetText(text)
+	}
+}
+
+// test
+var testDetailLabel *widget.Label //ประกาศแบบ golbal
+
+func TestDetailLabelcmd(text string) {
+	if testDetailLabel != nil {
+		testDetailLabel.SetText(text)
 	}
 }
 
@@ -107,17 +117,9 @@ func RamTabs() fyne.CanvasObject {
 	// ============================================================================
 	// ขอสิทธิ์เข้าถึงแรม
 	// ============================================================================
-	//แบบ 1
-	//สิทธิ์ไม่พอ + ปุ่ม getting SMBIOS
-	MemoryPkexec := widget.NewLabel("")
 
-	RequestingAccessToRAM := widget.NewButton("ขอสิทธิ์เข้าถึงแรม", func() {
-		teXt, err := GetMemoryInfo()
-		if err != nil {
-			teXt = err.Error()
-		}
-		MemoryPkexec.SetText(teXt) //ให้มันอัพเดท
-	})
+	ramDetailLabel = widget.NewLabel("")
+	testDetailLabel = widget.NewLabel("")
 
 	// ============================================================================
 	// ghw.Memory
@@ -128,7 +130,11 @@ func RamTabs() fyne.CanvasObject {
 	var status string
 	var modulesS string
 
+	//ป้องกัน Memory() คืนค่า nil ให้เป็นค่าเริ่มต้นก่อนเข้าถึงฟิลด์
 	memInfo := Memory()
+	if memInfo == nil {
+		memInfo = &ghw.MemoryInfo{}
+	}
 
 	//info += fmt.Sprintf("Area: %v\n", &memInfo.Area) //ดูทั้งหมด
 
@@ -213,9 +219,7 @@ func RamTabs() fyne.CanvasObject {
 
 	//dmidecode
 	sub_Detail_ram := container.NewVBox(
-		ramLabel,
-		RequestingAccessToRAM,
-		MemoryPkexec,
+		ramDetailLabel,
 	)
 
 	//card
@@ -230,6 +234,9 @@ func RamTabs() fyne.CanvasObject {
 		widget.NewCard("Detail", "", sub_Detail_ram),
 	)
 
+	test := container.NewVBox(
+		widget.NewCard("test", "", testDetailLabel),
+	)
 	/*
 		subSystem := container.NewVBox(
 			//System
@@ -274,7 +281,7 @@ func RamTabs() fyne.CanvasObject {
 	return container.NewAppTabs(
 		container.NewTabItem("Overview", container.NewScroll(Overview)),
 		container.NewTabItem("Detail", container.NewScroll(Detail)),
-		//container.NewTabItem("ram", container.NewScroll(Mainboard)),
+		container.NewTabItem("test", container.NewScroll(test)),
 		//container.NewTabItem("ram", container.NewScroll(BIOS_UEFI)),
 		//container.NewTabItem("ram", container.NewScroll(Chassis)),
 	)

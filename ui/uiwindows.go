@@ -8,6 +8,8 @@ import (
 	cpuinfo "ihavecpu/cpu"
 	mainboardinfo "ihavecpu/mainboard"
 	raminfo "ihavecpu/ram"
+	"os/exec"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -40,6 +42,28 @@ var iconFS embed.FS
 var fontItim []byte
 var myFont = fyne.NewStaticResource("Itim-Regular.ttf", fontItim)
 
+func GetDataIn() (string, string, error) {
+	// เปลี่ยนจาก "sudo" เป็น "pkexec"
+	cmd := exec.Command("pkexec", "sh", "-c",
+		"dmidecode -t memory && echo '__SPLIT__' && dmidecode -t 2")
+
+	out, err := cmd.Output()
+	if err != nil {
+		return "", "", err
+	}
+
+	parts := strings.SplitN(string(out), "__SPLIT__", 2)
+
+	mem := strings.TrimSpace(parts[0])
+
+	var board string
+	if len(parts) > 1 {
+		board = strings.TrimSpace(parts[1])
+	}
+
+	return mem, board, nil
+}
+
 func CreateWindow() {
 
 	a := app.NewWithID("com.nawakarit.iHaveCPU")
@@ -52,14 +76,29 @@ func CreateWindow() {
 	mainboardTabs := mainboardinfo.MainboardTabs()
 	ram := raminfo.RamTabs()
 
-	teXt, err := raminfo.GetMemoryInfo()
+	memInfo, _, err := GetDataIn()
 
 	if err != nil {
-		teXt = err.Error()
+		return
 	}
+
 	fyne.Do(func() {
-		raminfo.RamLabelAllText(teXt)
+
+		//raminfo.TestDetailLabelcmd(testAll)
+		raminfo.TestDetailLabelcmd(memInfo)
+		//raminfo.BoardDetailLabelcmd(boardInfo)
 	})
+
+	/*
+		teXt, err := raminfo.GetMemoryInfo()
+
+		if err != nil {
+			teXt = err.Error()
+		}
+		fyne.Do(func() {
+			raminfo.RamDetailLabelcmd(teXt)
+		})
+	*/
 
 	//MemoryPkexec.SetText(teXt) //ให้มันอัพเดท
 	/*
