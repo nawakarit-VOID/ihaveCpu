@@ -5,7 +5,6 @@ package Ppackage_raminfo
 
 import (
 	"fmt"
-	"os/exec"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -33,20 +32,6 @@ func Memory() *ghw.MemoryInfo {
 
 }
 */
-
-// เรียก dmidecode  แบบ 1
-
-func GetMemoryInfo() (string, error) {
-	// เปลี่ยนจาก "sudo" เป็น "pkexec"
-	cmd := exec.Command("pkexec", "dmidecode", "-t", "memory")
-
-	out, err := cmd.Output()
-	if err != nil {
-		return "", err
-	}
-
-	return string(out), nil
-}
 
 var ramDetailLabel *widget.Label //ประกาศแบบ golbal
 
@@ -105,10 +90,6 @@ func newProcessValue(value float64) (float64, string) {
 
 // dmidecode
 func RamTabs() fyne.CanvasObject {
-	// ============================================================================
-	// ขอสิทธิ์เข้าถึงแรม
-	// ============================================================================
-
 	ramDetailLabel = widget.NewLabel("")
 
 	// ============================================================================
@@ -156,12 +137,6 @@ func RamTabs() fyne.CanvasObject {
 	TotalHugePageBytes, TotalHugePageBytesString := newProcessValue(float64(memInfo.TotalHugePageBytes))
 	status += fmt.Sprintf("\nใช้ Hug Page ไปแล้ว %.2f %s\n", TotalHugePageBytes, TotalHugePageBytesString)
 
-	/*
-		for _, m := range memInfo.Modules {
-			fmt.Printf("%+v\n", m)
-		} //*ไม่ขึ้น
-	*/
-	//หรือ
 	//ยังไม่แสดง
 	for i, m := range memInfo.Modules {
 		modulesS += fmt.Sprintf("\nModule %d\n", i+1)
@@ -173,16 +148,6 @@ func RamTabs() fyne.CanvasObject {
 		modulesS += fmt.Sprintf("  Serial : %s\n", m.Location)
 	} //*ไม่ขึ้น
 
-	/*หรือ ดูทั้งหมด
-	b, err := json.MarshalIndent(memInfo, "", "  ")
-	if err != nil {
-		log.Fatal(err)
-	}
-	x := string(b)
-	fmt.Println(x)
-	info += fmt.Sprintf("%s", x)
-	*/
-	//
 	//ghw
 	physical_usable := container.NewVBox(
 		widget.NewLabel(total),
@@ -224,51 +189,9 @@ func RamTabs() fyne.CanvasObject {
 		widget.NewCard("Detail", "", sub_Detail_ram),
 	)
 
-	/*
-		subSystem := container.NewVBox(
-			//System
-			widget.NewLabel("ผู้ผลิต"),
-		)
-
-		System := container.NewVBox(
-			//System
-			widget.NewCard("System", "", subSystem),
-			widget.NewLabel("0000"),
-		)
-
-		subMainboard := container.NewVBox(
-			//mainboard
-			widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s", x)),
-		)
-
-		Mainboard := container.NewVBox(
-			//mainboard
-			widget.NewCard("Mainboard", "", subMainboard),
-		)
-
-		subBIOS_UEFI := container.NewVBox(
-			//BIOS/UEFI
-			widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s", x)),
-		)
-		BIOS_UEFI := container.NewVBox(
-			//BIOS/UEFI
-			widget.NewCard("BIOS/UEFI", "", subBIOS_UEFI),
-		)
-
-		subChassis := container.NewVBox(
-			//Chassis
-			widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s")),
-		)
-
-		Chassis := container.NewVBox(
-			//Chassis
-			widget.NewCard("Chassis", "", subChassis),
-		)
-	*/
 	return container.NewAppTabs(
 		container.NewTabItem("Overview", container.NewScroll(Overview)),
 		container.NewTabItem("Detail", container.NewScroll(Detail)),
-		//container.NewTabItem("test", container.NewScroll(test)),
 		//container.NewTabItem("ram", container.NewScroll(BIOS_UEFI)),
 		//container.NewTabItem("ram", container.NewScroll(Chassis)),
 	)

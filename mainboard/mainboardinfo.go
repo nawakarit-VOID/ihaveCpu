@@ -6,7 +6,6 @@ package Ppackage_mainboardinfo
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -21,20 +20,6 @@ func read(path string) string {
 	}
 	return strings.TrimSpace(string(b))
 }
-
-func GetMainboardInfo() (string, error) {
-	// เปลี่ยนจาก "sudo" เป็น "pkexec"
-	cmd := exec.Command("pkexec", "dmidecode", "-t", "2")
-
-	out, err := cmd.Output()
-	if err != nil {
-		return "", err
-	}
-
-	return string(out), nil
-}
-
-// เพิ่มการขอสิทธ์ทีเดียว
 
 func mainboard_info() map[string]interface{} {
 
@@ -70,38 +55,7 @@ func mainboard_info() map[string]interface{} {
 	modalias := read("/sys/class/dmi/id/modalias")
 
 	//-----------------------------------------------------------------------//
-	/*
-		//System
-		fmt.Println(sys_vendor)      //ผู้ผลิตเครื่องทั้งเครื่อง (OEM)
-		fmt.Println(product_name)    //รุ่นของเครื่อง
-		fmt.Println(product_family)  //ตระกูลของเครื่อง
-		fmt.Println(product_version) //เวอร์ชันหรือ Revision ของรุ่นเครื่อง
-		//fmt.Println(product_serial)//Serial Number ของเครื่องทั้งเครื่อง
-		//fmt.Println(product_uuid)//UUID ของเครื่อง
-		fmt.Println(product_sku) //SKU/Part Number ของเครื่อง
 
-		//Mainboard
-		fmt.Println(board_vendor)  //ผู้ผลิตเมนบอร์ด
-		fmt.Println(board_name)    //รุ่นเมนบอร์ด
-		fmt.Println(board_version) //Revision/Version ของเมนบอร์ด
-		//fmt.Println(board_serial)//Serial Number ของเมนบอร์ด
-		fmt.Println(board_asset_tag) //รหัสทรัพย์สิน (Asset Tag) ของเมนบอร์ด ใช้ในองค์กร
-
-		//BIOS/UEFI
-		fmt.Println(bios_vendor)  //ผู้ผลิต BIOS
-		fmt.Println(bios_version) //เวอร์ชัน BIOS
-		fmt.Println(bios_date)    //วันที่ออก BIOS
-		fmt.Println(bios_release) //เวอร์ชัน Release ของ BIOS ตาม SMBIOS
-
-		//Chassis
-		fmt.Println(chassis_vendor) //ผู้ผลิตตัวเครื่อง/เคส
-		fmt.Println(chassis_type)   //ประเภทของเครื่อง
-		//fmt.Println(chassis_serial)//Serial Number ของตัวเครื่อง/เคส
-		fmt.Println(chassis_version)   //รุ่นหรือ Revision ของตัวเครื่อง
-		fmt.Println(chassis_asset_tag) //Asset Tag ของตัวเครื่อง
-
-		fmt.Println(modalias) //Hardware ID สำหรับ kernel ใช้จับคู่ driver
-	*/
 	//-----------------------------------------------------------------------//
 
 	return map[string]interface{}{
@@ -135,51 +89,36 @@ func mainboard_info() map[string]interface{} {
 
 }
 
-// test
-var testDetailLabel *widget.Label //ประกาศแบบ golbal
+var mainboardDetailLabel *widget.Label //ประกาศแบบ golbal
 
-func TestDetailLabelcmd(text string) {
-	if testDetailLabel != nil {
-		testDetailLabel.SetText(text)
+func MainboardDetailLabelcmd(text string) {
+	if mainboardDetailLabel != nil {
+		mainboardDetailLabel.SetText(text)
 	}
 }
 
 func MainboardTabs() fyne.CanvasObject {
-	x := mainboard_info()
+	m := mainboard_info()
 
-	MainboardPkexec := widget.NewLabel("")
-	testDetailLabel = widget.NewLabel("")
-
-	RequestingAccessToMainboard := widget.NewButton("ขอสิทธิ์เข้าถึงเมนบอร์ด", func() {
-		teXt, err := GetMainboardInfo()
-		if err != nil {
-			teXt = err.Error()
-		}
-		MainboardPkexec.SetText(teXt) //ให้มันอัพเดท
-	})
+	mainboardDetailLabel = widget.NewLabel("")
 
 	subdetail_mainboard := container.NewVBox(
-		RequestingAccessToMainboard,
-		MainboardPkexec,
+		mainboardDetailLabel,
 	)
 
 	detail_mainboard := container.NewVBox(
 		widget.NewCard("Detail", "", subdetail_mainboard),
 	)
 
-	test := container.NewVBox(
-		widget.NewCard("test", "", testDetailLabel),
-	)
-
 	subSystem := container.NewVBox(
 		//System
-		widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s", x["Sys_vendor"])),       //ผู้ผลิตเครื่องทั้งเครื่อง (OEM)
-		widget.NewLabel(fmt.Sprintf("รุ่น : %s", x["Product_name"])),        //รุ่นของเครื่อง
-		widget.NewLabel(fmt.Sprintf("ตระกูล : %s", x["Product_family"])),    //ตระกูลของเครื่อง
-		widget.NewLabel(fmt.Sprintf("เวอร์ชัน : %s", x["Product_version"])), //เวอร์ชันหรือ Revision ของรุ่นเครื่อง
+		widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s", m["Sys_vendor"])),       //ผู้ผลิตเครื่องทั้งเครื่อง (OEM)
+		widget.NewLabel(fmt.Sprintf("รุ่น : %s", m["Product_name"])),        //รุ่นของเครื่อง
+		widget.NewLabel(fmt.Sprintf("ตระกูล : %s", m["Product_family"])),    //ตระกูลของเครื่อง
+		widget.NewLabel(fmt.Sprintf("เวอร์ชัน : %s", m["Product_version"])), //เวอร์ชันหรือ Revision ของรุ่นเครื่อง
 		//widget.NewLabel(fmt.Sprintf("Serial Number : %s", x[//"Product_serial"])),    //Serial Number ของเครื่องทั้งเครื่อง
 		//widget.NewLabel(fmt.Sprintf("UUID : %s", x[//"Product_uuid"])),      //UUID ของเครื่อง
-		widget.NewLabel(fmt.Sprintf("รหัส : %s", x["Product_sku"])), //SKU/Part Number ของเครื่อง
+		widget.NewLabel(fmt.Sprintf("รหัส : %s", m["Product_sku"])), //SKU/Part Number ของเครื่อง
 	)
 
 	System := container.NewVBox(
@@ -189,11 +128,11 @@ func MainboardTabs() fyne.CanvasObject {
 
 	subMainboard := container.NewVBox(
 		//mainboard
-		widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s", x["Board_vendor"])),   //ผู้ผลิตเมนบอร์ด
-		widget.NewLabel(fmt.Sprintf("รุ่น : %s", x["Board_name"])),        //รุ่นเมนบอร์ด
-		widget.NewLabel(fmt.Sprintf("เวอร์ชัน : %s", x["Board_version"])), //Revision/Version ของเมนบอร์ด
-		//widget.NewLabel(fmt.Sprintf("Serial Number : %s", x["Board_serial"])),     //Serial Number ของเมนบอร์ด
-		widget.NewLabel(fmt.Sprintf("รหัส : %s", x["Board_asset_tag"])), //รหัสทรัพย์สิน (Asset Tag) ของเมนบอร์ด ใช้ในองค์กร
+		widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s", m["Board_vendor"])),   //ผู้ผลิตเมนบอร์ด
+		widget.NewLabel(fmt.Sprintf("รุ่น : %s", m["Board_name"])),        //รุ่นเมนบอร์ด
+		widget.NewLabel(fmt.Sprintf("เวอร์ชัน : %s", m["Board_version"])), //Revision/Version ของเมนบอร์ด
+		//widget.NewLabel(fmt.Sprintf("Serial Number : %s", m["Board_serial"])),     //Serial Number ของเมนบอร์ด
+		widget.NewLabel(fmt.Sprintf("รหัส : %s", m["Board_asset_tag"])), //รหัสทรัพย์สิน (Asset Tag) ของเมนบอร์ด ใช้ในองค์กร
 
 	)
 
@@ -204,10 +143,10 @@ func MainboardTabs() fyne.CanvasObject {
 
 	subBIOS_UEFI := container.NewVBox(
 		//BIOS/UEFI
-		widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s", x["Bios_vendor"])),   //ผู้ผลิต BIOS
-		widget.NewLabel(fmt.Sprintf("เวอร์ชัน : %s", x["Bios_version"])), //เวอร์ชัน BIOS
-		widget.NewLabel(fmt.Sprintf("วันที่ออก : %s", x["Bios_date"])),   //วันที่ออก BIOS
-		widget.NewLabel(fmt.Sprintf("เวอร์ชัน : %s", x["Bios_release"])), //เวอร์ชัน Release ของ BIOS ตาม SMBIOS
+		widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s", m["Bios_vendor"])),   //ผู้ผลิต BIOS
+		widget.NewLabel(fmt.Sprintf("เวอร์ชัน : %s", m["Bios_version"])), //เวอร์ชัน BIOS
+		widget.NewLabel(fmt.Sprintf("วันที่ออก : %s", m["Bios_date"])),   //วันที่ออก BIOS
+		widget.NewLabel(fmt.Sprintf("เวอร์ชัน : %s", m["Bios_release"])), //เวอร์ชัน Release ของ BIOS ตาม SMBIOS
 
 	)
 	BIOS_UEFI := container.NewVBox(
@@ -217,12 +156,12 @@ func MainboardTabs() fyne.CanvasObject {
 
 	subChassis := container.NewVBox(
 		//Chassis
-		widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s", x["Chassis_vendor"])), //ผู้ผลิตตัวเครื่อง/เคส
-		widget.NewLabel(fmt.Sprintf("ประเภท : %s", x["Chassis_type"])),    //ประเภทของเครื่อง
-		//widget.NewLabel(fmt.Sprintf("รหัส : %s", x["Chassis_serial"])),    //Serial Number ของตัวเครื่อง/เคส
-		widget.NewLabel(fmt.Sprintf("รุ่น : %s", x["Chassis_version"])),  //รุ่นหรือ Revision ของตัวเครื่อง
-		widget.NewLabel(fmt.Sprintf("Tag : %s", x["Chassis_asset_tag"])), //Asset Tag ของตัวเครื่อง
-		//widget.NewLabel(fmt.Sprintf("Hardware ID : %s", x["Modalias"])),          //Hardware ID สำหรับ kernel ใช้จับคู่ driver
+		widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s", m["Chassis_vendor"])), //ผู้ผลิตตัวเครื่อง/เคส
+		widget.NewLabel(fmt.Sprintf("ประเภท : %s", m["Chassis_type"])),    //ประเภทของเครื่อง
+		//widget.NewLabel(fmt.Sprintf("รหัส : %s", m["Chassis_serial"])),    //Serial Number ของตัวเครื่อง/เคส
+		widget.NewLabel(fmt.Sprintf("รุ่น : %s", m["Chassis_version"])),  //รุ่นหรือ Revision ของตัวเครื่อง
+		widget.NewLabel(fmt.Sprintf("Tag : %s", m["Chassis_asset_tag"])), //Asset Tag ของตัวเครื่อง
+		//widget.NewLabel(fmt.Sprintf("Hardware ID : %s", m["Modalias"])),          //Hardware ID สำหรับ kernel ใช้จับคู่ driver
 		//widget.NewSeparator(),
 
 	)
@@ -238,6 +177,5 @@ func MainboardTabs() fyne.CanvasObject {
 		container.NewTabItem("BIOS / UEFI", container.NewScroll(BIOS_UEFI)),
 		container.NewTabItem("Chassis", container.NewScroll(Chassis)),
 		container.NewTabItem("Detail", container.NewScroll(detail_mainboard)),
-		container.NewTabItem("Detail", container.NewScroll(test)),
 	)
 }

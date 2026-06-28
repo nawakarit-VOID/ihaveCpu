@@ -52,14 +52,14 @@ func GetDataIn() (string, string, error) {
 		return "", "", err
 	}
 
-	parts := strings.SplitN(string(out), "__SPLIT__", 2)
+	parts := strings.Split(string(out), "__SPLIT__")
 
-	mem := strings.TrimSpace(parts[0])
-
-	var board string
-	if len(parts) > 1 {
-		board = strings.TrimSpace(parts[1])
+	for i := range parts {
+		parts[i] = strings.TrimSpace(parts[i])
 	}
+	mem := parts[0]
+	board := parts[1]
+	//bios := parts[2]
 
 	return mem, board, nil
 }
@@ -83,10 +83,10 @@ func CreateWindow() {
 	}
 
 	fyne.Do(func() {
-
 		//raminfo.TestDetailLabelcmd(testAll)
 		raminfo.RamDetailLabelcmd(memInfo)
-		mainboardinfo.TestDetailLabelcmd(boardInfo)
+		mainboardinfo.MainboardDetailLabelcmd(boardInfo)
+		println(boardInfo)
 	})
 
 	/*
