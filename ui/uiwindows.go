@@ -45,14 +45,14 @@ var myFont = fyne.NewStaticResource("Itim-Regular.ttf", fontItim)
 func GetDataIn() (string, string, error) {
 	// เปลี่ยนจาก "sudo" เป็น "pkexec"
 	cmd := exec.Command("pkexec", "sh", "-c",
-		"dmidecode -t memory && echo '__SPLIT__' && dmidecode -t 2")
+		"dmidecode -t memory && echo '(-@_@-)' && dmidecode -t 2")
 
 	out, err := cmd.Output()
 	if err != nil {
 		return "", "", err
 	}
 
-	parts := strings.Split(string(out), "__SPLIT__")
+	parts := strings.Split(string(out), "(-@_@-)")
 
 	for i := range parts {
 		parts[i] = strings.TrimSpace(parts[i])
@@ -86,7 +86,6 @@ func CreateWindow() {
 		//raminfo.TestDetailLabelcmd(testAll)
 		raminfo.RamDetailLabelcmd(memInfo)
 		mainboardinfo.MainboardDetailLabelcmd(boardInfo)
-		println(boardInfo)
 	})
 
 	/*
