@@ -39,12 +39,6 @@ func mainboard_info() map[string]interface{} {
 	//board_serial := read("/sys/class/dmi/id/board_serial")
 	board_asset_tag := read("/sys/class/dmi/id/board_asset_tag")
 
-	//BIOS/UEFI
-	bios_vendor := read("/sys/class/dmi/id/bios_vendor")
-	bios_version := read("/sys/class/dmi/id/bios_version")
-	bios_date := read("/sys/class/dmi/id/bios_date")
-	bios_release := read("/sys/class/dmi/id/bios_release")
-
 	//Chassis
 	chassis_vendor := read("/sys/class/dmi/id/chassis_vendor")
 	chassis_type := read("/sys/class/dmi/id/chassis_type")
@@ -53,10 +47,6 @@ func mainboard_info() map[string]interface{} {
 	chassis_asset_tag := read("/sys/class/dmi/id/chassis_asset_tag")
 
 	modalias := read("/sys/class/dmi/id/modalias")
-
-	//-----------------------------------------------------------------------//
-
-	//-----------------------------------------------------------------------//
 
 	return map[string]interface{}{
 		//System
@@ -73,11 +63,6 @@ func mainboard_info() map[string]interface{} {
 		"Board_version": board_version, //Revision/Version ของเมนบอร์ด
 		//"Board_serial":      board_serial,      //Serial Number ของเมนบอร์ด
 		"Board_asset_tag": board_asset_tag, //รหัสทรัพย์สิน (Asset Tag) ของเมนบอร์ด ใช้ในองค์กร
-		//BIOS/UEFI
-		"Bios_vendor":  bios_vendor,  //ผู้ผลิต BIOS
-		"Bios_version": bios_version, //เวอร์ชัน BIOS
-		"Bios_date":    bios_date,    //วันที่ออก BIOS
-		"Bios_release": bios_release, //เวอร์ชัน Release ของ BIOS ตาม SMBIOS
 		//Chassis
 		"Chassis_vendor": chassis_vendor, //ผู้ผลิตตัวเครื่อง/เคส
 		"Chassis_type":   chassis_type,   //ประเภทของเครื่อง
@@ -96,18 +81,10 @@ func MainboardDetailLabelcmd(text string) {
 	}
 }
 
-var biosDetailLabel *widget.Label //ประกาศแบบ golbal
-func BiosDetailLabelcmd(text string) {
-	if biosDetailLabel != nil {
-		biosDetailLabel.SetText(text)
-	}
-}
-
 func MainboardTabs() fyne.CanvasObject {
 	m := mainboard_info()
 
 	mainboardDetailLabel = widget.NewLabel("")
-	biosDetailLabel = widget.NewLabel("")
 
 	subdetail_mainboard := container.NewVBox(
 		mainboardDetailLabel,
@@ -148,30 +125,6 @@ func MainboardTabs() fyne.CanvasObject {
 		widget.NewCard("Mainboard", "", subMainboard),
 	)
 
-	subBIOS_UEFI_label := container.NewVBox(
-		//BIOS/UEFI
-		widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s", m["Bios_vendor"])),   //ผู้ผลิต BIOS
-		widget.NewLabel(fmt.Sprintf("เวอร์ชัน : %s", m["Bios_version"])), //เวอร์ชัน BIOS
-		widget.NewLabel(fmt.Sprintf("วันที่ออก : %s", m["Bios_date"])),   //วันที่ออก BIOS
-		widget.NewLabel(fmt.Sprintf("เวอร์ชัน : %s", m["Bios_release"])), //เวอร์ชัน Release ของ BIOS ตาม SMBIOS
-	)
-
-	subBIOS_UEFI := container.NewVBox(
-		widget.NewCard("BIOS_UEFI", "", subBIOS_UEFI_label),
-	)
-
-	sub_Detail_BIOS_UEFI := container.NewVBox(
-		//BIOS/UEFI
-		widget.NewCard("Detail", "", biosDetailLabel),
-	)
-
-	BIOS_UEFI := container.NewAppTabs(
-		//BIOS/UEFI
-		container.NewTabItem("BIOS/UEFI", container.NewScroll(subBIOS_UEFI)),
-		container.NewTabItem("Detail", container.NewScroll(sub_Detail_BIOS_UEFI)),
-		//widget.NewCard("BIOS/UEFI", "", subBIOS_UEFI),
-	)
-
 	subChassis := container.NewVBox(
 		//Chassis
 		widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s", m["Chassis_vendor"])), //ผู้ผลิตตัวเครื่อง/เคส
@@ -194,6 +147,5 @@ func MainboardTabs() fyne.CanvasObject {
 		container.NewTabItem("Mainboard", container.NewScroll(Mainboard)),
 		container.NewTabItem("Chassis", container.NewScroll(Chassis)),
 		container.NewTabItem("Detail", container.NewScroll(detail_mainboard)),
-		container.NewTabItem("BIOS / UEFI", container.NewScroll(BIOS_UEFI)),
 	)
 }

@@ -5,9 +5,11 @@ package Package_ui
 
 import (
 	"embed"
+	biosinfo "ihavecpu/bios"
 	cpuinfo "ihavecpu/cpu"
 	mainboardinfo "ihavecpu/mainboard"
 	raminfo "ihavecpu/ram"
+
 	"os/exec"
 	"strings"
 
@@ -78,6 +80,7 @@ func CreateWindow() {
 	cpuTabs := cpuinfo.CpuTabs(w)
 	mainboardTabs := mainboardinfo.MainboardTabs()
 	ram := raminfo.RamTabs()
+	biOs := biosinfo.BiosTabs()
 
 	memInfo, boardInfo, bios, err := GetDataIn()
 
@@ -89,7 +92,8 @@ func CreateWindow() {
 		//raminfo.TestDetailLabelcmd(testAll)
 		raminfo.RamDetailLabelcmd(memInfo)
 		mainboardinfo.MainboardDetailLabelcmd(boardInfo)
-		mainboardinfo.BiosDetailLabelcmd(bios)
+		biosinfo.BiosDetailLabelcmd(bios)
+
 	})
 
 	/*
@@ -118,6 +122,7 @@ func CreateWindow() {
 		container.NewTabItem("CPU", container.NewScroll(cpuTabs)),
 		container.NewTabItem("MainBoard", container.NewScroll(mainboardTabs)),
 		container.NewTabItem("Ram", ram),
+		container.NewTabItem("Bios", biOs),
 		//container.NewTabItem("Security", container.NewScroll(nil)),
 		//container.NewTabItem("Virtualization", container.NewScroll(nil)),
 	)
