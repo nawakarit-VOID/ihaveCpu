@@ -90,10 +90,16 @@ func mainboard_info() map[string]interface{} {
 }
 
 var mainboardDetailLabel *widget.Label //ประกาศแบบ golbal
-
 func MainboardDetailLabelcmd(text string) {
 	if mainboardDetailLabel != nil {
 		mainboardDetailLabel.SetText(text)
+	}
+}
+
+var biosDetailLabel *widget.Label //ประกาศแบบ golbal
+func BiosDetailLabelcmd(text string) {
+	if biosDetailLabel != nil {
+		biosDetailLabel.SetText(text)
 	}
 }
 
@@ -101,6 +107,7 @@ func MainboardTabs() fyne.CanvasObject {
 	m := mainboard_info()
 
 	mainboardDetailLabel = widget.NewLabel("")
+	biosDetailLabel = widget.NewLabel("")
 
 	subdetail_mainboard := container.NewVBox(
 		mainboardDetailLabel,
@@ -141,17 +148,28 @@ func MainboardTabs() fyne.CanvasObject {
 		widget.NewCard("Mainboard", "", subMainboard),
 	)
 
-	subBIOS_UEFI := container.NewVBox(
+	subBIOS_UEFI_label := container.NewVBox(
 		//BIOS/UEFI
 		widget.NewLabel(fmt.Sprintf("ผู้ผลิต : %s", m["Bios_vendor"])),   //ผู้ผลิต BIOS
 		widget.NewLabel(fmt.Sprintf("เวอร์ชัน : %s", m["Bios_version"])), //เวอร์ชัน BIOS
 		widget.NewLabel(fmt.Sprintf("วันที่ออก : %s", m["Bios_date"])),   //วันที่ออก BIOS
 		widget.NewLabel(fmt.Sprintf("เวอร์ชัน : %s", m["Bios_release"])), //เวอร์ชัน Release ของ BIOS ตาม SMBIOS
-
 	)
-	BIOS_UEFI := container.NewVBox(
+
+	subBIOS_UEFI := container.NewVBox(
+		widget.NewCard("BIOS_UEFI", "", subBIOS_UEFI_label),
+	)
+
+	sub_Detail_BIOS_UEFI := container.NewVBox(
 		//BIOS/UEFI
-		widget.NewCard("BIOS/UEFI", "", subBIOS_UEFI),
+		widget.NewCard("Detail", "", biosDetailLabel),
+	)
+
+	BIOS_UEFI := container.NewAppTabs(
+		//BIOS/UEFI
+		container.NewTabItem("BIOS/UEFI", container.NewScroll(subBIOS_UEFI)),
+		container.NewTabItem("Detail", container.NewScroll(sub_Detail_BIOS_UEFI)),
+		//widget.NewCard("BIOS/UEFI", "", subBIOS_UEFI),
 	)
 
 	subChassis := container.NewVBox(
@@ -174,8 +192,8 @@ func MainboardTabs() fyne.CanvasObject {
 	return container.NewAppTabs(
 		container.NewTabItem("System", container.NewScroll(System)),
 		container.NewTabItem("Mainboard", container.NewScroll(Mainboard)),
-		container.NewTabItem("BIOS / UEFI", container.NewScroll(BIOS_UEFI)),
 		container.NewTabItem("Chassis", container.NewScroll(Chassis)),
 		container.NewTabItem("Detail", container.NewScroll(detail_mainboard)),
+		container.NewTabItem("BIOS / UEFI", container.NewScroll(BIOS_UEFI)),
 	)
 }

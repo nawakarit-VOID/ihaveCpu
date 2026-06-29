@@ -42,14 +42,17 @@ var iconFS embed.FS
 var fontItim []byte
 var myFont = fyne.NewStaticResource("Itim-Regular.ttf", fontItim)
 
-func GetDataIn() (string, string, error) {
+func GetDataIn() (string, string, string, error) {
 	// เปลี่ยนจาก "sudo" เป็น "pkexec"
 	cmd := exec.Command("pkexec", "sh", "-c",
-		"dmidecode -t memory && echo '(-@_@-)' && dmidecode -t 2")
+		`dmidecode -t memory && 
+echo '(-@_@-)' && dmidecode -t 2
+echo '(-@_@-)' && dmidecode -t 0
+`)
 
 	out, err := cmd.Output()
 	if err != nil {
-		return "", "", err
+		return "", "", "", err
 	}
 
 	parts := strings.Split(string(out), "(-@_@-)")
@@ -59,9 +62,9 @@ func GetDataIn() (string, string, error) {
 	}
 	mem := parts[0]
 	board := parts[1]
-	//bios := parts[2]
+	bios := parts[2]
 
-	return mem, board, nil
+	return mem, board, bios, nil
 }
 
 func CreateWindow() {
@@ -76,7 +79,7 @@ func CreateWindow() {
 	mainboardTabs := mainboardinfo.MainboardTabs()
 	ram := raminfo.RamTabs()
 
-	memInfo, boardInfo, err := GetDataIn()
+	memInfo, boardInfo, bios, err := GetDataIn()
 
 	if err != nil {
 		return
@@ -86,6 +89,7 @@ func CreateWindow() {
 		//raminfo.TestDetailLabelcmd(testAll)
 		raminfo.RamDetailLabelcmd(memInfo)
 		mainboardinfo.MainboardDetailLabelcmd(boardInfo)
+		mainboardinfo.BiosDetailLabelcmd(bios)
 	})
 
 	/*
