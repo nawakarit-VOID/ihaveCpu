@@ -478,12 +478,14 @@ func CpuTabs(w fyne.Window) fyne.CanvasObject {
 	)
 	cachePage := container.NewVBox(
 		widget.NewCard("Cache", "ข้อมูลอาจไม่ตรง", widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Cache"]))), //cpuid
-		widget.NewCard("Detail", "", cacheLabel),
+		widget.NewCard("Cache Detail", "", cacheLabel),
 	)
 
-	cpuFlagsFeaturePage := container.NewVBox(
-		widget.NewCard("Flags Feature", "", widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["FlagsFeature"]))),
-	)
+	/*
+		cpuFlagsFeaturePage := container.NewVBox(
+			widget.NewCard("Flags Feature", "", widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["FlagsFeature"]))),
+		)
+	*/
 
 	//cpuUsagePage//
 	usagepercentTotalLabel := widget.NewLabel("usagepercentTotalLabel...")
@@ -561,7 +563,7 @@ func CpuTabs(w fyne.Window) fyne.CanvasObject {
 
 	return container.NewAppTabs(
 		container.NewTabItem("Overview", container.NewScroll(cpuOverviewPage)),
-		container.NewTabItem("Flags Feature", container.NewScroll(cpuFlagsFeaturePage)),
+		//container.NewTabItem("Flags Feature", container.NewScroll(cpuFlagsFeaturePage)),
 		container.NewTabItem("Cache", container.NewScroll(cachePage)),
 		container.NewTabItem("Detail", container.NewScroll(Detail_cpu)),
 		container.NewTabItem("Usage", container.NewScroll(cpuUsagePage)),

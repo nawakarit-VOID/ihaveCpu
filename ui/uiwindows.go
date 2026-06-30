@@ -47,12 +47,13 @@ var myFont = fyne.NewStaticResource("Itim-Regular.ttf", fontItim)
 func GetDataIn() (string, string, string, string, string, error) {
 	// เปลี่ยนจาก "sudo" เป็น "pkexec"
 	cmd := exec.Command("pkexec", "sh", "-c",
-		`dmidecode -t 0 && dmidecode -t 13 && dmidecode -t 40 && dmidecode -t 45 &&
+		`dmidecode -t 0 && dmidecode -t 13
 echo '(-@_@-)' && dmidecode -t 4
-echo '(-@_@-)' && dmidecode -t 7
-echo '(-@_@-)' && dmidecode -t memory
+echo '(-@_@-)' && dmidecode -t 7 
+echo '(-@_@-)' && dmidecode -t 5 && dmidecode -t 6 && dmidecode -t 16 && dmidecode -t 17 && dmidecode -t 18 && dmidecode -t 19 && dmidecode -t 20 && dmidecode -t 33 && dmidecode -t 37
 echo '(-@_@-)' && dmidecode -t 2
 `)
+	//dmidecode -t memory
 
 	out, err := cmd.Output()
 	if err != nil {
@@ -68,10 +69,10 @@ echo '(-@_@-)' && dmidecode -t 2
 	bios := parts[0]
 	cpu := parts[1]
 	cache := parts[2]
-	mem := parts[3]
+	ram := parts[3]
 	board := parts[4]
 
-	return bios, cpu, cache, mem, board, nil
+	return bios, cpu, cache, ram, board, nil
 }
 
 func CreateWindow() {
@@ -82,12 +83,12 @@ func CreateWindow() {
 	w := a.NewWindow("iHaveCPU")
 	w.SetIcon(icon)
 
+	biOsTabs := biosinfo.BiosTabs()
 	cpuTabs := cpuinfo.CpuTabs(w)
 	mainboardTabs := mainboardinfo.MainboardTabs()
-	ram := raminfo.RamTabs()
-	biOs := biosinfo.BiosTabs()
+	ramTabs := raminfo.RamTabs()
 
-	bios, cpu, chsche, memInfo, boardInfo,
+	bios, cpu, chsche, ram, boardInfo,
 		err := GetDataIn()
 
 	if err != nil {
@@ -95,10 +96,10 @@ func CreateWindow() {
 	}
 
 	fyne.Do(func() {
+		biosinfo.BiosDetailLabelcmd(bios)
 		cpuinfo.CPUDetailLabelcmd(cpu)
 		cpuinfo.CacheLabelcmd(chsche)
-		biosinfo.BiosDetailLabelcmd(bios)
-		raminfo.RamDetailLabelcmd(memInfo)
+		raminfo.RamDetailLabelcmd(ram)
 		mainboardinfo.MainboardDetailLabelcmd(boardInfo)
 
 	})
@@ -126,10 +127,10 @@ func CreateWindow() {
 		mainboardinfo.SetMainboardPkexecAllText(text)
 	*/
 	tabs := container.NewAppTabs(
+		container.NewTabItem("Bios", biOsTabs),
 		container.NewTabItem("CPU", container.NewScroll(cpuTabs)),
+		container.NewTabItem("Ram", ramTabs),
 		container.NewTabItem("MainBoard", container.NewScroll(mainboardTabs)),
-		container.NewTabItem("Ram", ram),
-		container.NewTabItem("Bios", biOs),
 		//container.NewTabItem("Security", container.NewScroll(nil)),
 		//container.NewTabItem("Virtualization", container.NewScroll(nil)),
 	)
