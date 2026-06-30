@@ -435,6 +435,13 @@ func CPUDetailLabelcmd(text string) {
 	}
 }
 
+var cacheLabel *widget.Label //ประกาศแบบ golbal
+func CacheLabelcmd(text string) {
+	if cacheLabel != nil {
+		cacheLabel.SetText(text)
+	}
+}
+
 // ============================================================================
 // CpuTabs
 // ============================================================================
@@ -443,6 +450,7 @@ func CpuTabs(w fyne.Window) fyne.CanvasObject {
 	dataCPUInfo := CPUdata()
 
 	cpuDetailLabel = widget.NewLabel("")
+	cacheLabel = widget.NewLabel("")
 
 	CPU := container.NewVBox(
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["ModelName"])),
@@ -455,9 +463,7 @@ func CpuTabs(w fyne.Window) fyne.CanvasObject {
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Family"])),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Modelid"])),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Stepping"])),
-	)
-
-	Cache := container.NewVBox(
+		//widget.NewSeparator(),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Cachet"])),
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Microcode"])),
 	)
@@ -465,14 +471,14 @@ func CpuTabs(w fyne.Window) fyne.CanvasObject {
 	cpuOverviewPage := container.NewVBox(
 		widget.NewCard("CPU", "", CPU),
 		widget.NewCard("Vendor", "", Vendor),
-		widget.NewCard("Cache", "", Cache),
+
 		//widget.NewSeparator(),
 		widget.NewCard("Hyper Threading", "", widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Hyperthreading"]))),
-		//widget.NewSeparator(),
 		widget.NewCard("Thread", "#ยังมีข้อผิดพลาด", widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["CpuThreadCoreSocketresult"]))),
-		//widget.NewSeparator(),
-		widget.NewCard("Cache", "", widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Cache"]))), //cpuid
-		//widget.NewSeparator(),
+	)
+	cachePage := container.NewVBox(
+		widget.NewCard("Cache", "ข้อมูลอาจไม่ตรง", widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Cache"]))), //cpuid
+		widget.NewCard("Detail", "", cacheLabel),
 	)
 
 	cpuFlagsFeaturePage := container.NewVBox(
@@ -542,12 +548,8 @@ func CpuTabs(w fyne.Window) fyne.CanvasObject {
 		widget.NewCard("เฉลี่ย", "", timesTotalAvg),
 		//widget.NewSeparator(),
 		widget.NewCard("ข้อมูลดิบ", "", timesSec),
-		//widget.NewSeparator(),
 		widget.NewCard("แปลงเป็นเวลาสากล", "", timesHms),
-		//widget.NewSeparator(),
-		//widget.NewLabel("[ ความหมาย ]\n[ User : CPU กำลังรันโปรแกรมทั่วไปของผู้ใช้ (โหมด user space) ]\n[ System : CPU กำลังทำงานในโหมดเคอร์เนล (เช่น ระบบเรียกไฟล์, จัดการหน่วยความจำ) ]\n[ Idle : CPU ไม่ได้ทำอะไร ไม่มีงานรอทำ ]\n[ Nice : เหมือน user mode แต่เป็นกระบวนการที่ถูกลด priority (nice value > 0) ]\n[ Iowait : ว่าง แต่มีกระบวนการรอ I/O (disk/SSD) อยู่ ถ้าค่าสูงแสดงว่า ssd ช้า ]\n[ Irq : กำลังทำงานตาม hardware interrupt (เช่น เมาส์, การ์ดเน็ตเวิร์ก) ]\n[ Softirq : งานต่อเนื่องจาก interrupt (มักเป็นงานเครือข่ายหรือ task scheduling) ]\n[ Steal : บน VM: CPU ถูก hypervisor แย่งไปให้ VM อื่น ]\n[ Guest : กำลังรัน VM อื่น (CPU ทำงานในโหมด guest OS) ]\n[ GuestNice : VM ใช้แบบ nice priority *ทำงาน แต่โดนลด priority บน host ]\n      **VM = Virtual Machine"),
 		widget.NewCard("ความหมาย", "", abt),
-		//widget.NewSeparator(),
 	)
 
 	Detail_cpu := container.NewVBox(
@@ -560,6 +562,7 @@ func CpuTabs(w fyne.Window) fyne.CanvasObject {
 	return container.NewAppTabs(
 		container.NewTabItem("Overview", container.NewScroll(cpuOverviewPage)),
 		container.NewTabItem("Flags Feature", container.NewScroll(cpuFlagsFeaturePage)),
+		container.NewTabItem("Cache", container.NewScroll(cachePage)),
 		container.NewTabItem("Detail", container.NewScroll(Detail_cpu)),
 		container.NewTabItem("Usage", container.NewScroll(cpuUsagePage)),
 		container.NewTabItem("TimeUsage", container.NewScroll(cpuTimesusagePage)),

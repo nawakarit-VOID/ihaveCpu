@@ -44,18 +44,19 @@ var iconFS embed.FS
 var fontItim []byte
 var myFont = fyne.NewStaticResource("Itim-Regular.ttf", fontItim)
 
-func GetDataIn() (string, string, string, string, error) {
+func GetDataIn() (string, string, string, string, string, error) {
 	// เปลี่ยนจาก "sudo" เป็น "pkexec"
 	cmd := exec.Command("pkexec", "sh", "-c",
 		`dmidecode -t 0 && dmidecode -t 13 && dmidecode -t 40 && dmidecode -t 45 &&
 echo '(-@_@-)' && dmidecode -t 4
+echo '(-@_@-)' && dmidecode -t 7
 echo '(-@_@-)' && dmidecode -t memory
 echo '(-@_@-)' && dmidecode -t 2
 `)
 
 	out, err := cmd.Output()
 	if err != nil {
-		return "", "", "", "", err
+		return "", "", "", "", "", err
 	}
 
 	parts := strings.Split(string(out), "(-@_@-)")
@@ -66,10 +67,11 @@ echo '(-@_@-)' && dmidecode -t 2
 	//ย้าย bios มาไว้อันแรก แล้วก็เรียกมาแสดงทุก type
 	bios := parts[0]
 	cpu := parts[1]
-	mem := parts[2]
-	board := parts[3]
+	cache := parts[2]
+	mem := parts[3]
+	board := parts[4]
 
-	return bios, cpu, mem, board, nil
+	return bios, cpu, cache, mem, board, nil
 }
 
 func CreateWindow() {
@@ -85,7 +87,7 @@ func CreateWindow() {
 	ram := raminfo.RamTabs()
 	biOs := biosinfo.BiosTabs()
 
-	bios, cpu, memInfo, boardInfo,
+	bios, cpu, chsche, memInfo, boardInfo,
 		err := GetDataIn()
 
 	if err != nil {
@@ -94,6 +96,7 @@ func CreateWindow() {
 
 	fyne.Do(func() {
 		cpuinfo.CPUDetailLabelcmd(cpu)
+		cpuinfo.CacheLabelcmd(chsche)
 		biosinfo.BiosDetailLabelcmd(bios)
 		raminfo.RamDetailLabelcmd(memInfo)
 		mainboardinfo.MainboardDetailLabelcmd(boardInfo)
