@@ -428,12 +428,21 @@ func grid() fyne.CanvasObject {
 	return grid
 }
 
+var cpuDetailLabel *widget.Label //ประกาศแบบ golbal
+func CPUDetailLabelcmd(text string) {
+	if cpuDetailLabel != nil {
+		cpuDetailLabel.SetText(text)
+	}
+}
+
 // ============================================================================
 // CpuTabs
 // ============================================================================
 func CpuTabs(w fyne.Window) fyne.CanvasObject {
 
 	dataCPUInfo := CPUdata()
+
+	cpuDetailLabel = widget.NewLabel("")
 
 	CPU := container.NewVBox(
 		widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["ModelName"])),
@@ -458,9 +467,6 @@ func CpuTabs(w fyne.Window) fyne.CanvasObject {
 		widget.NewCard("Vendor", "", Vendor),
 		widget.NewCard("Cache", "", Cache),
 		//widget.NewSeparator(),
-	)
-
-	cpuDetailPage := container.NewVBox(
 		widget.NewCard("Hyper Threading", "", widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["Hyperthreading"]))),
 		//widget.NewSeparator(),
 		widget.NewCard("Thread", "#ยังมีข้อผิดพลาด", widget.NewLabel(fmt.Sprintf("%s", dataCPUInfo["CpuThreadCoreSocketresult"]))),
@@ -544,12 +550,17 @@ func CpuTabs(w fyne.Window) fyne.CanvasObject {
 		//widget.NewSeparator(),
 	)
 
+	Detail_cpu := container.NewVBox(
+		//detail
+		widget.NewCard("Detail", "", cpuDetailLabel),
+	)
+
 	cpuControlPage := CpuControl(w)
 
 	return container.NewAppTabs(
 		container.NewTabItem("Overview", container.NewScroll(cpuOverviewPage)),
-		container.NewTabItem("Detail", container.NewScroll(cpuDetailPage)),
 		container.NewTabItem("Flags Feature", container.NewScroll(cpuFlagsFeaturePage)),
+		container.NewTabItem("Detail", container.NewScroll(Detail_cpu)),
 		container.NewTabItem("Usage", container.NewScroll(cpuUsagePage)),
 		container.NewTabItem("TimeUsage", container.NewScroll(cpuTimesusagePage)),
 		container.NewTabItem("Control", container.NewScroll(cpuControlPage)),
