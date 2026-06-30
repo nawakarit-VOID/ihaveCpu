@@ -9,6 +9,7 @@ import (
 	cpuinfo "ihavecpu/cpu"
 	mainboardinfo "ihavecpu/mainboard"
 	raminfo "ihavecpu/ram"
+	systeminfo "ihavecpu/system"
 
 	"os/exec"
 	"strings"
@@ -44,20 +45,21 @@ var iconFS embed.FS
 var fontItim []byte
 var myFont = fyne.NewStaticResource("Itim-Regular.ttf", fontItim)
 
-func GetDataIn() (string, string, string, string, string, error) {
+func GetDataIn() (string, string, string, string, string, string, error) {
 	// เปลี่ยนจาก "sudo" เป็น "pkexec"
 	cmd := exec.Command("pkexec", "sh", "-c",
-		`dmidecode -t 0 && dmidecode -t 13
+		`dmidecode -t 1 && dmidecode -t 3 && dmidecode -t 12 && dmidecode -t  15 && dmidecode -t 23 && dmidecode -t 24 && dmidecode -t 32
+echo '(-@_@-)' && dmidecode -t 0 && dmidecode -t 13 && dmidecode -t 40  && dmidecode -t 45
 echo '(-@_@-)' && dmidecode -t 4
 echo '(-@_@-)' && dmidecode -t 7 
 echo '(-@_@-)' && dmidecode -t 5 && dmidecode -t 6 && dmidecode -t 16 && dmidecode -t 17 && dmidecode -t 18 && dmidecode -t 19 && dmidecode -t 20 && dmidecode -t 33 && dmidecode -t 37
-echo '(-@_@-)' && dmidecode -t 2
+echo '(-@_@-)' && dmidecode -t 2 && dmidecode -t 10 && dmidecode -t 41
 `)
 	//dmidecode -t memory
 
 	out, err := cmd.Output()
 	if err != nil {
-		return "", "", "", "", "", err
+		return "", "", "", "", "", "", err
 	}
 
 	parts := strings.Split(string(out), "(-@_@-)")
@@ -66,13 +68,14 @@ echo '(-@_@-)' && dmidecode -t 2
 		parts[i] = strings.TrimSpace(parts[i])
 	}
 	//ย้าย bios มาไว้อันแรก แล้วก็เรียกมาแสดงทุก type
-	bios := parts[0]
-	cpu := parts[1]
-	cache := parts[2]
-	ram := parts[3]
-	board := parts[4]
+	sys := parts[0]
+	bios := parts[1]
+	cpu := parts[2]
+	cache := parts[3]
+	ram := parts[4]
+	board := parts[5]
 
-	return bios, cpu, cache, ram, board, nil
+	return sys, bios, cpu, cache, ram, board, nil
 }
 
 func CreateWindow() {
@@ -83,12 +86,13 @@ func CreateWindow() {
 	w := a.NewWindow("iHaveCPU")
 	w.SetIcon(icon)
 
+	system := systeminfo.SystemTabs()
 	biOsTabs := biosinfo.BiosTabs()
 	cpuTabs := cpuinfo.CpuTabs(w)
 	mainboardTabs := mainboardinfo.MainboardTabs()
 	ramTabs := raminfo.RamTabs()
 
-	bios, cpu, chsche, ram, boardInfo,
+	sys, bios, cpu, chsche, ram, boardInfo,
 		err := GetDataIn()
 
 	if err != nil {
@@ -96,6 +100,7 @@ func CreateWindow() {
 	}
 
 	fyne.Do(func() {
+		systeminfo.SystemsDetailLabelcmd(sys)
 		biosinfo.BiosDetailLabelcmd(bios)
 		cpuinfo.CPUDetailLabelcmd(cpu)
 		cpuinfo.CacheLabelcmd(chsche)
@@ -127,6 +132,7 @@ func CreateWindow() {
 		mainboardinfo.SetMainboardPkexecAllText(text)
 	*/
 	tabs := container.NewAppTabs(
+		container.NewTabItem("System", system),
 		container.NewTabItem("Bios", biOsTabs),
 		container.NewTabItem("CPU", container.NewScroll(cpuTabs)),
 		container.NewTabItem("Ram", ramTabs),
