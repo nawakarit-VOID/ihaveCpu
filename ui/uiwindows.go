@@ -8,6 +8,7 @@ import (
 	biosinfo "ihavecpu/bios"
 	cpuinfo "ihavecpu/cpu"
 	mainboardinfo "ihavecpu/mainboard"
+	pcieinfo "ihavecpu/pcie"
 	raminfo "ihavecpu/ram"
 	systeminfo "ihavecpu/system"
 
@@ -91,6 +92,7 @@ func CreateWindow() {
 	cpuTabs := cpuinfo.CpuTabs(w)
 	mainboardTabs := mainboardinfo.MainboardTabs()
 	ramTabs := raminfo.RamTabs()
+	pcieTabs := pcieinfo.PcieTabs()
 
 	sys, bios, cpu, chsche, ram, boardInfo,
 		err := GetDataIn()
@@ -137,6 +139,7 @@ func CreateWindow() {
 		container.NewTabItem("CPU", container.NewScroll(cpuTabs)),
 		container.NewTabItem("Ram", ramTabs),
 		container.NewTabItem("MainBoard", container.NewScroll(mainboardTabs)),
+		container.NewTabItem("Pcie", container.NewScroll(pcieTabs)),
 		//container.NewTabItem("Security", container.NewScroll(nil)),
 		//container.NewTabItem("Virtualization", container.NewScroll(nil)),
 	)

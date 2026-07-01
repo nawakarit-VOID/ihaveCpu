@@ -109,11 +109,11 @@ var pciClass = map[string]string{
 	"0x0c0500": "SMBus",
 }
 
-func SystemTabs() fyne.CanvasObject {
+func PcieTabs() fyne.CanvasObject {
 
 	systemsDetailLabel = widget.NewLabel("")
 
-	pcieX := container.NewVBox()
+	var pcieString string
 
 	devices, err := GetPCIeDevices()
 	if err != nil {
@@ -122,7 +122,14 @@ func SystemTabs() fyne.CanvasObject {
 
 	for _, d := range devices {
 
-		pcieX += fmt.Println("===================================")
+		//pcieX += fmt.Sprintln("===================================")
+		pcieString += fmt.Sprintln("Address :", d.Address)
+		pcieString += fmt.Sprintln("Vendor  :", d.VendorID)
+		pcieString += fmt.Sprintln("Device  :", d.DeviceID)
+		pcieString += fmt.Sprintln("Class   :", d.Class)
+		pcieString += fmt.Sprintln("Current :", d.CurrentLinkSpeed, d.CurrentLinkWidth)
+		pcieString += fmt.Sprintln("Max     :", d.MaxLinkSpeed, d.MaxLinkWidth)
+
 		fmt.Println("Address :", d.Address)
 		fmt.Println("Vendor  :", d.VendorID)
 		fmt.Println("Device  :", d.DeviceID)
@@ -131,11 +138,15 @@ func SystemTabs() fyne.CanvasObject {
 		fmt.Println("Max     :", d.MaxLinkSpeed, d.MaxLinkWidth)
 	}
 
+	pcie := container.NewVBox(widget.NewLabel(pcieString))
+
 	PcieDetail := container.NewVBox(
 		//detail
-		widget.NewCard("Pcie", "", systemsDetailLabel),
+		widget.NewCard("Pcie", "", pcie),
 	)
 
-	return container.NewScroll(PcieDetail)
-
+	return container.NewAppTabs(
+		//container.NewTabItem("BIOS/UEFI", container.NewScroll(PcieDetail)),
+		container.NewTabItem("Detail", container.NewScroll(PcieDetail)),
+	)
 }
