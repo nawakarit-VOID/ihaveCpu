@@ -49,7 +49,7 @@ func GetPCIeDevices() ([]PCIeDevice, error) {
 
 		dir := filepath.Join(base, entry.Name())
 
-		fmt.Println("กำลังอ่าน:", dir)
+		//fmt.Println("กำลังอ่าน:", dir)
 
 		device := PCIeDevice{
 			Address:          entry.Name(),
@@ -68,6 +68,62 @@ func GetPCIeDevices() ([]PCIeDevice, error) {
 	}
 
 	return devices, nil
+}
+
+func ClassName(class string) string {
+	if name, ok := pciClass[class]; ok {
+		return name
+	}
+	return class
+}
+
+var pciClass = map[string]string{
+	"0x010802": "NVMe",
+	"0x010601": "SATA",
+	"0x020000": "Ethernet",
+	"0x028000": "Wi-Fi",
+	"0x030000": "VGA",
+	"0x030200": "3D",
+	"0x040300": "Audio",
+	"0x060400": "PCI Bridge",
+	"0x0c0330": "USB xHCI",
+	"0x0c0500": "SMBus",
+}
+
+func VendorName(id string) string {
+	if name, ok := pciVendor[id]; ok {
+		return name
+	}
+	return id
+}
+
+var pciVendor = map[string]string{
+	"0x8086": "Intel",
+	"0x10de": "NVIDIA",
+	"0x1002": "AMD",
+	"0x1022": "AMD",
+	"0x144d": "Samsung",
+	"0x1b21": "ASMedia",
+	"0x14e4": "Broadcom",
+	"0x10ec": "Realtek",
+	"0x8087": "Intel",
+	"0x106b": "Apple",
+	"0x13B5": "ARM",
+	"0x17CB": "Qualcomm",
+	"0x1010": "Imagination Technologies",
+	"0x15ad": "VMware",
+	"0x1414": "Microsoft",
+	"0x1014": "IBM",
+	"0x1106": "VIA Technologies",
+	"0x1000": "Broadcom",
+	"0x1095": "Silicon Image",
+	"0x105A": "Promise Technology",
+	"0x1D0F": "Amazon",
+	"0x1013": "Cirrus Logic",
+	"0x1050": "Winbond",
+	"0x1234": "Bochs (Emulator)",
+	"0x1AF4": "Virtio (Paravirtualization)",
+	"0x1B36": "QEMU (Emulator)",
 }
 
 func PCIeGeneration(speed string) string {
@@ -102,12 +158,31 @@ func PCIeCanvas() fyne.CanvasObject {
 
 		//pcieX += fmt.Sprintln("===================================")
 		pcieString += fmt.Sprintln("Address :", d.Address)
-		pcieString += fmt.Sprintln("Vendor  :", d.VendorID)
-		pcieString += fmt.Sprintln("Device  :", d.DeviceID)
-		pcieString += fmt.Sprintln("Class   :", d.Class)
-		pcieString += fmt.Sprintln("Current :", d.CurrentLinkSpeed, d.CurrentLinkWidth)
-		pcieString += fmt.Sprintln("Max     :", d.MaxLinkSpeed, d.MaxLinkWidth)
 
+		pcieString += fmt.Sprintf("Vendor : %s (%s)\n",
+			VendorName(d.VendorID),
+			d.VendorID)
+
+		pcieString += fmt.Sprintln("Device  :", d.DeviceID)
+
+		pcieString += fmt.Sprintf("Class  : %s\n",
+			ClassName(d.Class))
+
+		if d.CurrentLinkSpeed != "" {
+
+			pcieString += fmt.Sprintf(
+				"PCIe   : %s x%s\n",
+				PCIeGeneration(d.CurrentLinkSpeed),
+				d.CurrentLinkWidth,
+			)
+
+			pcieString += fmt.Sprintf(
+				"Speed  : %s\n",
+				d.CurrentLinkSpeed,
+			)
+		} else {
+			pcieString += "\n"
+		}
 	}
 
 	pcie := widget.NewLabel(pcieString)
@@ -122,26 +197,11 @@ func PcieDetailLabelcmd(text string) {
 	}
 }
 
-var pciClass = map[string]string{
-	"0x010802": "NVMe",
-	"0x010601": "SATA",
-	"0x020000": "Ethernet",
-	"0x028000": "Wi-Fi",
-	"0x030000": "VGA",
-	"0x030200": "3D",
-	"0x040300": "Audio",
-	"0x060400": "PCI Bridge",
-	"0x0c0330": "USB xHCI",
-	"0x0c0500": "SMBus",
-}
-
 func PcieTabs() fyne.CanvasObject {
 
 	PcieDetailLabel = widget.NewLabel("")
 
 	pcie := PCIeCanvas()
-
-	print(pcie)
 
 	PcieX := container.NewVBox(
 		//detail
@@ -150,6 +210,6 @@ func PcieTabs() fyne.CanvasObject {
 
 	return container.NewAppTabs(
 		container.NewTabItem("Pcie", container.NewScroll(PcieX)),
-		container.NewTabItem("Detail", container.NewScroll(pcie)),
+		//container.NewTabItem("Detail", container.NewScroll(pcie)),
 	)
 }
