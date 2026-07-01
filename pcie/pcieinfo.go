@@ -47,11 +47,9 @@ func GetPCIeDevices() ([]PCIeDevice, error) {
 
 	for _, entry := range entries {
 
-		if !entry.IsDir() {
-			continue
-		}
-
 		dir := filepath.Join(base, entry.Name())
+
+		fmt.Println("กำลังอ่าน:", dir)
 
 		device := PCIeDevice{
 			Address:          entry.Name(),
@@ -65,53 +63,33 @@ func GetPCIeDevices() ([]PCIeDevice, error) {
 		}
 
 		devices = append(devices, device)
+
+		fmt.Printf("%+v\n", device)
 	}
 
 	return devices, nil
 }
 
-/*
-func bios_info() map[string]interface{} {
-
-	//BIOS/UEFI
-	bios_vendor := read("/sys/class/dmi/id/bios_vendor")
-	bios_version := read("/sys/class/dmi/id/bios_version")
-	bios_date := read("/sys/class/dmi/id/bios_date")
-	bios_release := read("/sys/class/dmi/id/bios_release")
-
-	return map[string]interface{}{
-		//BIOS/UEFI
-		"Bios_vendor":  bios_vendor,  //ผู้ผลิต BIOS
-		"Bios_version": bios_version, //เวอร์ชัน BIOS
-		"Bios_date":    bios_date,    //วันที่ออก BIOS
-		"Bios_release": bios_release, //เวอร์ชัน Release ของ BIOS ตาม SMBIOS
-	}
-}
-*/
-
-var systemsDetailLabel *widget.Label //ประกาศแบบ golbal
-func SystemsDetailLabelcmd(text string) {
-	if systemsDetailLabel != nil {
-		systemsDetailLabel.SetText(text)
+func PCIeGeneration(speed string) string {
+	switch speed {
+	case "2.5 GT/s PCIe":
+		return "Gen1"
+	case "5.0 GT/s PCIe":
+		return "Gen2"
+	case "8.0 GT/s PCIe":
+		return "Gen3"
+	case "16.0 GT/s PCIe":
+		return "Gen4"
+	case "32.0 GT/s PCIe":
+		return "Gen5"
+	case "64.0 GT/s PCIe":
+		return "Gen6"
+	default:
+		return "Unknown"
 	}
 }
 
-var pciClass = map[string]string{
-	"0x010802": "NVMe",
-	"0x010601": "SATA",
-	"0x020000": "Ethernet",
-	"0x028000": "Wi-Fi",
-	"0x030000": "VGA",
-	"0x030200": "3D",
-	"0x040300": "Audio",
-	"0x060400": "PCI Bridge",
-	"0x0c0330": "USB xHCI",
-	"0x0c0500": "SMBus",
-}
-
-func PcieTabs() fyne.CanvasObject {
-
-	systemsDetailLabel = widget.NewLabel("")
+func PCIeCanvas() fyne.CanvasObject {
 
 	var pcieString string
 
@@ -130,23 +108,48 @@ func PcieTabs() fyne.CanvasObject {
 		pcieString += fmt.Sprintln("Current :", d.CurrentLinkSpeed, d.CurrentLinkWidth)
 		pcieString += fmt.Sprintln("Max     :", d.MaxLinkSpeed, d.MaxLinkWidth)
 
-		fmt.Println("Address :", d.Address)
-		fmt.Println("Vendor  :", d.VendorID)
-		fmt.Println("Device  :", d.DeviceID)
-		fmt.Println("Class   :", d.Class)
-		fmt.Println("Current :", d.CurrentLinkSpeed, d.CurrentLinkWidth)
-		fmt.Println("Max     :", d.MaxLinkSpeed, d.MaxLinkWidth)
 	}
 
-	pcie := container.NewVBox(widget.NewLabel(pcieString))
+	pcie := widget.NewLabel(pcieString)
 
-	PcieDetail := container.NewVBox(
+	return pcie
+}
+
+var PcieDetailLabel *widget.Label //ประกาศแบบ golbal
+func PcieDetailLabelcmd(text string) {
+	if PcieDetailLabel != nil {
+		PcieDetailLabel.SetText(text)
+	}
+}
+
+var pciClass = map[string]string{
+	"0x010802": "NVMe",
+	"0x010601": "SATA",
+	"0x020000": "Ethernet",
+	"0x028000": "Wi-Fi",
+	"0x030000": "VGA",
+	"0x030200": "3D",
+	"0x040300": "Audio",
+	"0x060400": "PCI Bridge",
+	"0x0c0330": "USB xHCI",
+	"0x0c0500": "SMBus",
+}
+
+func PcieTabs() fyne.CanvasObject {
+
+	PcieDetailLabel = widget.NewLabel("")
+
+	pcie := PCIeCanvas()
+
+	print(pcie)
+
+	PcieX := container.NewVBox(
 		//detail
 		widget.NewCard("Pcie", "", pcie),
 	)
 
 	return container.NewAppTabs(
-		//container.NewTabItem("BIOS/UEFI", container.NewScroll(PcieDetail)),
-		container.NewTabItem("Detail", container.NewScroll(PcieDetail)),
+		container.NewTabItem("Pcie", container.NewScroll(PcieX)),
+		container.NewTabItem("Detail", container.NewScroll(pcie)),
 	)
 }
