@@ -4,10 +4,10 @@
 package main
 
 import (
-	uiwindows "ihavecpu/ui" //ชื่อไฟล์ "ชื่อ MOD / ชื่อ โฟรเดอร์" **แล้วดึงมาใช้
+	ui "ihavecpu/ui" //ชื่อไฟล์ "ชื่อ MOD / ชื่อ โฟรเดอร์" **แล้วดึงมาใช้
 )
 
 func main() {
 
-	uiwindows.CreateWindow()
+	ui.CreateWindow()
 }
