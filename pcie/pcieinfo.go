@@ -90,40 +90,30 @@ var pciClass = map[string]string{
 	"0x0c0500": "SMBus",
 }
 
-func VendorName(id string) string {
-	if name, ok := pciVendor[id]; ok {
-		return name
+func vendorName(id string) string {
+	if PCI == nil {
+		return id
 	}
-	return id
+
+	name := PCI.VendorName(id)
+	if name == "Unknown" {
+		return id
+	}
+
+	return name
 }
 
-var pciVendor = map[string]string{
-	"0x8086": "Intel",
-	"0x10de": "NVIDIA",
-	"0x1002": "AMD",
-	"0x1022": "AMD",
-	"0x144d": "Samsung",
-	"0x1b21": "ASMedia",
-	"0x14e4": "Broadcom",
-	"0x10ec": "Realtek",
-	"0x8087": "Intel",
-	"0x106b": "Apple",
-	"0x13B5": "ARM",
-	"0x17CB": "Qualcomm",
-	"0x1010": "Imagination Technologies",
-	"0x15ad": "VMware",
-	"0x1414": "Microsoft",
-	"0x1014": "IBM",
-	"0x1106": "VIA Technologies",
-	"0x1000": "Broadcom",
-	"0x1095": "Silicon Image",
-	"0x105A": "Promise Technology",
-	"0x1D0F": "Amazon",
-	"0x1013": "Cirrus Logic",
-	"0x1050": "Winbond",
-	"0x1234": "Bochs (Emulator)",
-	"0x1AF4": "Virtio (Paravirtualization)",
-	"0x1B36": "QEMU (Emulator)",
+func deviceName(vendorID, deviceID string) string {
+	if PCI == nil {
+		return deviceID
+	}
+
+	name := PCI.DeviceName(vendorID, deviceID)
+	if name == "Unknown" {
+		return deviceID
+	}
+
+	return name
 }
 
 func PCIeGeneration(speed string) string {
@@ -160,10 +150,12 @@ func PCIeCanvas() fyne.CanvasObject {
 		pcieString += fmt.Sprintln("Address :", d.Address)
 
 		pcieString += fmt.Sprintf("Vendor : %s (%s)\n",
-			VendorName(d.VendorID),
+			vendorName(d.VendorID),
 			d.VendorID)
 
-		pcieString += fmt.Sprintln("Device  :", d.DeviceID)
+		pcieString += fmt.Sprintf("Device  : %s (%s)\n",
+			deviceName(d.VendorID, d.DeviceID),
+			d.DeviceID)
 
 		pcieString += fmt.Sprintf("Class  : %s\n",
 			ClassName(d.Class))
@@ -201,6 +193,7 @@ func PcieTabs() fyne.CanvasObject {
 
 	PcieDetailLabel = widget.NewLabel("")
 
+	InitPCI()
 	pcie := PCIeCanvas()
 
 	PcieX := container.NewVBox(
