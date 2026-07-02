@@ -177,7 +177,7 @@ func PCIeCanvas() fyne.CanvasObject {
 			)
 
 			pcieString += fmt.Sprintf(
-				"Speed  : %s\n",
+				"Speed  : %s\n\n",
 				d.CurrentLinkSpeed,
 			)
 		} else {
